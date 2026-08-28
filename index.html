@@ -1,7 +1,7 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+
 :root{
   --bg:#0d0c10;
   --bg2:#121117;
@@ -26,9 +27,13 @@
   --shadow:0 20px 60px rgba(0,0,0,.35);
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box
+}
 
-html{scroll-behavior:smooth}
+html{
+  scroll-behavior:smooth
+}
 
 body{
   margin:0;
@@ -41,8 +46,15 @@ body{
   font-family:Inter,Arial,Helvetica,sans-serif;
 }
 
-button,input,select{font:inherit}
-button{cursor:pointer}
+button,
+input,
+select{
+  font:inherit
+}
+
+button{
+  cursor:pointer
+}
 
 /* =========================================================
    TOP BAR
@@ -148,7 +160,7 @@ button{cursor:pointer}
 }
 
 /* =========================================================
-   GOOGLE CALENDAR BUTTON
+   GOOGLE CALENDAR
 ========================================================= */
 
 .calendarButton{
@@ -174,38 +186,9 @@ button{cursor:pointer}
   letter-spacing:.2px;
 }
 
-.calendarButton::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(
-      120deg,
-      transparent 20%,
-      rgba(255,255,255,.12) 45%,
-      transparent 70%
-    );
-  transform:translateX(-100%);
-  transition:.6s ease;
-}
-
-.calendarButton:hover::before{
-  transform:translateX(100%);
-}
-
 .calendarButton:hover{
   border-color:rgba(217,196,154,.72);
-  background:
-    linear-gradient(
-      135deg,
-      rgba(217,196,154,.19),
-      rgba(255,255,255,.055),
-      rgba(217,196,154,.13)
-    );
   color:#fff1c9;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.1),
-    0 10px 30px rgba(0,0,0,.3);
 }
 
 .calendarIcon{
@@ -462,23 +445,10 @@ button{cursor:pointer}
 
 .lesson:hover{
   transform:translateY(-2px);
-  box-shadow:0 11px 25px rgba(0,0,0,.28);
 }
 
 .lesson:last-child{
   margin-bottom:0;
-}
-
-.lesson::after{
-  content:"";
-  position:absolute;
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  right:-40px;
-  top:-40px;
-  background:rgba(255,255,255,.22);
-  pointer-events:none;
 }
 
 .lessonTime{
@@ -537,23 +507,10 @@ button{cursor:pointer}
   min-height:130px;
   box-shadow:0 8px 20px rgba(0,0,0,.18);
   transition:.2s ease;
-  border:1px solid rgba(255,255,255,.08);
 }
 
 .resultCard:hover{
   transform:translateY(-2px);
-}
-
-.resultCard::after{
-  content:"";
-  position:absolute;
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  right:-45px;
-  top:-45px;
-  background:rgba(255,255,255,.2);
-  pointer-events:none;
 }
 
 .resultTop{
@@ -585,51 +542,35 @@ button{cursor:pointer}
 }
 
 /* =========================================================
-   CHIC SELECTION BUTTON
+   SELECTION
 ========================================================= */
 
 .selectClass{
   position:relative;
   z-index:3;
   flex-shrink:0;
-
   width:34px;
   height:34px;
-
   border-radius:50%;
-
   border:1px solid rgba(40,35,30,.28);
-
   background:rgba(255,255,255,.32);
-
   color:#4d4030;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   font-size:16px;
   font-weight:800;
-
   transition:.2s ease;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.45),
-    0 3px 10px rgba(0,0,0,.12);
 }
 
 .selectClass:hover{
   transform:scale(1.06);
-  background:rgba(255,255,255,.55);
-  border-color:rgba(217,196,154,.8);
 }
 
 .selectClass.selected{
   background:#171419;
   color:#f1dfb2;
   border-color:#171419;
-  box-shadow:
-    0 4px 14px rgba(0,0,0,.25);
 }
 
 .selectClass.selected::after{
@@ -644,20 +585,12 @@ button{cursor:pointer}
   display:none;
   margin-top:15px;
   padding:13px;
-
   align-items:center;
   justify-content:space-between;
   gap:12px;
-
   border:1px solid rgba(217,196,154,.18);
   border-radius:14px;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(217,196,154,.055),
-      rgba(255,255,255,.025)
-    );
+  background:rgba(217,196,154,.055);
 }
 
 .searchActions.visible{
@@ -679,10 +612,6 @@ button{cursor:pointer}
   color:#bcae90;
   font-size:11px;
   font-weight:700;
-}
-
-.clearSelection:hover{
-  color:#fff;
 }
 
 /* =========================================================
@@ -1039,6 +968,7 @@ button{cursor:pointer}
   .adminGrid{
     grid-template-columns:1fr;
   }
+
 }
 
 @media(max-width:650px){
@@ -1058,10 +988,6 @@ button{cursor:pointer}
   .heroTitle{
     font-size:43px;
     letter-spacing:-2px;
-  }
-
-  .heroDescription{
-    font-size:13px;
   }
 
   .controlsWrap,
@@ -1112,309 +1038,269 @@ button{cursor:pointer}
   .adminActions .btn{
     flex:1;
   }
+
 }
+
 </style>
 </head>
 
 <body>
 
 <header class="topbar">
-  <div class="topbarInner">
 
-    <div class="brand">
-      <img src="circle-cropped.png" class="brandLogo" alt="Premier Ballet Academy">
+<div class="topbarInner">
 
-      <div>
-        <div class="brandName">PREMIER BALLET ACADEMY</div>
-        <div class="brandSub">2026 / 2027 Academy Schedule</div>
-      </div>
-    </div>
+<div class="brand">
 
-  </div>
+<img
+src="circle-cropped.png"
+class="brandLogo"
+alt="Premier Ballet Academy"
+>
+
+<div>
+
+<div class="brandName">
+PREMIER BALLET ACADEMY
+</div>
+
+<div class="brandSub">
+2026 / 2027 Academy Schedule
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 </header>
 
 
 <section class="hero">
 
-  <div>
+<div>
 
-    <div class="heroEyebrow">
-      Official Academy Schedule
-    </div>
+<div class="heroEyebrow">
+Official Academy Schedule
+</div>
 
-    <h1 class="heroTitle">
-      Move with
-      <span>Elegance.</span>
-    </h1>
+<h1 class="heroTitle">
+Move with
+<span>Elegance.</span>
+</h1>
 
-    <p class="heroDescription">
-      Explore the complete Premier Ballet Academy 2026/27 weekly schedule.
-      Search classes and teachers, choose your branch and find exactly what
-      you are looking for.
-    </p>
+<p class="heroDescription">
+Explore the complete Premier Ballet Academy 2026/27 weekly schedule.
+Search classes and teachers, choose your branch and find exactly what
+you are looking for.
+</p>
 
-  </div>
+</div>
 
 
-  <div class="heroMeta">
+<div class="heroMeta">
 
-    <div class="metaCard">
-      <div class="metaLabel">Selected Branch</div>
-      <div class="metaValue" id="branchMeta">Maadi</div>
-    </div>
+<div class="metaCard">
 
-    <div class="metaCard">
-      <div class="metaLabel">Season</div>
-      <div class="metaValue">2026/27</div>
-    </div>
+<div class="metaLabel">
+Selected Branch
+</div>
 
-  </div>
+<div
+class="metaValue"
+id="branchMeta"
+>
+Maadi
+</div>
+
+</div>
+
+<div class="metaCard">
+
+<div class="metaLabel">
+Season
+</div>
+
+<div class="metaValue">
+2026/27
+</div>
+
+</div>
+
+</div>
 
 </section>
 
 
 <section class="controlsWrap">
 
-  <div class="controls">
+<div class="controls">
 
-    <div class="field">
+<div class="field">
 
-      <select id="branchSelect">
+<select id="branchSelect"></select>
 
-        <option value="Maadi">
-          Maadi Branch
-        </option>
-
-        <option value="New Cairo">
-          New Cairo Branch
-        </option>
-
-        <option value="Sheikh Zayed">
-          Sheikh Zayed Branch
-        </option>
-
-          <option value="New Giza">
-          New Giza Branch
-        </option>
-
-      </select>
-
-    </div>
+</div>
 
 
-    <div class="field">
+<div class="field">
 
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="Search class or teacher..."
-        autocomplete="off"
-      >
+<input
+id="searchInput"
+type="search"
+placeholder="Search class or teacher..."
+autocomplete="off"
+>
 
-      <span class="searchIcon">⌕</span>
+<span class="searchIcon">⌕</span>
 
-    </div>
+</div>
 
 
-    <button
-      class="btn calendarButton hidden"
-      id="calendarButton"
-    >
-      <span class="calendarIcon">＋</span>
-      <span id="calendarButtonText">
-        Add Class to Google Calendar
-      </span>
-    </button>
+<button
+class="btn calendarButton hidden"
+id="calendarButton"
+>
 
-  </div>
+<span class="calendarIcon">＋</span>
+
+<span id="calendarButtonText">
+Add Class to Google Calendar
+</span>
+
+</button>
+
+</div>
 
 </section>
 
 
 <div class="statusWrap">
-  <div id="status" class="status"></div>
+
+<div
+id="status"
+class="status"
+></div>
+
 </div>
 
 
-<section id="results" class="results">
+<section
+id="results"
+class="results"
+>
 
-  <div class="scheduleHeader">
+<div class="scheduleHeader">
 
-    <div>
+<div>
 
-      <div class="sectionEyebrow">
-        Search
-      </div>
+<div class="sectionEyebrow">
+Search
+</div>
 
-      <h2 class="sectionTitle">
-        Search Results
-      </h2>
+<h2 class="sectionTitle">
+Search Results
+</h2>
 
-    </div>
+</div>
 
-  </div>
-
-
-  <div id="resultsGrid" class="resultsGrid"></div>
+</div>
 
 
-  <div id="searchActions" class="searchActions">
+<div
+id="resultsGrid"
+class="resultsGrid"
+></div>
 
-    <div class="selectionText">
-      <strong id="selectionCount">0</strong>
-      classes selected
-    </div>
 
-    <button
-      class="clearSelection"
-      id="clearSelection"
-    >
-      Clear selection
-    </button>
+<div
+id="searchActions"
+class="searchActions"
+>
 
-  </div>
+<div class="selectionText">
+
+<strong id="selectionCount">
+0
+</strong>
+
+classes selected
+
+</div>
+
+<button
+class="clearSelection"
+id="clearSelection"
+>
+Clear selection
+</button>
+
+</div>
 
 </section>
 
 
 <main class="scheduleWrap">
 
-  <div class="scheduleHeader">
+<div class="scheduleHeader">
 
-    <div>
+<div>
 
-      <div class="sectionEyebrow">
-        Weekly Schedule
-      </div>
+<div class="sectionEyebrow">
+Weekly Schedule
+</div>
 
-      <h2
-        class="sectionTitle"
-        id="scheduleTitle"
-      >
-        Maadi Branch
-      </h2>
+<h2
+class="sectionTitle"
+id="scheduleTitle"
+>
+Maadi Branch
+</h2>
 
-    </div>
+</div>
 
-  </div>
+</div>
 
 
-  <div class="scheduleScroller">
+<div class="scheduleScroller">
 
-    <div id="days" class="days">
+<div
+id="days"
+class="days"
+>
+Loading...
+</div>
 
-      <div class="dayColumn">
-        <div class="dayHeader">
-          <div class="skeletonLine short"></div>
-        </div>
-
-        <div class="skeleton">
-          <div class="skeletonLine"></div>
-          <div class="skeletonLine short"></div>
-          <div class="skeletonLine"></div>
-        </div>
-      </div>
-
-      <div class="dayColumn">
-        <div class="dayHeader">
-          <div class="skeletonLine short"></div>
-        </div>
-
-        <div class="skeleton">
-          <div class="skeletonLine"></div>
-          <div class="skeletonLine short"></div>
-          <div class="skeletonLine"></div>
-        </div>
-      </div>
-
-      <div class="dayColumn">
-        <div class="dayHeader">
-          <div class="skeletonLine short"></div>
-        </div>
-
-        <div class="skeleton">
-          <div class="skeletonLine"></div>
-          <div class="skeletonLine short"></div>
-          <div class="skeletonLine"></div>
-        </div>
-      </div>
-
-      <div class="dayColumn">
-        <div class="dayHeader">
-          <div class="skeletonLine short"></div>
-        </div>
-
-        <div class="skeleton">
-          <div class="skeletonLine"></div>
-          <div class="skeletonLine short"></div>
-          <div class="skeletonLine"></div>
-        </div>
-      </div>
-
-      <div class="dayColumn">
-        <div class="dayHeader">
-          <div class="skeletonLine short"></div>
-        </div>
-
-        <div class="skeleton">
-          <div class="skeletonLine"></div>
-          <div class="skeletonLine short"></div>
-          <div class="skeletonLine"></div>
-        </div>
-      </div>
-
-      <div class="dayColumn">
-        <div class="dayHeader">
-          <div class="skeletonLine short"></div>
-        </div>
-
-        <div class="skeleton">
-          <div class="skeletonLine"></div>
-          <div class="skeletonLine short"></div>
-          <div class="skeletonLine"></div>
-        </div>
-      </div>
-
-      <div class="dayColumn">
-        <div class="dayHeader">
-          <div class="skeletonLine short"></div>
-        </div>
-
-        <div class="skeleton">
-          <div class="skeletonLine"></div>
-          <div class="skeletonLine short"></div>
-          <div class="skeletonLine"></div>
-        </div>
-      </div>
-
-    </div>
-
-  </div>
+</div>
 
 </main>
 
 
 <section class="legendWrap">
 
-  <div class="legend">
+<div class="legend">
 
-    <div class="sectionEyebrow">
-      Teachers
-    </div>
+<div class="sectionEyebrow">
+Teachers
+</div>
 
-    <h2 class="sectionTitle">
-      Teacher Colour Guide
-    </h2>
+<h2 class="sectionTitle">
+Teacher Colour Guide
+</h2>
 
-    <div id="legendGrid" class="legendGrid"></div>
+<div
+id="legendGrid"
+class="legendGrid"
+></div>
 
-  </div>
+</div>
 
 </section>
 
 
 <footer class="footer">
-  PREMIER BALLET ACADEMY · 2026 / 2027
+PREMIER BALLET ACADEMY · 2026 / 2027
 </footer>
 
 
@@ -1422,80 +1308,83 @@ button{cursor:pointer}
      ADMIN LOGIN
 ========================================================= -->
 
-<div id="loginOverlay" class="overlay">
+<div
+id="loginOverlay"
+class="overlay"
+>
 
-  <div class="modal">
+<div class="modal">
 
-    <div class="modalTop">
+<div class="modalTop">
 
-      <img
-        src="circle-cropped.png"
-        class="modalLogo"
-        alt=""
-      >
+<img
+src="circle-cropped.png"
+class="modalLogo"
+alt=""
+>
 
-      <div>
+<div>
 
-        <h2>
-          Admin Access
-        </h2>
+<h2>
+Admin Access
+</h2>
 
-        <div class="modalSub">
-          Premier Ballet Academy Management
-        </div>
+<div class="modalSub">
+Premier Ballet Academy Management
+</div>
 
-      </div>
+</div>
 
-    </div>
-
-
-    <label>
-      Email
-    </label>
-
-    <input
-      id="adminEmail"
-      type="email"
-      autocomplete="username"
-    >
+</div>
 
 
-    <label>
-      Password
-    </label>
+<label>
+Email
+</label>
 
-    <input
-      id="adminPassword"
-      type="password"
-      autocomplete="current-password"
-    >
-
-
-    <div
-      id="loginError"
-      class="error"
-    ></div>
+<input
+id="adminEmail"
+type="email"
+autocomplete="username"
+>
 
 
-    <div class="modalActions">
+<label>
+Password
+</label>
 
-      <button
-        class="btn btnDark"
-        id="cancelLogin"
-      >
-        Cancel
-      </button>
+<input
+id="adminPassword"
+type="password"
+autocomplete="current-password"
+>
 
-      <button
-        class="btn btnPink"
-        id="loginButton"
-      >
-        Sign In
-      </button>
 
-    </div>
+<div
+id="loginError"
+class="error"
+></div>
 
-  </div>
+
+<div class="modalActions">
+
+<button
+class="btn btnDark"
+id="cancelLogin"
+>
+Cancel
+</button>
+
+<button
+class="btn btnPink"
+id="loginButton"
+>
+Sign In
+</button>
+
+</div>
+
+</div>
 
 </div>
 
@@ -1505,488 +1394,591 @@ button{cursor:pointer}
 ========================================================= -->
 
 <section
-  id="adminPanel"
-  class="adminPanel"
+id="adminPanel"
+class="adminPanel"
 >
 
-  <div class="adminTop">
+<div class="adminTop">
 
-    <div class="adminTopInner">
+<div class="adminTopInner">
 
-      <div class="brand">
+<div class="brand">
 
-        <img
-          src="circle-cropped.png"
-          class="brandLogo"
-          alt=""
-        >
-
-        <div>
-
-          <div class="brandName">
-            PBA ADMINISTRATION
-          </div>
-
-          <div
-            class="brandSub"
-            id="adminUser"
-          ></div>
-
-        </div>
-
-      </div>
-
-
-      <div class="topActions">
-
-        <button
-          class="btn"
-          id="closeAdmin"
-        >
-          Back to Schedule
-        </button>
-
-        <button
-          class="btn btnDanger"
-          id="logoutButton"
-        >
-          Logout
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div class="adminContent">
-
-    <div class="adminTabs">
-
-      <button
-        class="adminTab active"
-        data-tab="scheduleAdmin"
-      >
-        Schedule
-      </button>
-
-      <button
-        class="adminTab"
-        data-tab="teachersAdmin"
-      >
-        Teachers
-      </button>
-
-      <button
-        class="adminTab"
-        data-tab="adminsAdmin"
-      >
-        Administrators
-      </button>
-
-    </div>
-
-
-    <!-- =====================================================
-         SCHEDULE ADMIN
-    ====================================================== -->
-
-    <div
-      id="scheduleAdmin"
-      class="adminSection active"
-    >
-
-      <div class="adminGrid">
-
-        <div class="adminCard">
-
-          <h2 id="formTitle">
-            Add Schedule Class
-          </h2>
-
-
-          <div class="formGrid">
-
-            <div class="formField">
-
-              <label>
-                Branch
-              </label>
-
-              <select id="adminBranch">
-                <option>Maadi</option>
-                <option>New Cairo</option>
-                <option>Sheikh Zayed</option>
-                 <option>New Giza</option>
-              </select>
-
-            </div>
-
-
-            <div class="formField">
-
-              <label>
-                Day
-              </label>
-
-              <select id="adminDay">
-                <option>Sunday</option>
-                <option>Monday</option>
-                <option>Tuesday</option>
-                <option>Wednesday</option>
-                <option>Thursday</option>
-                <option>Friday</option>
-                <option>Saturday</option>
-              </select>
-
-            </div>
-
-
-            <div class="formField">
-
-              <label>
-                Studio
-              </label>
-
-              <select id="adminStudio">
-                <option>Studio 1</option>
-                <option>Studio 2</option>
-                <option>Studio 3</option>
-              </select>
-
-            </div>
-
-
-            <div class="formField">
-
-              <label>
-                Teacher
-              </label>
-
-              <select id="adminTeacher">
-                <option value="">
-                  No teacher
-                </option>
-              </select>
-
-            </div>
-
-
-            <div class="formField">
-
-              <label>
-                Start Time
-              </label>
-
-              <input
-                id="adminStart"
-                placeholder="5:00 PM"
-              >
-
-            </div>
-
-
-            <div class="formField">
-
-              <label>
-                End Time
-              </label>
-
-              <input
-                id="adminEnd"
-                placeholder="6:30 PM"
-              >
-
-            </div>
-
-
-            <div class="formField full">
-
-              <label>
-                Class Name
-              </label>
-
-              <input
-                id="adminClassName"
-                placeholder="Premier G2 Classical Ballet"
-              >
-
-            </div>
-
-          </div>
-
-
-          <input
-            id="editId"
-            type="hidden"
-          >
-
-
-          <div
-            id="adminMessage"
-            class="smallNote"
-          ></div>
-
-
-          <div class="modalActions">
-
-            <button
-              class="btn btnDark"
-              id="cancelEdit"
-              style="display:none"
-            >
-              Cancel Edit
-            </button>
-
-            <button
-              class="btn btnPink"
-              id="saveClass"
-            >
-              Save Class
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <div class="adminCard">
-
-          <div class="scheduleHeader">
-
-            <div>
-
-              <div class="sectionEyebrow">
-                Database
-              </div>
-
-              <h2>
-                Schedule Classes
-              </h2>
-
-            </div>
-
-          </div>
-
-          <div
-            id="adminList"
-            class="adminList"
-          >
-            Loading...
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         TEACHERS ADMIN
-    ====================================================== -->
-
-    <div
-      id="teachersAdmin"
-      class="adminSection"
-    >
-
-      <div class="adminGrid">
-
-        <div class="adminCard">
-
-          <h2 id="teacherFormTitle">
-            Add Teacher
-          </h2>
-
-
-          <div class="formField">
-
-            <label>
-              Teacher Name
-            </label>
-
-            <input
-              id="newTeacherName"
-              placeholder="Ms. New Teacher"
-            >
-
-          </div>
-
-
-          <div
-            class="formField"
-            style="margin-top:12px"
-          >
-
-            <label>
-              Colour
-            </label>
-
-            <input
-              id="newTeacherColor"
-              type="color"
-              value="#E8BFD0"
-              style="height:43px;padding:4px"
-            >
-
-          </div>
-
-
-          <input
-            id="editTeacherId"
-            type="hidden"
-          >
-
-
-          <div
-            id="teacherMessage"
-            class="smallNote"
-          ></div>
-
-
-          <div class="modalActions">
-
-            <button
-              class="btn btnDark"
-              id="cancelTeacherEdit"
-              style="display:none"
-            >
-              Cancel Edit
-            </button>
-
-            <button
-              class="btn btnPink"
-              id="addTeacherButton"
-            >
-              Add Teacher
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <div class="adminCard">
-
-          <div class="sectionEyebrow">
-            Database
-          </div>
-
-          <h2>
-            Teachers
-          </h2>
-
-          <div id="teacherList"></div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ADMINS ADMIN
-    ====================================================== -->
-
-    <div
-      id="adminsAdmin"
-      class="adminSection"
-    >
-
-      <div class="adminGrid">
-
-        <div class="adminCard">
-
-          <h2>
-            Add Administrator
-          </h2>
-
-
-          <div class="formField">
-
-            <label>
-              Email
-            </label>
-
-            <input
-              id="newAdminEmail"
-              type="email"
-              placeholder="admin@example.com"
-            >
-
-            <div
-  class="formField"
-  style="margin-top:12px"
+<img
+src="circle-cropped.png"
+class="brandLogo"
+alt=""
 >
-  <label>
-    Role
-  </label>
 
-  <select id="newAdminRole">
-    <option value="admin">
-      Administrator
-    </option>
+<div>
 
-    <option value="superior">
-      Superior Administrator
-    </option>
-  </select>
+<div class="brandName">
+PBA ADMINISTRATION
 </div>
 
-          </div>
+<div
+class="brandSub"
+id="adminUser"
+></div>
+
+</div>
+
+</div>
 
 
-          <div class="smallNote">
+<div class="topActions">
 
-            Only a Superior Administrator should be allowed
-            to invite administrators. The invitation itself
-            is handled securely by the Supabase Edge Function.
+<button
+class="btn"
+id="closeAdmin"
+>
+Back to Schedule
+</button>
 
-          </div>
+<button
+class="btn btnDanger"
+id="logoutButton"
+>
+Logout
+</button>
 
+</div>
 
-          <div
-            id="adminCreateMessage"
-            class="smallNote"
-          ></div>
+</div>
 
-
-          <div class="modalActions">
-
-            <button
-              class="btn btnPink"
-              id="addAdminButton"
-            >
-              Invite Administrator
-            </button>
-
-          </div>
-
-        </div>
+</div>
 
 
-        <div class="adminCard">
+<div class="adminContent">
 
-          <div class="sectionEyebrow">
-            Database
-          </div>
 
-          <h2>
-            Administrators
-          </h2>
+<div class="adminTabs">
 
-          <div id="adminUsersList"></div>
+<button
+class="adminTab active"
+data-tab="scheduleAdmin"
+>
+Schedule
+</button>
 
-        </div>
+<button
+class="adminTab"
+data-tab="branchesAdmin"
+>
+Branches
+</button>
 
-      </div>
+<button
+class="adminTab"
+data-tab="teachersAdmin"
+>
+Teachers
+</button>
 
-    </div>
+<button
+class="adminTab"
+data-tab="adminsAdmin"
+>
+Administrators
+</button>
 
-  </div>
+</div>
+
+
+<!-- =====================================================
+     SCHEDULE ADMIN
+====================================================== -->
+
+<div
+id="scheduleAdmin"
+class="adminSection active"
+>
+
+<div class="adminGrid">
+
+<div class="adminCard">
+
+<h2 id="formTitle">
+Add Schedule Class
+</h2>
+
+
+<div class="formGrid">
+
+<div class="formField">
+
+<label>
+Branch
+</label>
+
+<select id="adminBranch"></select>
+
+</div>
+
+
+<div class="formField">
+
+<label>
+Day
+</label>
+
+<select id="adminDay">
+
+<option>Sunday</option>
+<option>Monday</option>
+<option>Tuesday</option>
+<option>Wednesday</option>
+<option>Thursday</option>
+<option>Friday</option>
+<option>Saturday</option>
+
+</select>
+
+</div>
+
+
+<div class="formField">
+
+<label>
+Studio
+</label>
+
+<select id="adminStudio">
+
+<option>Studio 1</option>
+<option>Studio 2</option>
+<option>Studio 3</option>
+
+</select>
+
+</div>
+
+
+<div class="formField">
+
+<label>
+Teacher
+</label>
+
+<select id="adminTeacher">
+
+<option value="">
+No teacher
+</option>
+
+</select>
+
+</div>
+
+
+<div class="formField">
+
+<label>
+Start Time
+</label>
+
+<input
+id="adminStart"
+placeholder="5:00 PM"
+>
+
+</div>
+
+
+<div class="formField">
+
+<label>
+End Time
+</label>
+
+<input
+id="adminEnd"
+placeholder="6:30 PM"
+>
+
+</div>
+
+
+<div class="formField full">
+
+<label>
+Class Name
+</label>
+
+<input
+id="adminClassName"
+placeholder="Premier G2 Classical Ballet"
+>
+
+</div>
+
+</div>
+
+
+<input
+id="editId"
+type="hidden"
+>
+
+
+<div
+id="adminMessage"
+class="smallNote"
+></div>
+
+
+<div class="modalActions">
+
+<button
+class="btn btnDark"
+id="cancelEdit"
+style="display:none"
+>
+Cancel Edit
+</button>
+
+<button
+class="btn btnPink"
+id="saveClass"
+>
+Save Class
+</button>
+
+</div>
+
+</div>
+
+
+<div class="adminCard">
+
+<div class="scheduleHeader">
+
+<div>
+
+<div class="sectionEyebrow">
+Database
+</div>
+
+<h2>
+Schedule Classes
+</h2>
+
+</div>
+
+</div>
+
+<div
+id="adminList"
+class="adminList"
+>
+Loading...
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     BRANCH ADMIN
+====================================================== -->
+
+<div
+id="branchesAdmin"
+class="adminSection"
+>
+
+<div class="adminGrid">
+
+<div class="adminCard">
+
+<h2 id="branchFormTitle">
+Add Branch
+</h2>
+
+
+<div class="formField">
+
+<label>
+Branch Name
+</label>
+
+<input
+id="newBranchName"
+placeholder="Badr"
+>
+
+</div>
+
+
+<input
+id="editBranchId"
+type="hidden"
+>
+
+
+<div
+id="branchMessage"
+class="smallNote"
+></div>
+
+
+<div class="modalActions">
+
+<button
+class="btn btnDark"
+id="cancelBranchEdit"
+style="display:none"
+>
+Cancel Edit
+</button>
+
+<button
+class="btn btnPink"
+id="saveBranchButton"
+>
+Add Branch
+</button>
+
+</div>
+
+</div>
+
+
+<div class="adminCard">
+
+<div class="sectionEyebrow">
+Database
+</div>
+
+<h2>
+Branches
+</h2>
+
+<div
+id="branchList"
+class="adminList"
+>
+Loading...
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     TEACHERS ADMIN
+====================================================== -->
+
+<div
+id="teachersAdmin"
+class="adminSection"
+>
+
+<div class="adminGrid">
+
+<div class="adminCard">
+
+<h2 id="teacherFormTitle">
+Add Teacher
+</h2>
+
+
+<div class="formField">
+
+<label>
+Teacher Name
+</label>
+
+<input
+id="newTeacherName"
+placeholder="Ms. New Teacher"
+>
+
+</div>
+
+
+<div
+class="formField"
+style="margin-top:12px"
+>
+
+<label>
+Colour
+</label>
+
+<input
+id="newTeacherColor"
+type="color"
+value="#E8BFD0"
+style="height:43px;padding:4px"
+>
+
+</div>
+
+
+<input
+id="editTeacherId"
+type="hidden"
+>
+
+
+<div
+id="teacherMessage"
+class="smallNote"
+></div>
+
+
+<div class="modalActions">
+
+<button
+class="btn btnDark"
+id="cancelTeacherEdit"
+style="display:none"
+>
+Cancel Edit
+</button>
+
+<button
+class="btn btnPink"
+id="addTeacherButton"
+>
+Add Teacher
+</button>
+
+</div>
+
+</div>
+
+
+<div class="adminCard">
+
+<div class="sectionEyebrow">
+Database
+</div>
+
+<h2>
+Teachers
+</h2>
+
+<div id="teacherList"></div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     ADMINS ADMIN
+====================================================== -->
+
+<div
+id="adminsAdmin"
+class="adminSection"
+>
+
+<div class="adminGrid">
+
+<div class="adminCard">
+
+<h2>
+Add Administrator
+</h2>
+
+
+<div class="formField">
+
+<label>
+Email
+</label>
+
+<input
+id="newAdminEmail"
+type="email"
+placeholder="admin@example.com"
+>
+
+</div>
+
+
+<div
+class="formField"
+style="margin-top:12px"
+>
+
+<label>
+Role
+</label>
+
+<select id="newAdminRole">
+
+<option value="admin">
+Administrator
+</option>
+
+<option value="superior">
+Superior Administrator
+</option>
+
+</select>
+
+</div>
+
+
+<div class="smallNote">
+
+Only a Superior Administrator should be allowed
+to invite administrators.
+
+</div>
+
+
+<div
+id="adminCreateMessage"
+class="smallNote"
+></div>
+
+
+<div class="modalActions">
+
+<button
+class="btn btnPink"
+id="addAdminButton"
+>
+Invite Administrator
+</button>
+
+</div>
+
+</div>
+
+
+<div class="adminCard">
+
+<div class="sectionEyebrow">
+Database
+</div>
+
+<h2>
+Administrators
+</h2>
+
+<div id="adminUsersList"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
 
 </section>
 
@@ -1998,16 +1990,16 @@ button{cursor:pointer}
 ========================================================= */
 
 const SUPABASE_URL =
-  "https://valwxktxaknqwmozdzyx.supabase.co";
+"https://valwxktxaknqwmozdzyx.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_d0M6R4ILw8bduSv_2wIrdQ_txzl3JrJ";
+"sb_publishable_d0M6R4ILw8bduSv_2wIrdQ_txzl3JrJ";
 
 const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 
 /* =========================================================
@@ -2017,25 +2009,38 @@ const supabaseClient =
 let classes = [];
 let teachers = [];
 let admins = [];
+let branches = [];
 
 let currentUser = null;
 
 let selectedClassIds = new Set();
 
 const days = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday"
+"Sunday",
+"Monday",
+"Tuesday",
+"Wednesday",
+"Thursday",
+"Friday",
+"Saturday"
 ];
 
 const studios = [
-  "Studio 1",
-  "Studio 2",
-  "Studio 3"
+"Studio 1",
+"Studio 2",
+"Studio 3"
+];
+
+
+/* =========================================================
+   DEFAULT BRANCHES
+========================================================= */
+
+const fallbackBranches = [
+"Maadi",
+"New Cairo",
+"Sheikh Zayed",
+"New Giza"
 ];
 
 
@@ -2045,51 +2050,607 @@ const studios = [
 
 const defaultTeacherColors = {
 
-  "Mr. Mohamed Fadlon":"#DCE6F1",
-  "Ms. Nada Nabil":"#F3B3A5",
-  "Ms. Noran Mohamed":"#ADD8E6",
-  "Ms. Victoria Pashchenko":"#CCFFCC",
-  "Ms. Marina Ehab":"#F2C2D4",
-  "Ms. Valentina Kendall":"#E8C6DC",
-  "Ms. Nada Amr":"#B4C7E7",
-  "Ms. Mahinour Ahmed":"#F6EB20",
-  "Ms. Una Stepanovic":"#FFF200",
-  "Ms. Rena Takemura":"#99CCFF",
-  "Ms. Luiza Pigatto":"#D461A6"
+"Mr. Mohamed Fadlon":"#DCE6F1",
+"Ms. Nada Nabil":"#F3B3A5",
+"Ms. Noran Mohamed":"#ADD8E6",
+"Ms. Victoria Pashchenko":"#CCFFCC",
+"Ms. Marina Ehab":"#F2C2D4",
+"Ms. Valentina Kendall":"#E8C6DC",
+"Ms. Nada Amr":"#B4C7E7",
+"Ms. Mahinour Ahmed":"#F6EB20",
+"Ms. Una Stepanovic":"#FFF200",
+"Ms. Rena Takemura":"#99CCFF",
+"Ms. Luiza Pigatto":"#D461A6"
 
 };
 
 let teacherColors = {
-  ...defaultTeacherColors
+...defaultTeacherColors
 };
 
 
 /* =========================================================
-   BRANCH
+   BRANCH FUNCTIONS
 ========================================================= */
 
-const savedBranch =
-  localStorage.getItem(
-    "pba_selected_branch"
-  );
+async function loadBranches(){
 
-let currentBranch =
-  savedBranch || "Maadi";
+  try{
+
+    const {
+      data,
+      error
+    } =
+    await supabaseClient
+      .from("branches")
+      .select("id,name")
+      .order("name");
+
+    if(error)
+      throw error;
+
+    branches =
+      data || [];
+
+    if(!branches.length){
+
+      branches =
+      fallbackBranches.map(
+        (name,index)=>({
+          id:"fallback-"+index,
+          name
+        })
+      );
+
+    }
+
+  }
+  catch(error){
+
+    console.warn(
+      "Branches table unavailable:",
+      error.message
+    );
+
+    branches =
+    fallbackBranches.map(
+      (name,index)=>({
+        id:"fallback-"+index,
+        name
+      })
+    );
+
+  }
+
+  populateBranchSelects();
+  renderBranchList();
+
+}
+
+
+/* =========================================================
+   BRANCH SELECTS
+========================================================= */
+
+function populateBranchSelects(){
+
+  const publicSelect =
+    document.getElementById(
+      "branchSelect"
+    );
+
+  const adminSelect =
+    document.getElementById(
+      "adminBranch"
+    );
+
+  const saved =
+    localStorage.getItem(
+      "pba_selected_branch"
+    );
+
+  const available =
+    branches.map(
+      b=>b.name
+    );
+
+  let current =
+    saved && available.includes(saved)
+      ? saved
+      : available[0] || "Maadi";
+
+  currentBranch =
+    current;
+
+
+  publicSelect.innerHTML = "";
+
+  adminSelect.innerHTML = "";
+
+
+  branches.forEach(branch=>{
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      branch.name;
+
+    option.textContent =
+      branch.name + " Branch";
+
+    publicSelect.appendChild(
+      option
+    );
+
+
+    const adminOption =
+      document.createElement("option");
+
+    adminOption.value =
+      branch.name;
+
+    adminOption.textContent =
+      branch.name;
+
+    adminSelect.appendChild(
+      adminOption
+    );
+
+  });
+
+
+  publicSelect.value =
+    currentBranch;
+
+  adminSelect.value =
+    currentBranch;
+
+
+  updateBranchDisplay();
+
+}
+
+
+/* =========================================================
+   BRANCH DISPLAY
+========================================================= */
+
+function updateBranchDisplay(){
+
+  document.getElementById(
+    "branchMeta"
+  ).textContent =
+    currentBranch;
+
+
+  document.getElementById(
+    "scheduleTitle"
+  ).textContent =
+    currentBranch +
+    " Branch";
+
+}
+
+
+/* =========================================================
+   BRANCH LIST
+========================================================= */
+
+function renderBranchList(){
+
+  const list =
+    document.getElementById(
+      "branchList"
+    );
+
+  if(!list)
+    return;
+
+  list.innerHTML = "";
+
+
+  branches.forEach(branch=>{
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "adminItem";
+
+
+    const info =
+      document.createElement(
+        "div"
+      );
+
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "adminItemName";
+
+    name.textContent =
+      branch.name;
+
+
+    const details =
+      document.createElement(
+        "div"
+      );
+
+    details.className =
+      "adminItemDetails";
+
+    details.textContent =
+      "Schedule branch";
+
+
+    info.appendChild(name);
+    info.appendChild(details);
+
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "adminActions";
+
+
+    const edit =
+      document.createElement(
+        "button"
+      );
+
+    edit.className =
+      "btn btnGold";
+
+    edit.textContent =
+      "Edit";
+
+    edit.onclick =
+      ()=>startBranchEdit(branch);
+
+
+    const del =
+      document.createElement(
+        "button"
+      );
+
+    del.className =
+      "btn btnDanger";
+
+    del.textContent =
+      "Delete";
+
+    del.onclick =
+      ()=>deleteBranch(branch);
+
+
+    actions.appendChild(edit);
+    actions.appendChild(del);
+
+
+    row.appendChild(info);
+    row.appendChild(actions);
+
+
+    list.appendChild(row);
+
+  });
+
+}
+
+
+/* =========================================================
+   ADD / UPDATE BRANCH
+========================================================= */
 
 document.getElementById(
-  "branchSelect"
-).value =
-  currentBranch;
+  "saveBranchButton"
+).addEventListener(
+  "click",
+  addOrUpdateBranch
+);
+
+
+async function addOrUpdateBranch(){
+
+  const id =
+    document.getElementById(
+      "editBranchId"
+    ).value;
+
+
+  const name =
+    document.getElementById(
+      "newBranchName"
+    ).value.trim();
+
+
+  const message =
+    document.getElementById(
+      "branchMessage"
+    );
+
+
+  if(!name){
+
+    message.textContent =
+      "Enter a branch name.";
+
+    return;
+
+  }
+
+
+  if(
+    !currentUser
+  ){
+
+    message.textContent =
+      "You must be logged in.";
+
+    return;
+
+  }
+
+
+  let result;
+
+
+  if(id){
+
+    result =
+      await supabaseClient
+        .from("branches")
+        .update({
+          name
+        })
+        .eq(
+          "id",
+          id
+        );
+
+  }
+  else{
+
+    result =
+      await supabaseClient
+        .from("branches")
+        .insert({
+          name
+        });
+
+  }
+
+
+  if(result.error){
+
+    message.textContent =
+      result.error.message;
+
+    return;
+
+  }
+
+
+  message.textContent =
+    id
+      ? "Branch updated successfully."
+      : "Branch added successfully.";
+
+
+  cancelBranchEdit();
+
+
+  await loadBranches();
+
+  await loadClasses();
+
+  await loadAdminClasses();
+
+}
+
+
+/* =========================================================
+   EDIT BRANCH
+========================================================= */
+
+function startBranchEdit(branch){
+
+  document.getElementById(
+    "editBranchId"
+  ).value =
+    branch.id;
+
+
+  document.getElementById(
+    "newBranchName"
+  ).value =
+    branch.name;
+
+
+  document.getElementById(
+    "branchFormTitle"
+  ).textContent =
+    "Edit Branch";
+
+
+  document.getElementById(
+    "saveBranchButton"
+  ).textContent =
+    "Save Branch";
+
+
+  document.getElementById(
+    "cancelBranchEdit"
+  ).style.display =
+    "inline-block";
+
+
+  document.getElementById(
+    "branchMessage"
+  ).textContent = "";
+
+}
+
+
+/* =========================================================
+   CANCEL BRANCH EDIT
+========================================================= */
 
 document.getElementById(
-  "branchMeta"
-).textContent =
-  currentBranch;
+  "cancelBranchEdit"
+).addEventListener(
+  "click",
+  cancelBranchEdit
+);
 
-document.getElementById(
-  "scheduleTitle"
-).textContent =
-  currentBranch + " Branch";
+
+function cancelBranchEdit(){
+
+  document.getElementById(
+    "editBranchId"
+  ).value = "";
+
+
+  document.getElementById(
+    "newBranchName"
+  ).value = "";
+
+
+  document.getElementById(
+    "branchFormTitle"
+  ).textContent =
+    "Add Branch";
+
+
+  document.getElementById(
+    "saveBranchButton"
+  ).textContent =
+    "Add Branch";
+
+
+  document.getElementById(
+    "cancelBranchEdit"
+  ).style.display =
+    "none";
+
+}
+
+
+/* =========================================================
+   DELETE BRANCH
+========================================================= */
+
+async function deleteBranch(branch){
+
+  if(
+    !confirm(
+      `Delete branch "${branch.name}"?`
+    )
+  )
+    return;
+
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient
+    .from("classes")
+    .select("id")
+    .eq(
+      "branch",
+      branch.name
+    )
+    .limit(1);
+
+
+  if(error){
+
+    alert(
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  if(data && data.length){
+
+    alert(
+      "This branch still has classes. Delete or move those classes first."
+    );
+
+    return;
+
+  }
+
+
+  if(
+    String(branch.id)
+      .startsWith("fallback-")
+  ){
+
+    alert(
+      "This branch is a fallback branch. Create the branches table in Supabase first."
+    );
+
+    return;
+
+  }
+
+
+  const result =
+    await supabaseClient
+      .from("branches")
+      .delete()
+      .eq(
+        "id",
+        branch.id
+      );
+
+
+  if(result.error){
+
+    alert(
+      result.error.message
+    );
+
+    return;
+
+  }
+
+
+  if(
+    currentBranch ===
+    branch.name
+  ){
+
+    localStorage.removeItem(
+      "pba_selected_branch"
+    );
+
+  }
+
+
+  await loadBranches();
+
+  await loadClasses();
+
+  await loadAdminClasses();
+
+}
 
 
 /* =========================================================
@@ -2127,45 +2688,16 @@ function normalizeClassName(name){
 
 
 /* =========================================================
-   SEARCH ENGINE
+   SEARCH
 ========================================================= */
 
-/*
-  IMPORTANT SEARCH RULES
-
-  Each search token is tested against the appropriate
-  field instead of one giant combined string.
-
-  Therefore:
-
-  "premier 2"
-  -> both tokens must exist in CLASS NAME
-
-  "premier 3"
-  -> both tokens must exist in CLASS NAME
-
-  "fadlon"
-  -> teacher name can match
-
-  "studio 3"
-  -> studio must match
-
-  "11:30"
-  -> time can match progressively
-
-  "premier 3 fadlon"
-  -> class name + teacher can match
-
-  This prevents "3" from matching Studio 3 when the
-  user actually searched "Premier 3".
-*/
-
-
-function tokenMatchesClass(c, token){
+function tokenMatchesClass(c,token){
 
   const className =
     normalizeText(
-      normalizeClassName(c.class_name)
+      normalizeClassName(
+        c.class_name
+      )
     );
 
   const teacher =
@@ -2186,9 +2718,6 @@ function tokenMatchesClass(c, token){
   const time =
     `${start} ${end}`;
 
-  /*
-    Exact/partial class search
-  */
 
   if(
     className.includes(token)
@@ -2196,22 +2725,11 @@ function tokenMatchesClass(c, token){
     return true;
 
 
-  /*
-    Teacher search
-
-    This is why "fadlon" finds
-    Mr. Mohamed Fadlon.
-  */
-
   if(
     teacher.includes(token)
   )
     return true;
 
-
-  /*
-    Studio is searchable independently.
-  */
 
   if(
     studio.includes(token)
@@ -2219,26 +2737,11 @@ function tokenMatchesClass(c, token){
     return true;
 
 
-  /*
-    Day search.
-  */
-
   if(
     day.includes(token)
   )
     return true;
 
-
-  /*
-    Time search.
-
-    "11"
-    "11:"
-    "11:3"
-    "11:30"
-
-    all work progressively.
-  */
 
   if(
     start.includes(token) ||
@@ -2253,22 +2756,7 @@ function tokenMatchesClass(c, token){
 }
 
 
-/*
-  The important part:
-
-  If the user types "Premier 3", the numeric token 3
-  MUST NOT be allowed to match Studio 3.
-
-  When the search contains "premier", "competition",
-  "level", "g", etc. we treat the complete class-name
-  search as a class-name phrase.
-
-  For ordinary single-token searches, all fields remain
-  searchable.
-*/
-
-
-function classMatchesSearch(c, query){
+function classMatchesSearch(c,query){
 
   const raw =
     normalizeText(query);
@@ -2282,24 +2770,6 @@ function classMatchesSearch(c, query){
       .split(" ")
       .filter(Boolean);
 
-
-  if(!tokens.length)
-    return true;
-
-
-  /*
-    Class-oriented searches.
-
-    If the query contains a class keyword, every token
-    must match the CLASS NAME.
-
-    This fixes:
-
-    Premier 2
-    Premier 3
-    Level 4A
-    Level 6 7A
-  */
 
   const classKeywords = [
     "premier",
@@ -2317,8 +2787,9 @@ function classMatchesSearch(c, query){
 
 
   const hasClassKeyword =
-    tokens.some(token =>
-      classKeywords.includes(token)
+    tokens.some(
+      token =>
+        classKeywords.includes(token)
     );
 
 
@@ -2331,25 +2802,20 @@ function classMatchesSearch(c, query){
         )
       );
 
-    return tokens.every(token =>
-      className.includes(token)
+    return tokens.every(
+      token =>
+        className.includes(token)
     );
 
   }
 
 
-  /*
-    Otherwise every token may match any relevant field.
-
-    Example:
-
-    "fadlon"
-    "studio 3"
-    "11:30"
-  */
-
-  return tokens.every(token =>
-    tokenMatchesClass(c,token)
+  return tokens.every(
+    token =>
+      tokenMatchesClass(
+        c,
+        token
+      )
   );
 
 }
@@ -2367,10 +2833,10 @@ async function loadTeachers(){
       data,
       error
     } =
-      await supabaseClient
-        .from("teachers")
-        .select("id,name,color")
-        .order("name");
+    await supabaseClient
+      .from("teachers")
+      .select("id,name,color")
+      .order("name");
 
     if(error)
       throw error;
@@ -2407,14 +2873,16 @@ async function loadTeachers(){
 
 
     teachers =
-      Object.keys(teacherColors)
-        .map(
-          (name,index)=>({
-            id:"default-"+index,
-            name,
-            color:teacherColors[name]
-          })
-        );
+    Object.keys(
+      teacherColors
+    ).map(
+      (name,index)=>({
+        id:"default-"+index,
+        name,
+        color:
+          teacherColors[name]
+      })
+    );
 
 
     populateTeacherSelect();
@@ -2440,6 +2908,7 @@ function populateTeacherSelect(){
   const current =
     select.value;
 
+
   select.innerHTML =
     '<option value="">No teacher</option>';
 
@@ -2447,7 +2916,9 @@ function populateTeacherSelect(){
   teachers.forEach(t=>{
 
     const option =
-      document.createElement("option");
+      document.createElement(
+        "option"
+      );
 
     option.value =
       t.name;
@@ -2455,7 +2926,9 @@ function populateTeacherSelect(){
     option.textContent =
       t.name;
 
-    select.appendChild(option);
+    select.appendChild(
+      option
+    );
 
   });
 
@@ -2478,6 +2951,7 @@ async function loadClasses(){
       "status"
     );
 
+
   status.textContent =
     "Loading schedule...";
 
@@ -2488,12 +2962,12 @@ async function loadClasses(){
       data,
       error
     } =
-      await supabaseClient
-        .from("classes")
-        .select(
-          "id,branch,day,studio,start_time,end_time,class_name,teacher"
-        )
-        .order("start_time");
+    await supabaseClient
+      .from("classes")
+      .select(
+        "id,branch,day,studio,start_time,end_time,class_name,teacher"
+      )
+      .order("start_time");
 
 
     if(error)
@@ -2501,7 +2975,8 @@ async function loadClasses(){
 
 
     classes =
-      (data || []).map(c=>({
+    (data || []).map(
+      c=>({
 
         ...c,
 
@@ -2510,31 +2985,35 @@ async function loadClasses(){
             c.class_name
           )
 
-      }));
+      })
+    );
 
-
-    /*
-      Remove selections that no longer exist.
-    */
 
     const validIds =
       new Set(
-        classes.map(c=>String(c.id))
+        classes.map(
+          c=>String(c.id)
+        )
       );
 
+
     selectedClassIds =
-      new Set(
-        [...selectedClassIds]
-          .filter(id =>
-            validIds.has(String(id))
-          )
-      );
+    new Set(
+      [...selectedClassIds]
+        .filter(
+          id =>
+            validIds.has(
+              String(id)
+            )
+        )
+    );
 
 
     renderSchedule();
     runSearch();
 
-    status.textContent="";
+
+    status.textContent = "";
 
   }
   catch(error){
@@ -2554,18 +3033,11 @@ async function loadClasses(){
    SORT
 ========================================================= */
 
-function sortByTime(a,b){
-
-  return timeToMinutes(a.start_time) -
-         timeToMinutes(b.start_time);
-
-}
-
-
 function timeToMinutes(value){
 
   if(!value)
     return 0;
+
 
   const text =
     String(value)
@@ -2620,6 +3092,18 @@ function timeToMinutes(value){
 }
 
 
+function sortByTime(a,b){
+
+  return timeToMinutes(
+    a.start_time
+  ) -
+  timeToMinutes(
+    b.start_time
+  );
+
+}
+
+
 /* =========================================================
    RENDER SCHEDULE
 ========================================================= */
@@ -2631,13 +3115,11 @@ function renderSchedule(){
       "days"
     );
 
-  container.innerHTML="";
+
+  container.innerHTML = "";
 
 
-  document.getElementById(
-    "scheduleTitle"
-  ).textContent =
-    currentBranch + " Branch";
+  updateBranchDisplay();
 
 
   days.forEach(day=>{
@@ -2692,9 +3174,12 @@ function renderSchedule(){
 
     const dayClasses =
       classes
-        .filter(c =>
-          c.branch === currentBranch &&
-          c.day === day
+        .filter(
+          c =>
+            c.branch ===
+            currentBranch &&
+            c.day ===
+            day
         )
         .sort(sortByTime);
 
@@ -2766,6 +3251,7 @@ function renderSchedule(){
 
       empty.textContent =
         "No classes";
+
 
       column.appendChild(
         empty
@@ -2880,64 +3366,65 @@ function renderLegend(){
       "legendGrid"
     );
 
-  grid.innerHTML="";
+
+  grid.innerHTML = "";
 
 
   Object.entries(
     teacherColors
   )
-    .sort(
-      ([a],[b]) =>
-        a.localeCompare(b)
-    )
-    .forEach(
-      ([teacher,color])=>{
+  .sort(
+    ([a],[b]) =>
+      a.localeCompare(b)
+  )
+  .forEach(
+    ([teacher,color])=>{
 
-        const item =
-          document.createElement(
-            "div"
-          );
-
-        item.className =
-          "legendItem";
-
-
-        const colorBox =
-          document.createElement(
-            "div"
-          );
-
-        colorBox.className =
-          "legendColor";
-
-        colorBox.style.background =
-          color;
-
-
-        const text =
-          document.createElement(
-            "span"
-          );
-
-        text.textContent =
-          teacher;
-
-
-        item.appendChild(
-          colorBox
+      const item =
+        document.createElement(
+          "div"
         );
 
-        item.appendChild(
-          text
+      item.className =
+        "legendItem";
+
+
+      const colorBox =
+        document.createElement(
+          "div"
         );
 
+      colorBox.className =
+        "legendColor";
 
-        grid.appendChild(
-          item
+      colorBox.style.background =
+        color;
+
+
+      const text =
+        document.createElement(
+          "span"
         );
 
-      }
-    );
+      text.textContent =
+        teacher;
+
+
+      item.appendChild(
+        colorBox
+      );
+
+      item.appendChild(
+        text
+      );
+
+
+      grid.appendChild(
+        item
+      );
+
+    }
+  );
 
 }
 
@@ -2953,15 +3440,18 @@ function runSearch(){
       "searchInput"
     );
 
+
   const results =
     document.getElementById(
       "results"
     );
 
+
   const grid =
     document.getElementById(
       "resultsGrid"
     );
+
 
   const calendarButton =
     document.getElementById(
@@ -2978,7 +3468,7 @@ function runSearch(){
     results.style.display =
       "none";
 
-    grid.innerHTML="";
+    grid.innerHTML = "";
 
     calendarButton.classList.add(
       "hidden"
@@ -2993,14 +3483,17 @@ function runSearch(){
 
   const matches =
     classes
-      .filter(c =>
-        c.branch === currentBranch
+      .filter(
+        c =>
+          c.branch ===
+          currentBranch
       )
-      .filter(c =>
-        classMatchesSearch(
-          c,
-          query
-        )
+      .filter(
+        c =>
+          classMatchesSearch(
+            c,
+            query
+          )
       )
       .sort(sortByTime);
 
@@ -3009,18 +3502,14 @@ function runSearch(){
     "block";
 
 
-  grid.innerHTML="";
+  grid.innerHTML = "";
 
-
-  /*
-    Remove selected classes that are no longer
-    visible in the current search.
-  */
 
   const visibleIds =
     new Set(
-      matches.map(c =>
-        String(c.id)
+      matches.map(
+        c =>
+          String(c.id)
       )
     );
 
@@ -3028,10 +3517,11 @@ function runSearch(){
   selectedClassIds =
     new Set(
       [...selectedClassIds]
-        .filter(id =>
-          visibleIds.has(
-            String(id)
-          )
+        .filter(
+          id =>
+            visibleIds.has(
+              String(id)
+            )
         )
     );
 
@@ -3056,9 +3546,7 @@ function runSearch(){
       "No matching classes found.";
 
 
-    grid.appendChild(
-      card
-    );
+    grid.appendChild(card);
 
 
     calendarButton.classList.add(
@@ -3146,10 +3634,6 @@ function runSearch(){
     left.appendChild(name);
 
 
-    /*
-      Selection button
-    */
-
     const select =
       document.createElement(
         "button"
@@ -3221,26 +3705,16 @@ function runSearch(){
       .join(" · ");
 
 
-    card.appendChild(
-      top
-    );
-
-    card.appendChild(
-      info
-    );
+    card.appendChild(top);
+    card.appendChild(info);
 
 
-    grid.appendChild(
-      card
-    );
+    grid.appendChild(card);
 
   });
 
 
-  updateCalendarButton(
-    matches
-  );
-
+  updateCalendarButton(matches);
   updateSearchActions();
 
 }
@@ -3260,16 +3734,12 @@ function toggleClassSelection(id){
     selectedClassIds.has(key)
   ){
 
-    selectedClassIds.delete(
-      key
-    );
+    selectedClassIds.delete(key);
 
   }
   else{
 
-    selectedClassIds.add(
-      key
-    );
+    selectedClassIds.add(key);
 
   }
 
@@ -3295,34 +3765,39 @@ function updateSearchActions(){
       "searchActions"
     );
 
+
   const count =
     document.getElementById(
       "selectionCount"
     );
 
 
-  const amount =
+  count.textContent =
     selectedClassIds.size;
 
 
-  count.textContent =
-    amount;
+  if(
+    selectedClassIds.size > 0
+  ){
 
-
-  if(amount > 0)
     actions.classList.add(
       "visible"
     );
-  else
+
+  }
+  else{
+
     actions.classList.remove(
       "visible"
     );
+
+  }
 
 }
 
 
 /* =========================================================
-   CALENDAR BUTTON
+   GOOGLE CALENDAR
 ========================================================= */
 
 function updateCalendarButton(matches){
@@ -3332,17 +3807,12 @@ function updateCalendarButton(matches){
       "calendarButton"
     );
 
+
   const text =
     document.getElementById(
       "calendarButtonText"
     );
 
-
-  /*
-    ONE RESULT
-
-    Automatically use the only result.
-  */
 
   if(matches.length === 1){
 
@@ -3353,21 +3823,17 @@ function updateCalendarButton(matches){
       "hidden"
     );
 
+
     button.onclick =
       ()=>addClassesToGoogleCalendar(
         [matches[0]]
       );
 
+
     return;
 
   }
 
-
-  /*
-    MULTIPLE RESULTS
-
-    User must select classes.
-  */
 
   if(selectedClassIds.size > 0){
 
@@ -3375,6 +3841,7 @@ function updateCalendarButton(matches){
       selectedClassIds.size === 1
         ? "Add Selected Class to Google Calendar"
         : "Add Selected Classes to Google Calendar";
+
 
     button.classList.remove(
       "hidden"
@@ -3385,11 +3852,13 @@ function updateCalendarButton(matches){
       ()=>{
 
         const selected =
-          matches.filter(c =>
-            selectedClassIds.has(
-              String(c.id)
-            )
+          matches.filter(
+            c =>
+              selectedClassIds.has(
+                String(c.id)
+              )
           );
+
 
         addClassesToGoogleCalendar(
           selected
@@ -3403,10 +3872,6 @@ function updateCalendarButton(matches){
   }
 
 
-  /*
-    Multiple results but nothing selected.
-  */
-
   button.classList.add(
     "hidden"
   );
@@ -3414,49 +3879,10 @@ function updateCalendarButton(matches){
 }
 
 
-/* =========================================================
-   GOOGLE CALENDAR
-========================================================= */
-
-function calendarDate(){
-
-  const now =
-    new Date();
-
-
-  /*
-    Google Calendar needs YYYYMMDD.
-  */
-
-  return {
-    year:
-      now.getFullYear(),
-
-    month:
-      String(
-        now.getMonth()+1
-      ).padStart(2,"0"),
-
-    day:
-      String(
-        now.getDate()
-      ).padStart(2,"0")
-  };
-
-}
-
-
-/*
-  Convert the academy time into a Google Calendar
-  date/time.
-
-  Because this is a WEEKLY schedule, we use the
-  next occurrence of the selected class day.
-*/
-
 function nextOccurrence(dayName){
 
   const dayIndex = {
+
     Sunday:0,
     Monday:1,
     Tuesday:2,
@@ -3464,6 +3890,7 @@ function nextOccurrence(dayName){
     Thursday:4,
     Friday:5,
     Saturday:6
+
   };
 
 
@@ -3486,6 +3913,7 @@ function nextOccurrence(dayName){
 
   const date =
     new Date(now);
+
 
   date.setDate(
     now.getDate() +
@@ -3582,17 +4010,12 @@ function googleDateTime(
 }
 
 
-/*
-  Google Calendar can create one event at a time through
-  the event URL.
-
-  For multiple selected classes, we open one Google
-  Calendar tab for each selected class.
-*/
-
 function addClassesToGoogleCalendar(matches){
 
-  if(!matches || !matches.length)
+  if(
+    !matches ||
+    !matches.length
+  )
     return;
 
 
@@ -3657,11 +4080,6 @@ function addClassesToGoogleCalendar(matches){
         encodeURIComponent(location);
 
 
-      /*
-        First event opens normally.
-        Additional events open in new tabs.
-      */
-
       setTimeout(
         ()=>{
           window.open(
@@ -3679,7 +4097,7 @@ function addClassesToGoogleCalendar(matches){
 
 
 /* =========================================================
-   BRANCH CHANGE
+   PUBLIC BRANCH CHANGE
 ========================================================= */
 
 document.getElementById(
@@ -3698,10 +4116,7 @@ document.getElementById(
     );
 
 
-    document.getElementById(
-      "branchMeta"
-    ).textContent =
-      currentBranch;
+    updateBranchDisplay();
 
 
     selectedClassIds.clear();
@@ -3804,8 +4219,12 @@ document.getElementById(
 ).addEventListener(
   "keydown",
   event=>{
-    if(event.key === "Enter")
+
+    if(
+      event.key === "Enter"
+    )
       adminLogin();
+
   }
 );
 
@@ -3830,10 +4249,13 @@ async function adminLogin(){
     );
 
 
-  error.textContent="";
+  error.textContent = "";
 
 
-  if(!email || !password){
+  if(
+    !email ||
+    !password
+  ){
 
     error.textContent =
       "Enter your email and password.";
@@ -3847,11 +4269,11 @@ async function adminLogin(){
     data,
     error:authError
   } =
-    await supabaseClient.auth
-      .signInWithPassword({
-        email,
-        password
-      });
+  await supabaseClient.auth
+    .signInWithPassword({
+      email,
+      password
+    });
 
 
   if(authError){
@@ -3864,31 +4286,123 @@ async function adminLogin(){
   }
 
 
+  await finishAdminLogin(
+    data.user,
+    error
+  );
+
+}
+
+
+/* =========================================================
+   RESTORE ADMIN SESSION
+========================================================= */
+
+async function restoreAdminSession(){
+
+  const {
+    data
+  } =
+  await supabaseClient.auth.getSession();
+
+
+  const session =
+    data?.session;
+
+
+  if(!session)
+    return;
+
+
+  const {
+    data:userData
+  } =
+  await supabaseClient.auth.getUser();
+
+
+  const user =
+    userData?.user;
+
+
+  if(!user)
+    return;
+
+
+  const {
+    data:admin,
+    error
+  } =
+  await supabaseClient
+    .from("admins")
+    .select("id,email,role")
+    .eq(
+      "id",
+      user.id
+    )
+    .maybeSingle();
+
+
+  if(
+    error ||
+    !admin
+  ){
+
+    await supabaseClient.auth.signOut();
+
+    return;
+
+  }
+
+
+  currentUser =
+    user;
+
+
+  currentUser.adminRole =
+    admin.role || "admin";
+
+
+  /*
+    We DO NOT automatically open the admin panel
+    after a refresh.
+
+    The session remains valid, but the public schedule
+    remains visible.
+
+    This prevents accidental admin exposure.
+  */
+
+}
+
+
+/* =========================================================
+   FINISH ADMIN LOGIN
+========================================================= */
+
+async function finishAdminLogin(
+  user,
+  errorElement
+){
+
   const {
     data:admin,
     error:adminError
   } =
-    await supabaseClient
-      .from("admins")
-      .select("id,email,role")
-      .eq(
-        "id",
-        data.user.id
-      )
-      .maybeSingle();
+  await supabaseClient
+    .from("admins")
+    .select("id,email,role")
+    .eq(
+      "id",
+      user.id
+    )
+    .maybeSingle();
 
 
   if(adminError){
 
-    console.error(
-      adminError
-    );
-
-
     await supabaseClient.auth.signOut();
 
-
-    error.textContent =
+    errorElement.textContent =
       "Admin database error: " +
       adminError.message;
 
@@ -3901,8 +4415,7 @@ async function adminLogin(){
 
     await supabaseClient.auth.signOut();
 
-
-    error.textContent =
+    errorElement.textContent =
       "This account is not authorized as an administrator.";
 
     return;
@@ -3911,7 +4424,7 @@ async function adminLogin(){
 
 
   currentUser =
-    data.user;
+    user;
 
 
   currentUser.adminRole =
@@ -3947,6 +4460,7 @@ async function openAdmin(){
     currentUser?.email || "";
 
 
+  await loadBranches();
   await loadTeachers();
   await loadAdminClasses();
   await loadAdmins();
@@ -3972,8 +4486,10 @@ document.getElementById(
 
     cancelEdit();
     cancelTeacherEdit();
+    cancelBranchEdit();
 
 
+    await loadBranches();
     await loadTeachers();
     await loadClasses();
 
@@ -4076,14 +4592,14 @@ async function loadAdminClasses(){
     data,
     error
   } =
-    await supabaseClient
-      .from("classes")
-      .select(
-        "id,branch,day,studio,start_time,end_time,class_name,teacher"
-      )
-      .order("branch")
-      .order("day")
-      .order("start_time");
+  await supabaseClient
+    .from("classes")
+    .select(
+      "id,branch,day,studio,start_time,end_time,class_name,teacher"
+    )
+    .order("branch")
+    .order("day")
+    .order("start_time");
 
 
   if(error){
@@ -4096,7 +4612,7 @@ async function loadAdminClasses(){
   }
 
 
-  list.innerHTML="";
+  list.innerHTML = "";
 
 
   (data || []).forEach(c=>{
@@ -4269,7 +4785,8 @@ async function saveClass(){
     teacher:
       document.getElementById(
         "adminTeacher"
-      ).value || null
+      ).value ||
+      null
 
   };
 
@@ -4417,7 +4934,7 @@ function startEdit(c){
 
   document.getElementById(
     "adminMessage"
-  ).textContent="";
+  ).textContent = "";
 
 }
 
@@ -4438,27 +4955,27 @@ function cancelEdit(){
 
   document.getElementById(
     "editId"
-  ).value="";
+  ).value = "";
 
 
   document.getElementById(
     "adminStart"
-  ).value="";
+  ).value = "";
 
 
   document.getElementById(
     "adminEnd"
-  ).value="";
+  ).value = "";
 
 
   document.getElementById(
     "adminClassName"
-  ).value="";
+  ).value = "";
 
 
   document.getElementById(
     "adminTeacher"
-  ).value="";
+  ).value = "";
 
 
   document.getElementById(
@@ -4492,13 +5009,13 @@ async function deleteClass(id){
   const {
     error
   } =
-    await supabaseClient
-      .from("classes")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
+  await supabaseClient
+    .from("classes")
+    .delete()
+    .eq(
+      "id",
+      id
+    );
 
 
   if(error){
@@ -4540,7 +5057,7 @@ function renderTeacherList(){
     return;
 
 
-  list.innerHTML="";
+  list.innerHTML = "";
 
 
   teachers.forEach(t=>{
@@ -4623,11 +5140,6 @@ function renderTeacherList(){
       "adminActions";
 
 
-    /*
-      Default teachers are fallback-only and cannot
-      be edited/deleted because they aren't database rows.
-    */
-
     if(
       String(t.id).startsWith(
         "default-"
@@ -4688,7 +5200,7 @@ function renderTeacherList(){
 
 
 /* =========================================================
-   ADD / UPDATE TEACHER
+   TEACHERS
 ========================================================= */
 
 document.getElementById(
@@ -4786,12 +5298,6 @@ async function addOrUpdateTeacher(){
 
 
   await loadTeachers();
-
-  /*
-    Refresh classes because changing a teacher's
-    name may affect displayed teacher colours.
-  */
-
   await loadClasses();
   await loadAdminClasses();
 
@@ -4840,16 +5346,11 @@ function startTeacherEdit(t){
   ).style.display =
     "inline-block";
 
-
-  document.getElementById(
-    "teacherMessage"
-  ).textContent="";
-
 }
 
 
 /* =========================================================
-   CANCEL TEACHER EDIT
+   CANCEL TEACHER
 ========================================================= */
 
 document.getElementById(
@@ -4864,17 +5365,18 @@ function cancelTeacherEdit(){
 
   document.getElementById(
     "editTeacherId"
-  ).value="";
+  ).value = "";
 
 
   document.getElementById(
     "newTeacherName"
-  ).value="";
+  ).value = "";
 
 
   document.getElementById(
     "newTeacherColor"
-  ).value="#E8BFD0";
+  ).value =
+    "#E8BFD0";
 
 
   document.getElementById(
@@ -4914,13 +5416,13 @@ async function deleteTeacher(t){
   const {
     error
   } =
-    await supabaseClient
-      .from("teachers")
-      .delete()
-      .eq(
-        "id",
-        t.id
-      );
+  await supabaseClient
+    .from("teachers")
+    .delete()
+    .eq(
+      "id",
+      t.id
+    );
 
 
   if(error){
@@ -4932,12 +5434,6 @@ async function deleteTeacher(t){
     return;
 
   }
-
-
-  document.getElementById(
-    "teacherMessage"
-  ).textContent =
-    "Teacher deleted successfully.";
 
 
   await loadTeachers();
@@ -4965,12 +5461,12 @@ async function loadAdmins(){
     data,
     error
   } =
-    await supabaseClient
-      .from("admins")
-      .select(
-        "id,email,role"
-      )
-      .order("email");
+  await supabaseClient
+    .from("admins")
+    .select(
+      "id,email,role"
+    )
+    .order("email");
 
 
   if(error){
@@ -4987,7 +5483,7 @@ async function loadAdmins(){
     data || [];
 
 
-  list.innerHTML="";
+  list.innerHTML = "";
 
 
   admins.forEach(admin=>{
@@ -5044,29 +5540,12 @@ async function loadAdmins(){
         : "Administrator";
 
 
-    text.appendChild(
-      email
-    );
+    text.appendChild(email);
+    text.appendChild(role);
 
-    text.appendChild(
-      role
-    );
+    left.appendChild(text);
+    row.appendChild(left);
 
-
-    left.appendChild(
-      text
-    );
-
-
-    row.appendChild(
-      left
-    );
-
-
-    /*
-      Only superior admins can delete other admins.
-      The actual database policy must enforce this too.
-    */
 
     if(
       currentUser?.adminRole ===
@@ -5102,21 +5581,13 @@ async function loadAdmins(){
         );
 
 
-      actions.appendChild(
-        del
-      );
-
-
-      row.appendChild(
-        actions
-      );
+      actions.appendChild(del);
+      row.appendChild(actions);
 
     }
 
 
-    list.appendChild(
-      row
-    );
+    list.appendChild(row);
 
   });
 
@@ -5151,21 +5622,16 @@ async function deleteAdmin(admin){
     return;
 
 
-  /*
-    This deletes the administrators-table record.
-    Auth-user deletion still needs the secure Edge Function.
-  */
-
   const {
     error
   } =
-    await supabaseClient
-      .from("admins")
-      .delete()
-      .eq(
-        "id",
-        admin.id
-      );
+  await supabaseClient
+    .from("admins")
+    .delete()
+    .eq(
+      "id",
+      admin.id
+    );
 
 
   if(error){
@@ -5204,10 +5670,11 @@ async function addAdmin(){
     ).value.trim()
       .toLowerCase();
 
+
   const role =
-  document.getElementById(
-    "newAdminRole"
-  ).value;
+    document.getElementById(
+      "newAdminRole"
+    ).value;
 
 
   const message =
@@ -5243,87 +5710,38 @@ async function addAdmin(){
     "Sending invitation...";
 
 
-  /*
-    DATABASE / EDGE FUNCTION PART
-
-    We are intentionally leaving this connection here
-    for the next step.
-
-    The Edge Function must be deployed and must accept
-    the authenticated user's session.
-  */
-
-
   try{
 
     const {
       data,
       error
     } =
-      await supabaseClient.functions.invoke(
-        "invite-admin",
-        {
-         body:{
-  email,
-  role
-}
+    await supabaseClient.functions.invoke(
+      "invite-admin",
+      {
+        body:{
+          email,
+          role
         }
-      );
+      }
+    );
 
 
     if(error){
 
-  console.error(
-    "Edge Function error:",
-    error
-  );
-
-  let errorText =
-    "Failed to send a request to the Edge Function.";
-
-  try{
-
-    const response =
-      error.context;
-
-    if(response){
-
-      const data =
-        await response.json();
-
       console.error(
-        "Edge Function response:",
-        data
+        error
       );
 
-      errorText =
-        data?.error ||
-        data?.message ||
-        errorText;
+      message.textContent =
+        "Failed to send invitation.";
+
+      return;
 
     }
 
-  }
-  catch(e){
 
-    console.error(
-      "Could not read Edge Function error:",
-      e
-    );
-
-  }
-
-  message.textContent =
-    errorText;
-
-  return;
-
-}
-
-
-    if(
-      data?.error
-    ){
+    if(data?.error){
 
       message.textContent =
         data.error;
@@ -5340,7 +5758,7 @@ async function addAdmin(){
 
     document.getElementById(
       "newAdminEmail"
-    ).value="";
+    ).value = "";
 
 
     await loadAdmins();
@@ -5348,73 +5766,85 @@ async function addAdmin(){
   }
   catch(error){
 
-    console.error(
-      error
-    );
-
+    console.error(error);
 
     message.textContent =
-      "Failed to send a request to the Edge Function.";
+      "Failed to send invitation.";
 
   }
 
 }
 
-  /* =========================================================
-   INVITATION PASSWORD SETUP
+
+/* =========================================================
+   FIXED INVITATION CHECK
 ========================================================= */
+
+/*
+  THIS IS THE IMPORTANT FIX.
+
+  Previously your code checked whether the user had
+  an email identity.
+
+  Almost every normal Supabase email user has one.
+
+  Therefore every refresh could trigger the password
+  setup screen.
+
+  Now we ONLY show password setup when the URL actually
+  contains an invitation type.
+
+  Example:
+
+  #access_token=...
+  &type=invite
+*/
 
 async function checkInvitation(){
 
-  const {
-    data: {
-      session
-    }
-  } =
-    await supabaseClient.auth.getSession();
-
-  if(!session)
-    return;
+  const hash =
+    window.location.hash || "";
 
 
-  /*
-    Check whether this user came from an invitation.
-  */
-
-  const {
-    data: {
-      user
-    }
-  } =
-    await supabaseClient.auth.getUser();
+  const search =
+    window.location.search || "";
 
 
-  if(!user)
-    return;
-
-
-  /*
-    Supabase invitation users normally have
-    an "invite" identity.
-  */
-
-  const hasInviteIdentity =
-    user.identities?.some(
-      identity =>
-        identity.provider === "email"
+  const params =
+    new URLSearchParams(
+      hash.startsWith("#")
+        ? hash.substring(1)
+        : hash
     );
 
 
-  if(!hasInviteIdentity)
+  const queryParams =
+    new URLSearchParams(
+      search
+    );
+
+
+  const type =
+    params.get("type") ||
+    queryParams.get("type");
+
+
+  if(
+    type !== "invite"
+  ){
+
     return;
 
+  }
 
-  /*
-    Don't interrupt an already logged-in
-    administrator.
-  */
 
-  if(currentUser)
+  const {
+    data
+  } =
+  await supabaseClient.auth.getSession();
+
+
+  if(!data?.session)
     return;
 
 
@@ -5423,11 +5853,11 @@ async function checkInvitation(){
 }
 
 
-function showPasswordSetup(){
+/* =========================================================
+   PASSWORD SETUP
+========================================================= */
 
-  /*
-    Create the password setup screen.
-  */
+function showPasswordSetup(){
 
   let overlay =
     document.getElementById(
@@ -5483,14 +5913,12 @@ function showPasswordSetup(){
         Premier Ballet Academy
       </div>
 
-
       <h2 style="
         margin:0 0 10px;
         font-size:28px;
       ">
         Create Your Password
       </h2>
-
 
       <p style="
         color:#cfcbd2;
@@ -5500,7 +5928,6 @@ function showPasswordSetup(){
         Welcome! Please create a password for
         your administrator account.
       </p>
-
 
       <input
         id="invitePassword"
@@ -5519,7 +5946,6 @@ function showPasswordSetup(){
         "
       >
 
-
       <input
         id="invitePasswordConfirm"
         type="password"
@@ -5537,7 +5963,6 @@ function showPasswordSetup(){
         "
       >
 
-
       <div
         id="invitePasswordMessage"
         style="
@@ -5546,7 +5971,6 @@ function showPasswordSetup(){
           color:#f3b3a5;
         "
       ></div>
-
 
       <button
         id="setInvitePassword"
@@ -5582,9 +6006,12 @@ function showPasswordSetup(){
     setInvitationPassword
   );
 
-
 }
 
+
+/* =========================================================
+   SET INVITATION PASSWORD
+========================================================= */
 
 async function setInvitationPassword(){
 
@@ -5609,7 +6036,9 @@ async function setInvitationPassword(){
   message.textContent = "";
 
 
-  if(password.length < 6){
+  if(
+    password.length < 6
+  ){
 
     message.textContent =
       "Password must be at least 6 characters.";
@@ -5619,7 +6048,10 @@ async function setInvitationPassword(){
   }
 
 
-  if(password !== confirmPassword){
+  if(
+    password !==
+    confirmPassword
+  ){
 
     message.textContent =
       "The passwords do not match.";
@@ -5632,9 +6064,9 @@ async function setInvitationPassword(){
   const {
     error
   } =
-    await supabaseClient.auth.updateUser({
-      password
-    });
+  await supabaseClient.auth.updateUser({
+    password
+  });
 
 
   if(error){
@@ -5652,8 +6084,35 @@ async function setInvitationPassword(){
   message.style.color =
     "#b8e6b8";
 
+
   message.textContent =
     "Password created successfully!";
+
+
+  /*
+    Remove the invitation parameters from the URL.
+
+    This is another important part of the fix.
+
+    After the password is created, refreshing the page
+    will no longer see type=invite.
+  */
+
+  try{
+
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname +
+      window.location.search
+    );
+
+  }
+  catch(e){
+
+    console.warn(e);
+
+  }
 
 
   setTimeout(
@@ -5664,14 +6123,10 @@ async function setInvitationPassword(){
           "passwordSetupOverlay"
         );
 
+
       if(overlay)
         overlay.remove();
 
-
-      /*
-        Sign out so the administrator
-        can use the normal admin login.
-      */
 
       await supabaseClient.auth.signOut();
 
@@ -5691,37 +6146,33 @@ async function setInvitationPassword(){
    STARTUP
 ========================================================= */
 
-/* =========================================================
-   STARTUP
-========================================================= */
-
 async function startup(){
 
-  document.getElementById(
-    "branchSelect"
-  ).value =
-    currentBranch;
+  /*
+    Load branches first so all selectors exist
+    before classes are loaded.
+  */
 
-
-  document.getElementById(
-    "branchMeta"
-  ).textContent =
-    currentBranch;
-
-
-  document.getElementById(
-    "scheduleTitle"
-  ).textContent =
-    currentBranch +
-    " Branch";
-
-
-  renderLegend();
-
+  await loadBranches();
 
   await loadTeachers();
 
   await loadClasses();
+
+  /*
+    Restore existing Supabase session.
+
+    IMPORTANT:
+    This does NOT open the admin panel automatically.
+    It only remembers that the admin is authenticated.
+  */
+
+  await restoreAdminSession();
+
+  /*
+    Only show password setup if this is genuinely
+    an invitation URL.
+  */
 
   await checkInvitation();
 
