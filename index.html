@@ -7,7 +7,14 @@
 
 <title>Premier Ballet Academy | 2026/27 Schedule</title>
 
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Google API -->
+<script src="https://apis.google.com/js/api.js"></script>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client"></script>
 
 <style>
 
@@ -54,6 +61,24 @@ select{
 
 button{
   cursor:pointer
+}
+
+/* =========================================================
+   SEARCH INPUT - REMOVE BLUE X
+========================================================= */
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration{
+  -webkit-appearance:none;
+  appearance:none;
+  display:none;
+}
+
+input[type="search"]{
+  -webkit-appearance:none;
+  appearance:none;
 }
 
 /* =========================================================
@@ -2003,6 +2028,476 @@ supabase.createClient(
 
 
 /* =========================================================
+   GOOGLE CALENDAR CONFIGURATION
+========================================================= */
+
+const GOOGLE_CLIENT_ID =
+"42916356992-b1r0c1d5dgacsokg81cru558bigrb3o4.apps.googleusercontent.com";
+
+const GOOGLE_CALENDAR_SCOPE =
+"https://www.googleapis.com/auth/calendar.events";
+
+const GOOGLE_CALENDAR_DISCOVERY =
+"https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+
+let googleTokenClient = null;
+let googleCalendarReady = false;
+let googleAccessToken = null;
+
+
+/* =========================================================
+   GOOGLE CALENDAR INITIALIZATION
+========================================================= */
+
+function initializeGoogleCalendar(){
+
+  try{
+
+    if(
+      typeof google === "undefined" ||
+      !google.accounts ||
+      !google.accounts.oauth2
+    ){
+
+      console.warn(
+        "Google Identity Services has not loaded yet."
+      );
+
+      return;
+
+    }
+
+
+    googleTokenClient =
+      google.accounts.oauth2.initTokenClient({
+
+        client_id:
+          GOOGLE_CLIENT_ID,
+
+        scope:
+          GOOGLE_CALENDAR_SCOPE,
+
+        callback:
+          ""
+
+      });
+
+
+    if(
+      typeof gapi !== "undefined"
+    ){
+
+      gapi.load(
+        "client",
+        async()=>{
+
+          try{
+
+            await gapi.client.init({
+              discoveryDocs:[
+                GOOGLE_CALENDAR_DISCOVERY
+              ]
+            });
+
+            googleCalendarReady =
+              true;
+
+          }
+          catch(error){
+
+            console.error(
+              "Google Calendar initialization failed:",
+              error
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      "Google Calendar setup error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   GOOGLE AUTHENTICATION
+========================================================= */
+
+function requestGoogleCalendarAccess(){
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      if(!googleTokenClient){
+
+        initializeGoogleCalendar();
+
+      }
+
+
+      if(!googleTokenClient){
+
+        reject(
+          new Error(
+            "Google Calendar authentication is not ready."
+          )
+        );
+
+        return;
+
+      }
+
+
+      googleTokenClient.callback =
+      response=>{
+
+        if(response.error){
+
+          reject(
+            response
+          );
+
+          return;
+
+        }
+
+
+        googleAccessToken =
+          response.access_token;
+
+
+        if(
+          typeof gapi !== "undefined" &&
+          gapi.client
+        ){
+
+          gapi.client.setToken({
+            access_token:
+              googleAccessToken
+          });
+
+        }
+
+
+        resolve(response);
+
+      };
+
+
+      googleTokenClient.requestAccessToken({
+        prompt:"consent"
+      });
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   CREATE GOOGLE CALENDAR EVENT
+========================================================= */
+
+async function createGoogleCalendarEvent(c){
+
+  if(!googleAccessToken){
+
+    await requestGoogleCalendarAccess();
+
+  }
+
+
+  if(!googleCalendarReady){
+
+    if(
+      typeof gapi === "undefined"
+    ){
+
+      throw new Error(
+        "Google Calendar API has not loaded."
+      );
+
+    }
+
+
+    await new Promise(
+      resolve=>{
+
+        const check =
+        setInterval(
+          ()=>{
+
+            if(googleCalendarReady){
+
+              clearInterval(check);
+              resolve();
+
+            }
+
+          },
+          100
+        );
+
+        setTimeout(
+          ()=>{
+            clearInterval(check);
+            resolve();
+          },
+          10000
+        );
+
+      }
+    );
+
+  }
+
+
+  const date =
+    nextOccurrence(
+      c.day
+    );
+
+
+  const start =
+    googleDateTime(
+      date,
+      c.start_time
+    );
+
+
+  const end =
+    googleDateTime(
+      date,
+      c.end_time
+    );
+
+
+  if(!start || !end){
+
+    throw new Error(
+      `Invalid time for ${c.class_name}`
+    );
+
+  }
+
+
+  /*
+    Google Calendar API accepts RFC3339 timestamps.
+    We construct the date using the user's local timezone.
+  */
+
+  const startDate =
+    makeLocalDate(
+      date,
+      c.start_time
+    );
+
+
+  const endDate =
+    makeLocalDate(
+      date,
+      c.end_time
+    );
+
+
+  const event = {
+
+    summary:
+      normalizeClassName(
+        c.class_name
+      ),
+
+    description:
+      [
+        "Premier Ballet Academy",
+        `Teacher: ${c.teacher || "N/A"}`,
+        `Branch: ${c.branch}`,
+        `Studio: ${c.studio}`,
+        `Class time: ${c.start_time} – ${c.end_time}`
+      ].join("\n"),
+
+    location:
+      `${c.branch} Branch · ${c.studio}`,
+
+    start:{
+      dateTime:
+        toRFC3339(
+          startDate
+        ),
+      timeZone:
+        Intl.DateTimeFormat()
+          .resolvedOptions()
+          .timeZone
+    },
+
+    end:{
+      dateTime:
+        toRFC3339(
+          endDate
+        ),
+      timeZone:
+        Intl.DateTimeFormat()
+          .resolvedOptions()
+          .timeZone
+    }
+
+  };
+
+
+  const response =
+    await gapi.client.calendar.events.insert({
+
+      calendarId:"primary",
+
+      resource:event
+
+    });
+
+
+  return response.result;
+
+}
+
+
+/* =========================================================
+   LOCAL DATE CREATOR
+========================================================= */
+
+function makeLocalDate(
+  date,
+  time
+){
+
+  const text =
+    String(time || "")
+      .trim()
+      .toUpperCase();
+
+
+  const match =
+    text.match(
+      /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/
+    );
+
+
+  if(!match)
+    return null;
+
+
+  let hour =
+    parseInt(
+      match[1],
+      10
+    );
+
+
+  const minute =
+    parseInt(
+      match[2] || "0",
+      10
+    );
+
+
+  const period =
+    match[3];
+
+
+  if(
+    period === "PM" &&
+    hour !== 12
+  )
+    hour += 12;
+
+
+  if(
+    period === "AM" &&
+    hour === 12
+  )
+    hour = 0;
+
+
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    hour,
+    minute,
+    0,
+    0
+  );
+
+}
+
+
+/* =========================================================
+   RFC3339
+========================================================= */
+
+function toRFC3339(date){
+
+  if(!date)
+    return null;
+
+
+  const pad =
+    n =>
+      String(n)
+        .padStart(2,"0");
+
+
+  const offset =
+    -date.getTimezoneOffset();
+
+
+  const sign =
+    offset >= 0
+      ? "+"
+      : "-";
+
+
+  const offsetHours =
+    Math.floor(
+      Math.abs(offset) / 60
+    );
+
+
+  const offsetMinutes =
+    Math.abs(offset) % 60;
+
+
+  return (
+    date.getFullYear() +
+    "-" +
+    pad(date.getMonth()+1) +
+    "-" +
+    pad(date.getDate()) +
+    "T" +
+    pad(date.getHours()) +
+    ":" +
+    pad(date.getMinutes()) +
+    ":" +
+    pad(date.getSeconds()) +
+    sign +
+    pad(offsetHours) +
+    ":" +
+    pad(offsetMinutes)
+  );
+
+}
+
+
+/* =========================================================
    STATE
 ========================================================= */
 
@@ -2012,6 +2507,9 @@ let admins = [];
 let branches = [];
 
 let currentUser = null;
+
+/* FIX: this was missing in the original code */
+let currentBranch = "Maadi";
 
 let selectedClassIds = new Set();
 
@@ -2159,12 +2657,12 @@ function populateBranchSelects(){
       ? saved
       : available[0] || "Maadi";
 
+
   currentBranch =
     current;
 
 
   publicSelect.innerHTML = "";
-
   adminSelect.innerHTML = "";
 
 
@@ -2391,9 +2889,7 @@ async function addOrUpdateBranch(){
   }
 
 
-  if(
-    !currentUser
-  ){
+  if(!currentUser){
 
     message.textContent =
       "You must be logged in.";
@@ -2452,9 +2948,7 @@ async function addOrUpdateBranch(){
 
 
   await loadBranches();
-
   await loadClasses();
-
   await loadAdminClasses();
 
 }
@@ -2645,9 +3139,7 @@ async function deleteBranch(branch){
 
 
   await loadBranches();
-
   await loadClasses();
-
   await loadAdminClasses();
 
 }
@@ -2801,6 +3293,7 @@ function classMatchesSearch(c,query){
           c.class_name
         )
       );
+
 
     return tokens.every(
       token =>
@@ -3253,9 +3746,7 @@ function renderSchedule(){
         "No classes";
 
 
-      column.appendChild(
-        empty
-      );
+      column.appendChild(empty);
 
     }
 
@@ -3410,18 +3901,10 @@ function renderLegend(){
         teacher;
 
 
-      item.appendChild(
-        colorBox
-      );
+      item.appendChild(colorBox);
+      item.appendChild(text);
 
-      item.appendChild(
-        text
-      );
-
-
-      grid.appendChild(
-        item
-      );
+      grid.appendChild(item);
 
     }
   );
@@ -3797,7 +4280,7 @@ function updateSearchActions(){
 
 
 /* =========================================================
-   GOOGLE CALENDAR
+   GOOGLE CALENDAR BUTTON
 ========================================================= */
 
 function updateCalendarButton(matches){
@@ -3879,6 +4362,10 @@ function updateCalendarButton(matches){
 }
 
 
+/* =========================================================
+   NEXT OCCURRENCE
+========================================================= */
+
 function nextOccurrence(dayName){
 
   const dayIndex = {
@@ -3921,10 +4408,22 @@ function nextOccurrence(dayName){
   );
 
 
+  date.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
   return date;
 
 }
 
+
+/* =========================================================
+   GOOGLE DATE TIME
+========================================================= */
 
 function googleDateTime(
   date,
@@ -4010,7 +4509,11 @@ function googleDateTime(
 }
 
 
-function addClassesToGoogleCalendar(matches){
+/* =========================================================
+   ADD CLASSES TO GOOGLE CALENDAR
+========================================================= */
+
+async function addClassesToGoogleCalendar(matches){
 
   if(
     !matches ||
@@ -4019,79 +4522,133 @@ function addClassesToGoogleCalendar(matches){
     return;
 
 
-  matches.forEach(
-    (c,index)=>{
+  const button =
+    document.getElementById(
+      "calendarButton"
+    );
 
-      const date =
-        nextOccurrence(
-          c.day
+
+  const originalText =
+    document.getElementById(
+      "calendarButtonText"
+    ).textContent;
+
+
+  try{
+
+    button.disabled =
+      true;
+
+
+    document.getElementById(
+      "calendarButtonText"
+    ).textContent =
+      "Connecting to Google Calendar...";
+
+
+    /*
+      This opens Google's official OAuth window.
+      The user signs into Google and grants access
+      to their calendar.
+    */
+
+    await requestGoogleCalendarAccess();
+
+
+    document.getElementById(
+      "calendarButtonText"
+    ).textContent =
+      "Adding to Google Calendar...";
+
+
+    let added = 0;
+
+
+    for(
+      const c of matches
+    ){
+
+      try{
+
+        await createGoogleCalendarEvent(c);
+
+        added++;
+
+      }
+      catch(error){
+
+        console.error(
+          "Could not add event:",
+          c,
+          error
         );
 
-
-      const start =
-        googleDateTime(
-          date,
-          c.start_time
-        );
-
-
-      const end =
-        googleDateTime(
-          date,
-          c.end_time
-        );
-
-
-      if(!start || !end)
-        return;
-
-
-      const title =
-        normalizeClassName(
-          c.class_name
-        );
-
-
-      const details =
-        [
-          "Premier Ballet Academy",
-          `Teacher: ${c.teacher || "N/A"}`,
-          `Branch: ${c.branch}`,
-          `Studio: ${c.studio}`
-        ].join("\n");
-
-
-      const location =
-        `${c.branch} Branch · ${c.studio}`;
-
-
-      const url =
-        "https://calendar.google.com/calendar/render" +
-        "?action=TEMPLATE" +
-        "&text=" +
-        encodeURIComponent(title) +
-        "&dates=" +
-        start +
-        "/" +
-        end +
-        "&details=" +
-        encodeURIComponent(details) +
-        "&location=" +
-        encodeURIComponent(location);
-
-
-      setTimeout(
-        ()=>{
-          window.open(
-            url,
-            "_blank"
-          );
-        },
-        index * 250
-      );
+      }
 
     }
-  );
+
+
+    document.getElementById(
+      "calendarButtonText"
+    ).textContent =
+      added === 1
+        ? "Added to Google Calendar ✓"
+        : `${added} Classes Added ✓`;
+
+
+    setTimeout(
+      ()=>{
+        document.getElementById(
+          "calendarButtonText"
+        ).textContent =
+          originalText;
+
+        button.disabled =
+          false;
+
+      },
+      2500
+    );
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Google Calendar error:",
+      error
+    );
+
+
+    button.disabled =
+      false;
+
+
+    document.getElementById(
+      "calendarButtonText"
+    ).textContent =
+      "Google Calendar Connection Failed";
+
+
+    alert(
+      "Google Calendar could not be connected.\n\n" +
+      "Please make sure you are signed into Google and " +
+      "that the Google Calendar API is enabled for this website."
+    );
+
+
+    setTimeout(
+      ()=>{
+        document.getElementById(
+          "calendarButtonText"
+        ).textContent =
+          originalText;
+
+      },
+      2500
+    );
+
+  }
 
 }
 
@@ -4360,17 +4917,6 @@ async function restoreAdminSession(){
 
   currentUser.adminRole =
     admin.role || "admin";
-
-
-  /*
-    We DO NOT automatically open the admin panel
-    after a refresh.
-
-    The session remains valid, but the public schedule
-    remains visible.
-
-    This prevents accidental admin exposure.
-  */
 
 }
 
@@ -5777,28 +6323,8 @@ async function addAdmin(){
 
 
 /* =========================================================
-   FIXED INVITATION CHECK
+   INVITATION CHECK
 ========================================================= */
-
-/*
-  THIS IS THE IMPORTANT FIX.
-
-  Previously your code checked whether the user had
-  an email identity.
-
-  Almost every normal Supabase email user has one.
-
-  Therefore every refresh could trigger the password
-  setup screen.
-
-  Now we ONLY show password setup when the URL actually
-  contains an invitation type.
-
-  Example:
-
-  #access_token=...
-  &type=invite
-*/
 
 async function checkInvitation(){
 
@@ -6089,15 +6615,6 @@ async function setInvitationPassword(){
     "Password created successfully!";
 
 
-  /*
-    Remove the invitation parameters from the URL.
-
-    This is another important part of the fix.
-
-    After the password is created, refreshing the page
-    will no longer see type=invite.
-  */
-
   try{
 
     window.history.replaceState(
@@ -6149,6 +6666,13 @@ async function setInvitationPassword(){
 async function startup(){
 
   /*
+    Start Google Calendar initialization.
+  */
+
+  initializeGoogleCalendar();
+
+
+  /*
     Load branches first so all selectors exist
     before classes are loaded.
   */
@@ -6159,15 +6683,15 @@ async function startup(){
 
   await loadClasses();
 
+
   /*
     Restore existing Supabase session.
 
-    IMPORTANT:
     This does NOT open the admin panel automatically.
-    It only remembers that the admin is authenticated.
   */
 
   await restoreAdminSession();
+
 
   /*
     Only show password setup if this is genuinely
