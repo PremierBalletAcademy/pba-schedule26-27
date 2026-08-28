@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,13 +8,8 @@
 
 <title>Premier Ballet Academy | 2026/27 Schedule</title>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Google API -->
 <script src="https://apis.google.com/js/api.js"></script>
-
-<!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client"></script>
 
 <style>
@@ -64,7 +60,7 @@ button{
 }
 
 /* =========================================================
-   SEARCH INPUT - REMOVE BLUE X
+   REMOVE BLUE SEARCH X
 ========================================================= */
 
 input[type="search"]::-webkit-search-cancel-button,
@@ -159,6 +155,12 @@ input[type="search"]{
   transform:translateY(-1px);
 }
 
+.btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none;
+}
+
 .btnPink{
   background:var(--pink);
   color:#171219;
@@ -185,7 +187,7 @@ input[type="search"]{
 }
 
 /* =========================================================
-   GOOGLE CALENDAR
+   GOOGLE CALENDAR BUTTON
 ========================================================= */
 
 .calendarButton{
@@ -692,7 +694,7 @@ input[type="search"]{
 }
 
 /* =========================================================
-   OVERLAY
+   OVERLAY / MODALS
 ========================================================= */
 
 .overlay{
@@ -773,6 +775,54 @@ input[type="search"]{
   color:#e998a5;
   font-size:11px;
   margin-top:10px;
+}
+
+/* =========================================================
+   CALENDAR CHOICE MODAL
+========================================================= */
+
+.calendarChoiceModal{
+  width:min(520px,100%);
+}
+
+.calendarChoiceButtons{
+  display:grid;
+  gap:10px;
+  margin-top:20px;
+}
+
+.calendarChoice{
+  width:100%;
+  padding:18px;
+  border-radius:13px;
+  border:1px solid var(--border2);
+  background:#211e27;
+  color:#fff;
+  text-align:left;
+  transition:.2s ease;
+}
+
+.calendarChoice:hover{
+  background:#2b2731;
+  border-color:rgba(232,191,208,.55);
+  transform:translateY(-1px);
+}
+
+.calendarChoiceTitle{
+  font-size:14px;
+  font-weight:800;
+}
+
+.calendarChoiceDescription{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.5;
+}
+
+.calendarChoiceCancel{
+  margin-top:12px;
+  width:100%;
 }
 
 /* =========================================================
@@ -1330,6 +1380,88 @@ PREMIER BALLET ACADEMY · 2026 / 2027
 
 
 <!-- =========================================================
+     GOOGLE CALENDAR CHOICE MODAL
+========================================================= -->
+
+<div
+id="calendarChoiceOverlay"
+class="overlay"
+>
+
+<div class="modal calendarChoiceModal">
+
+<div class="modalTop">
+
+<img
+src="circle-cropped.png"
+class="modalLogo"
+alt=""
+>
+
+<div>
+
+<h2>
+Add to Google Calendar
+</h2>
+
+<div class="modalSub">
+Choose how far you want to add this schedule.
+</div>
+
+</div>
+
+</div>
+
+
+<div class="calendarChoiceButtons">
+
+<button
+class="calendarChoice"
+id="calendarUpcomingButton"
+>
+
+<div class="calendarChoiceTitle">
+Upcoming Week Only
+</div>
+
+<div class="calendarChoiceDescription">
+Add the next upcoming occurrence of the selected class.
+</div>
+
+</button>
+
+
+<button
+class="calendarChoice"
+id="calendarYearButton"
+>
+
+<div class="calendarChoiceTitle">
+Full 2026/27 Academy Year
+</div>
+
+<div class="calendarChoiceDescription">
+Add every weekly occurrence from September 1, 2026 through August 1, 2027.
+</div>
+
+</button>
+
+</div>
+
+
+<button
+class="btn btnDark calendarChoiceCancel"
+id="calendarChoiceCancel"
+>
+Cancel
+</button>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
      ADMIN LOGIN
 ========================================================= -->
 
@@ -1475,7 +1607,6 @@ Logout
 
 
 <div class="adminContent">
-
 
 <div class="adminTabs">
 
@@ -2028,7 +2159,7 @@ supabase.createClient(
 
 
 /* =========================================================
-   GOOGLE CALENDAR CONFIGURATION
+   GOOGLE CALENDAR
 ========================================================= */
 
 const GOOGLE_CLIENT_ID =
@@ -2046,7 +2177,41 @@ let googleAccessToken = null;
 
 
 /* =========================================================
-   GOOGLE CALENDAR INITIALIZATION
+   GOOGLE CALENDAR SEASON
+========================================================= */
+
+const ACADEMY_SEASON_START =
+new Date(
+  2026,
+  8,
+  1,
+  0,
+  0,
+  0,
+  0
+);
+
+const ACADEMY_SEASON_END =
+new Date(
+  2027,
+  7,
+  1,
+  0,
+  0,
+  0,
+  0
+);
+
+
+/* =========================================================
+   CALENDAR MODAL STATE
+========================================================= */
+
+let pendingCalendarClasses = [];
+
+
+/* =========================================================
+   INITIALIZE GOOGLE
 ========================================================= */
 
 function initializeGoogleCalendar(){
@@ -2131,7 +2296,7 @@ function initializeGoogleCalendar(){
 
 
 /* =========================================================
-   GOOGLE AUTHENTICATION
+   GOOGLE AUTH
 ========================================================= */
 
 function requestGoogleCalendarAccess(){
@@ -2164,9 +2329,7 @@ function requestGoogleCalendarAccess(){
 
         if(response.error){
 
-          reject(
-            response
-          );
+          reject(response);
 
           return;
 
@@ -2196,7 +2359,8 @@ function requestGoogleCalendarAccess(){
 
 
       googleTokenClient.requestAccessToken({
-        prompt:"consent"
+        prompt:
+          "consent"
       });
 
     }
@@ -2206,35 +2370,34 @@ function requestGoogleCalendarAccess(){
 
 
 /* =========================================================
-   CREATE GOOGLE CALENDAR EVENT
+   WAIT FOR GOOGLE CALENDAR API
 ========================================================= */
 
-async function createGoogleCalendarEvent(c){
+async function waitForGoogleCalendar(){
 
-  if(!googleAccessToken){
+  if(googleCalendarReady)
+    return;
 
-    await requestGoogleCalendarAccess();
+
+  if(
+    typeof gapi === "undefined"
+  ){
+
+    throw new Error(
+      "Google Calendar API has not loaded."
+    );
 
   }
 
 
-  if(!googleCalendarReady){
+  await new Promise(
+    (resolve,reject)=>{
 
-    if(
-      typeof gapi === "undefined"
-    ){
-
-      throw new Error(
-        "Google Calendar API has not loaded."
-      );
-
-    }
+      const started =
+        Date.now();
 
 
-    await new Promise(
-      resolve=>{
-
-        const check =
+      const check =
         setInterval(
           ()=>{
 
@@ -2244,140 +2407,36 @@ async function createGoogleCalendarEvent(c){
               resolve();
 
             }
+            else if(
+              Date.now() - started >
+              10000
+            ){
+
+              clearInterval(check);
+
+              reject(
+                new Error(
+                  "Google Calendar API timed out."
+                )
+              );
+
+            }
 
           },
           100
         );
 
-        setTimeout(
-          ()=>{
-            clearInterval(check);
-            resolve();
-          },
-          10000
-        );
-
-      }
-    );
-
-  }
-
-
-  const date =
-    nextOccurrence(
-      c.day
-    );
-
-
-  const start =
-    googleDateTime(
-      date,
-      c.start_time
-    );
-
-
-  const end =
-    googleDateTime(
-      date,
-      c.end_time
-    );
-
-
-  if(!start || !end){
-
-    throw new Error(
-      `Invalid time for ${c.class_name}`
-    );
-
-  }
-
-
-  /*
-    Google Calendar API accepts RFC3339 timestamps.
-    We construct the date using the user's local timezone.
-  */
-
-  const startDate =
-    makeLocalDate(
-      date,
-      c.start_time
-    );
-
-
-  const endDate =
-    makeLocalDate(
-      date,
-      c.end_time
-    );
-
-
-  const event = {
-
-    summary:
-      normalizeClassName(
-        c.class_name
-      ),
-
-    description:
-      [
-        "Premier Ballet Academy",
-        `Teacher: ${c.teacher || "N/A"}`,
-        `Branch: ${c.branch}`,
-        `Studio: ${c.studio}`,
-        `Class time: ${c.start_time} – ${c.end_time}`
-      ].join("\n"),
-
-    location:
-      `${c.branch} Branch · ${c.studio}`,
-
-    start:{
-      dateTime:
-        toRFC3339(
-          startDate
-        ),
-      timeZone:
-        Intl.DateTimeFormat()
-          .resolvedOptions()
-          .timeZone
-    },
-
-    end:{
-      dateTime:
-        toRFC3339(
-          endDate
-        ),
-      timeZone:
-        Intl.DateTimeFormat()
-          .resolvedOptions()
-          .timeZone
     }
-
-  };
-
-
-  const response =
-    await gapi.client.calendar.events.insert({
-
-      calendarId:"primary",
-
-      resource:event
-
-    });
-
-
-  return response.result;
+  );
 
 }
 
 
 /* =========================================================
-   LOCAL DATE CREATOR
+   TIME CONVERSION
 ========================================================= */
 
-function makeLocalDate(
-  date,
-  time
-){
+function parseTime(time){
 
   const text =
     String(time || "")
@@ -2416,23 +2475,66 @@ function makeLocalDate(
   if(
     period === "PM" &&
     hour !== 12
-  )
+  ){
+
     hour += 12;
+
+  }
 
 
   if(
     period === "AM" &&
     hour === 12
-  )
+  ){
+
     hour = 0;
+
+  }
+
+
+  if(
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ){
+
+    return null;
+
+  }
+
+
+  return {
+    hour,
+    minute
+  };
+
+}
+
+
+/* =========================================================
+   MAKE LOCAL DATE
+========================================================= */
+
+function makeLocalDate(
+  date,
+  time
+){
+
+  const parsed =
+    parseTime(time);
+
+
+  if(!parsed)
+    return null;
 
 
   return new Date(
     date.getFullYear(),
     date.getMonth(),
     date.getDate(),
-    hour,
-    minute,
+    parsed.hour,
+    parsed.minute,
     0,
     0
   );
@@ -2498,6 +2600,612 @@ function toRFC3339(date){
 
 
 /* =========================================================
+   DAY INDEX
+========================================================= */
+
+const dayIndex = {
+
+  Sunday:0,
+  Monday:1,
+  Tuesday:2,
+  Wednesday:3,
+  Thursday:4,
+  Friday:5,
+  Saturday:6
+
+};
+
+
+/* =========================================================
+   NEXT OCCURRENCE
+========================================================= */
+
+function nextOccurrence(dayName){
+
+  const now =
+    new Date();
+
+
+  const today =
+    now.getDay();
+
+
+  let difference =
+    dayIndex[dayName] -
+    today;
+
+
+  if(difference < 0)
+    difference += 7;
+
+
+  const date =
+    new Date(now);
+
+
+  date.setDate(
+    now.getDate() +
+    difference
+  );
+
+
+  date.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
+  return date;
+
+}
+
+
+/* =========================================================
+   FIRST OCCURRENCE INSIDE 2026/27
+========================================================= */
+
+function firstSeasonOccurrence(dayName){
+
+  const date =
+    new Date(
+      ACADEMY_SEASON_START
+    );
+
+
+  const wanted =
+    dayIndex[dayName];
+
+
+  const current =
+    date.getDay();
+
+
+  let difference =
+    wanted -
+    current;
+
+
+  if(difference < 0)
+    difference += 7;
+
+
+  date.setDate(
+    date.getDate() +
+    difference
+  );
+
+
+  date.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
+  return date;
+
+}
+
+
+/* =========================================================
+   ALL WEEKLY OCCURRENCES
+========================================================= */
+
+function getSeasonOccurrences(dayName){
+
+  const dates = [];
+
+  let date =
+    firstSeasonOccurrence(
+      dayName
+    );
+
+
+  while(
+    date < ACADEMY_SEASON_END
+  ){
+
+    dates.push(
+      new Date(date)
+    );
+
+
+    date.setDate(
+      date.getDate() + 7
+    );
+
+  }
+
+
+  return dates;
+
+}
+
+
+/* =========================================================
+   CREATE ONE CALENDAR EVENT
+========================================================= */
+
+async function createGoogleCalendarEvent(
+  c,
+  date
+){
+
+  const startDate =
+    makeLocalDate(
+      date,
+      c.start_time
+    );
+
+
+  const endDate =
+    makeLocalDate(
+      date,
+      c.end_time
+    );
+
+
+  if(
+    !startDate ||
+    !endDate
+  ){
+
+    throw new Error(
+      `Invalid time for ${c.class_name}`
+    );
+
+  }
+
+
+  const event = {
+
+    summary:
+      normalizeClassName(
+        c.class_name
+      ),
+
+    description:
+      [
+        "Premier Ballet Academy",
+        `Teacher: ${c.teacher || "N/A"}`,
+        `Branch: ${c.branch}`,
+        `Studio: ${c.studio}`,
+        `Class time: ${c.start_time} – ${c.end_time}`
+      ].join("\n"),
+
+    location:
+      `${c.branch} Branch · ${c.studio}`,
+
+    start:{
+      dateTime:
+        toRFC3339(
+          startDate
+        ),
+      timeZone:
+        Intl.DateTimeFormat()
+          .resolvedOptions()
+          .timeZone
+    },
+
+    end:{
+      dateTime:
+        toRFC3339(
+          endDate
+        ),
+      timeZone:
+        Intl.DateTimeFormat()
+          .resolvedOptions()
+          .timeZone
+    }
+
+  };
+
+
+  const response =
+    await gapi.client.calendar.events.insert({
+
+      calendarId:
+        "primary",
+
+      resource:
+        event
+
+    });
+
+
+  return response.result;
+
+}
+
+
+/* =========================================================
+   ADD UPCOMING WEEK
+========================================================= */
+
+async function addUpcomingWeek(
+  matches
+){
+
+  for(
+    const c of matches
+  ){
+
+    const date =
+      nextOccurrence(
+        c.day
+      );
+
+
+    await createGoogleCalendarEvent(
+      c,
+      date
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   ADD FULL 2026/27 YEAR
+========================================================= */
+
+async function addFullAcademyYear(
+  matches
+){
+
+  let added =
+    0;
+
+
+  for(
+    const c of matches
+  ){
+
+    const occurrences =
+      getSeasonOccurrences(
+        c.day
+      );
+
+
+    for(
+      const date of occurrences
+    ){
+
+      /*
+        Do not create an event after
+        August 1, 2027.
+      */
+
+      if(
+        date >=
+        ACADEMY_SEASON_END
+      ){
+
+        continue;
+
+      }
+
+
+      await createGoogleCalendarEvent(
+        c,
+        date
+      );
+
+
+      added++;
+
+    }
+
+  }
+
+
+  return added;
+
+}
+
+
+/* =========================================================
+   CALENDAR CHOICE MODAL
+========================================================= */
+
+function openCalendarChoice(
+  matches
+){
+
+  pendingCalendarClasses =
+    Array.isArray(matches)
+      ? matches
+      : [];
+
+
+  if(
+    !pendingCalendarClasses.length
+  )
+    return;
+
+
+  document.getElementById(
+    "calendarChoiceOverlay"
+  ).style.display =
+    "flex";
+
+}
+
+
+/* =========================================================
+   CLOSE CALENDAR CHOICE
+========================================================= */
+
+function closeCalendarChoice(){
+
+  document.getElementById(
+    "calendarChoiceOverlay"
+  ).style.display =
+    "none";
+
+
+  pendingCalendarClasses =
+    [];
+
+}
+
+
+/* =========================================================
+   START GOOGLE CALENDAR PROCESS
+========================================================= */
+
+async function beginCalendarAdd(
+  mode
+){
+
+  const matches =
+    pendingCalendarClasses;
+
+
+  closeCalendarChoice();
+
+
+  if(!matches.length)
+    return;
+
+
+  const button =
+    document.getElementById(
+      "calendarButton"
+    );
+
+
+  const buttonText =
+    document.getElementById(
+      "calendarButtonText"
+    );
+
+
+  const originalText =
+    buttonText.textContent;
+
+
+  try{
+
+    button.disabled =
+      true;
+
+
+    buttonText.textContent =
+      "Connecting to Google Calendar...";
+
+
+    await requestGoogleCalendarAccess();
+
+
+    await waitForGoogleCalendar();
+
+
+    buttonText.textContent =
+      mode === "year"
+        ? "Adding 2026/27 schedule..."
+        : "Adding upcoming class...";
+
+
+    let added =
+      0;
+
+
+    if(mode === "upcoming"){
+
+      await addUpcomingWeek(
+        matches
+      );
+
+
+      added =
+        matches.length;
+
+    }
+    else if(mode === "year"){
+
+      added =
+        await addFullAcademyYear(
+          matches
+        );
+
+    }
+
+
+    buttonText.textContent =
+      added === 1
+        ? "Added to Google Calendar ✓"
+        : `${added} Calendar Events Added ✓`;
+
+
+    selectedClassIds.clear();
+    updateSearchActions();
+
+
+    setTimeout(
+      ()=>{
+
+        buttonText.textContent =
+          originalText;
+
+        button.disabled =
+          false;
+
+      },
+      3000
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "Google Calendar error:",
+      error
+    );
+
+
+    button.disabled =
+      false;
+
+
+    buttonText.textContent =
+      "Google Calendar Connection Failed";
+
+
+    alert(
+      "Google Calendar could not be connected or the events could not be added.\n\n" +
+      "Please make sure you are signed into Google and that the Google Calendar API is enabled for this website.\n\n" +
+      "Error: " +
+      (error?.message || "Unknown error")
+    );
+
+
+    setTimeout(
+      ()=>{
+
+        buttonText.textContent =
+          originalText;
+
+      },
+      3000
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CALENDAR BUTTON
+========================================================= */
+
+function updateCalendarButton(
+  matches
+){
+
+  const button =
+    document.getElementById(
+      "calendarButton"
+    );
+
+
+  const text =
+    document.getElementById(
+      "calendarButtonText"
+    );
+
+
+  if(matches.length === 1){
+
+    text.textContent =
+      "Add Class to Google Calendar";
+
+
+    button.classList.remove(
+      "hidden"
+    );
+
+
+    button.onclick =
+      ()=>{
+        openCalendarChoice(
+          [matches[0]]
+        );
+      };
+
+
+    return;
+
+  }
+
+
+  if(selectedClassIds.size > 0){
+
+    const selected =
+      matches.filter(
+        c =>
+          selectedClassIds.has(
+            String(c.id)
+          )
+      );
+
+
+    text.textContent =
+      selected.length === 1
+        ? "Add Selected Class to Google Calendar"
+        : "Add Selected Classes to Google Calendar";
+
+
+    button.classList.remove(
+      "hidden"
+    );
+
+
+    button.onclick =
+      ()=>{
+        openCalendarChoice(
+          selected
+        );
+      };
+
+
+    return;
+
+  }
+
+
+  button.classList.add(
+    "hidden"
+  );
+
+}
+
+
+/* =========================================================
    STATE
 ========================================================= */
 
@@ -2508,25 +3216,26 @@ let branches = [];
 
 let currentUser = null;
 
-/* FIX: this was missing in the original code */
-let currentBranch = "Maadi";
+let currentBranch =
+  "Maadi";
 
-let selectedClassIds = new Set();
+let selectedClassIds =
+  new Set();
 
 const days = [
-"Sunday",
-"Monday",
-"Tuesday",
-"Wednesday",
-"Thursday",
-"Friday",
-"Saturday"
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday"
 ];
 
 const studios = [
-"Studio 1",
-"Studio 2",
-"Studio 3"
+  "Studio 1",
+  "Studio 2",
+  "Studio 3"
 ];
 
 
@@ -2535,10 +3244,10 @@ const studios = [
 ========================================================= */
 
 const fallbackBranches = [
-"Maadi",
-"New Cairo",
-"Sheikh Zayed",
-"New Giza"
+  "Maadi",
+  "New Cairo",
+  "Sheikh Zayed",
+  "New Giza"
 ];
 
 
@@ -2548,22 +3257,22 @@ const fallbackBranches = [
 
 const defaultTeacherColors = {
 
-"Mr. Mohamed Fadlon":"#DCE6F1",
-"Ms. Nada Nabil":"#F3B3A5",
-"Ms. Noran Mohamed":"#ADD8E6",
-"Ms. Victoria Pashchenko":"#CCFFCC",
-"Ms. Marina Ehab":"#F2C2D4",
-"Ms. Valentina Kendall":"#E8C6DC",
-"Ms. Nada Amr":"#B4C7E7",
-"Ms. Mahinour Ahmed":"#F6EB20",
-"Ms. Una Stepanovic":"#FFF200",
-"Ms. Rena Takemura":"#99CCFF",
-"Ms. Luiza Pigatto":"#D461A6"
+  "Mr. Mohamed Fadlon":"#DCE6F1",
+  "Ms. Nada Nabil":"#F3B3A5",
+  "Ms. Noran Mohamed":"#ADD8E6",
+  "Ms. Victoria Pashchenko":"#CCFFCC",
+  "Ms. Marina Ehab":"#F2C2D4",
+  "Ms. Valentina Kendall":"#E8C6DC",
+  "Ms. Nada Amr":"#B4C7E7",
+  "Ms. Mahinour Ahmed":"#F6EB20",
+  "Ms. Una Stepanovic":"#FFF200",
+  "Ms. Rena Takemura":"#99CCFF",
+  "Ms. Luiza Pigatto":"#D461A6"
 
 };
 
 let teacherColors = {
-...defaultTeacherColors
+  ...defaultTeacherColors
 };
 
 
@@ -2584,21 +3293,26 @@ async function loadBranches(){
       .select("id,name")
       .order("name");
 
+
     if(error)
       throw error;
+
 
     branches =
       data || [];
 
+
     if(!branches.length){
 
       branches =
-      fallbackBranches.map(
-        (name,index)=>({
-          id:"fallback-"+index,
-          name
-        })
-      );
+        fallbackBranches.map(
+          (name,index)=>({
+            id:
+              "fallback-" +
+              index,
+            name
+          })
+        );
 
     }
 
@@ -2610,15 +3324,19 @@ async function loadBranches(){
       error.message
     );
 
+
     branches =
-    fallbackBranches.map(
-      (name,index)=>({
-        id:"fallback-"+index,
-        name
-      })
-    );
+      fallbackBranches.map(
+        (name,index)=>({
+          id:
+            "fallback-" +
+            index,
+          name
+        })
+      );
 
   }
+
 
   populateBranchSelects();
   renderBranchList();
@@ -2637,69 +3355,93 @@ function populateBranchSelects(){
       "branchSelect"
     );
 
+
   const adminSelect =
     document.getElementById(
       "adminBranch"
     );
+
 
   const saved =
     localStorage.getItem(
       "pba_selected_branch"
     );
 
+
   const available =
     branches.map(
       b=>b.name
     );
 
-  let current =
-    saved && available.includes(saved)
+
+  const current =
+    saved &&
+    available.includes(saved)
       ? saved
-      : available[0] || "Maadi";
+      : available[0] ||
+        "Maadi";
 
 
   currentBranch =
     current;
 
 
-  publicSelect.innerHTML = "";
-  adminSelect.innerHTML = "";
+  publicSelect.innerHTML =
+    "";
 
 
-  branches.forEach(branch=>{
-
-    const option =
-      document.createElement("option");
-
-    option.value =
-      branch.name;
-
-    option.textContent =
-      branch.name + " Branch";
-
-    publicSelect.appendChild(
-      option
-    );
+  adminSelect.innerHTML =
+    "";
 
 
-    const adminOption =
-      document.createElement("option");
+  branches.forEach(
+    branch=>{
 
-    adminOption.value =
-      branch.name;
+      const option =
+        document.createElement(
+          "option"
+        );
 
-    adminOption.textContent =
-      branch.name;
 
-    adminSelect.appendChild(
-      adminOption
-    );
+      option.value =
+        branch.name;
 
-  });
+
+      option.textContent =
+        branch.name +
+        " Branch";
+
+
+      publicSelect.appendChild(
+        option
+      );
+
+
+      const adminOption =
+        document.createElement(
+          "option"
+        );
+
+
+      adminOption.value =
+        branch.name;
+
+
+      adminOption.textContent =
+        branch.name;
+
+
+      adminSelect.appendChild(
+        adminOption
+      );
+
+    }
+  );
 
 
   publicSelect.value =
     currentBranch;
+
 
   adminSelect.value =
     currentBranch;
@@ -2742,107 +3484,128 @@ function renderBranchList(){
       "branchList"
     );
 
+
   if(!list)
     return;
 
-  list.innerHTML = "";
+
+  list.innerHTML =
+    "";
 
 
-  branches.forEach(branch=>{
+  branches.forEach(
+    branch=>{
 
-    const row =
-      document.createElement(
-        "div"
-      );
-
-    row.className =
-      "adminItem";
+      const row =
+        document.createElement(
+          "div"
+        );
 
 
-    const info =
-      document.createElement(
-        "div"
-      );
+      row.className =
+        "adminItem";
 
 
-    const name =
-      document.createElement(
-        "div"
-      );
-
-    name.className =
-      "adminItemName";
-
-    name.textContent =
-      branch.name;
+      const info =
+        document.createElement(
+          "div"
+        );
 
 
-    const details =
-      document.createElement(
-        "div"
-      );
-
-    details.className =
-      "adminItemDetails";
-
-    details.textContent =
-      "Schedule branch";
+      const name =
+        document.createElement(
+          "div"
+        );
 
 
-    info.appendChild(name);
-    info.appendChild(details);
+      name.className =
+        "adminItemName";
 
 
-    const actions =
-      document.createElement(
-        "div"
-      );
-
-    actions.className =
-      "adminActions";
+      name.textContent =
+        branch.name;
 
 
-    const edit =
-      document.createElement(
-        "button"
-      );
-
-    edit.className =
-      "btn btnGold";
-
-    edit.textContent =
-      "Edit";
-
-    edit.onclick =
-      ()=>startBranchEdit(branch);
+      const details =
+        document.createElement(
+          "div"
+        );
 
 
-    const del =
-      document.createElement(
-        "button"
-      );
-
-    del.className =
-      "btn btnDanger";
-
-    del.textContent =
-      "Delete";
-
-    del.onclick =
-      ()=>deleteBranch(branch);
+      details.className =
+        "adminItemDetails";
 
 
-    actions.appendChild(edit);
-    actions.appendChild(del);
+      details.textContent =
+        "Schedule branch";
 
 
-    row.appendChild(info);
-    row.appendChild(actions);
+      info.appendChild(name);
+      info.appendChild(details);
 
 
-    list.appendChild(row);
+      const actions =
+        document.createElement(
+          "div"
+        );
 
-  });
+
+      actions.className =
+        "adminActions";
+
+
+      const edit =
+        document.createElement(
+          "button"
+        );
+
+
+      edit.className =
+        "btn btnGold";
+
+
+      edit.textContent =
+        "Edit";
+
+
+      edit.onclick =
+        ()=>startBranchEdit(
+          branch
+        );
+
+
+      const del =
+        document.createElement(
+          "button"
+        );
+
+
+      del.className =
+        "btn btnDanger";
+
+
+      del.textContent =
+        "Delete";
+
+
+      del.onclick =
+        ()=>deleteBranch(
+          branch
+        );
+
+
+      actions.appendChild(edit);
+      actions.appendChild(del);
+
+
+      row.appendChild(info);
+      row.appendChild(actions);
+
+
+      list.appendChild(row);
+
+    }
+  );
 
 }
 
@@ -2958,7 +3721,9 @@ async function addOrUpdateBranch(){
    EDIT BRANCH
 ========================================================= */
 
-function startBranchEdit(branch){
+function startBranchEdit(
+  branch
+){
 
   document.getElementById(
     "editBranchId"
@@ -2992,13 +3757,14 @@ function startBranchEdit(branch){
 
   document.getElementById(
     "branchMessage"
-  ).textContent = "";
+  ).textContent =
+    "";
 
 }
 
 
 /* =========================================================
-   CANCEL BRANCH EDIT
+   CANCEL BRANCH
 ========================================================= */
 
 document.getElementById(
@@ -3013,12 +3779,14 @@ function cancelBranchEdit(){
 
   document.getElementById(
     "editBranchId"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "newBranchName"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
@@ -3045,7 +3813,9 @@ function cancelBranchEdit(){
    DELETE BRANCH
 ========================================================= */
 
-async function deleteBranch(branch){
+async function deleteBranch(
+  branch
+){
 
   if(
     !confirm(
@@ -3080,7 +3850,10 @@ async function deleteBranch(branch){
   }
 
 
-  if(data && data.length){
+  if(
+    data &&
+    data.length
+  ){
 
     alert(
       "This branch still has classes. Delete or move those classes first."
@@ -3093,7 +3866,9 @@ async function deleteBranch(branch){
 
   if(
     String(branch.id)
-      .startsWith("fallback-")
+      .startsWith(
+        "fallback-"
+      )
   ){
 
     alert(
@@ -3149,7 +3924,9 @@ async function deleteBranch(branch){
    NORMALIZATION
 ========================================================= */
 
-function normalizeText(value){
+function normalizeText(
+  value
+){
 
   return String(value || "")
     .toLowerCase()
@@ -3160,10 +3937,13 @@ function normalizeText(value){
 }
 
 
-function normalizeClassName(name){
+function normalizeClassName(
+  name
+){
 
   if(!name)
     return "";
+
 
   return String(name)
     .replace(
@@ -3183,7 +3963,10 @@ function normalizeClassName(name){
    SEARCH
 ========================================================= */
 
-function tokenMatchesClass(c,token){
+function tokenMatchesClass(
+  c,
+  token
+){
 
   const className =
     normalizeText(
@@ -3192,20 +3975,36 @@ function tokenMatchesClass(c,token){
       )
     );
 
+
   const teacher =
-    normalizeText(c.teacher);
+    normalizeText(
+      c.teacher
+    );
+
 
   const day =
-    normalizeText(c.day);
+    normalizeText(
+      c.day
+    );
+
 
   const studio =
-    normalizeText(c.studio);
+    normalizeText(
+      c.studio
+    );
+
 
   const start =
-    normalizeText(c.start_time);
+    normalizeText(
+      c.start_time
+    );
+
 
   const end =
-    normalizeText(c.end_time);
+    normalizeText(
+      c.end_time
+    );
+
 
   const time =
     `${start} ${end}`;
@@ -3248,10 +4047,16 @@ function tokenMatchesClass(c,token){
 }
 
 
-function classMatchesSearch(c,query){
+function classMatchesSearch(
+  c,
+  query
+){
 
   const raw =
-    normalizeText(query);
+    normalizeText(
+      query
+    );
+
 
   if(!raw)
     return true;
@@ -3281,7 +4086,9 @@ function classMatchesSearch(c,query){
   const hasClassKeyword =
     tokens.some(
       token =>
-        classKeywords.includes(token)
+        classKeywords.includes(
+          token
+        )
     );
 
 
@@ -3297,7 +4104,9 @@ function classMatchesSearch(c,query){
 
     return tokens.every(
       token =>
-        className.includes(token)
+        className.includes(
+          token
+        )
     );
 
   }
@@ -3328,28 +4137,34 @@ async function loadTeachers(){
     } =
     await supabaseClient
       .from("teachers")
-      .select("id,name,color")
+      .select(
+        "id,name,color"
+      )
       .order("name");
+
 
     if(error)
       throw error;
+
 
     teachers =
       data || [];
 
 
-    teachers.forEach(t=>{
+    teachers.forEach(
+      t=>{
 
-      if(t.name){
+        if(t.name){
 
-        teacherColors[t.name] =
-          t.color ||
-          teacherColors[t.name] ||
-          "#D9D5DF";
+          teacherColors[t.name] =
+            t.color ||
+            teacherColors[t.name] ||
+            "#D9D5DF";
+
+        }
 
       }
-
-    });
+    );
 
 
     populateTeacherSelect();
@@ -3366,16 +4181,22 @@ async function loadTeachers(){
 
 
     teachers =
-    Object.keys(
-      teacherColors
-    ).map(
-      (name,index)=>({
-        id:"default-"+index,
-        name,
-        color:
-          teacherColors[name]
-      })
-    );
+      Object.keys(
+        teacherColors
+      ).map(
+        (name,index)=>({
+
+          id:
+            "default-" +
+            index,
+
+          name,
+
+          color:
+            teacherColors[name]
+
+        })
+      );
 
 
     populateTeacherSelect();
@@ -3398,6 +4219,7 @@ function populateTeacherSelect(){
       "adminTeacher"
     );
 
+
   const current =
     select.value;
 
@@ -3406,24 +4228,29 @@ function populateTeacherSelect(){
     '<option value="">No teacher</option>';
 
 
-  teachers.forEach(t=>{
+  teachers.forEach(
+    t=>{
 
-    const option =
-      document.createElement(
-        "option"
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        t.name;
+
+
+      option.textContent =
+        t.name;
+
+
+      select.appendChild(
+        option
       );
 
-    option.value =
-      t.name;
-
-    option.textContent =
-      t.name;
-
-    select.appendChild(
-      option
-    );
-
-  });
+    }
+  );
 
 
   if(current)
@@ -3460,7 +4287,9 @@ async function loadClasses(){
       .select(
         "id,branch,day,studio,start_time,end_time,class_name,teacher"
       )
-      .order("start_time");
+      .order(
+        "start_time"
+      );
 
 
     if(error)
@@ -3468,18 +4297,18 @@ async function loadClasses(){
 
 
     classes =
-    (data || []).map(
-      c=>({
+      (data || []).map(
+        c=>({
 
-        ...c,
+          ...c,
 
-        class_name:
-          normalizeClassName(
-            c.class_name
-          )
+          class_name:
+            normalizeClassName(
+              c.class_name
+            )
 
-      })
-    );
+        })
+      );
 
 
     const validIds =
@@ -3491,27 +4320,31 @@ async function loadClasses(){
 
 
     selectedClassIds =
-    new Set(
-      [...selectedClassIds]
-        .filter(
-          id =>
-            validIds.has(
-              String(id)
-            )
-        )
-    );
+      new Set(
+        [...selectedClassIds]
+          .filter(
+            id =>
+              validIds.has(
+                String(id)
+              )
+          )
+      );
 
 
     renderSchedule();
     runSearch();
 
 
-    status.textContent = "";
+    status.textContent =
+      "";
 
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     status.textContent =
       "Unable to load schedule: " +
@@ -3526,72 +4359,40 @@ async function loadClasses(){
    SORT
 ========================================================= */
 
-function timeToMinutes(value){
+function timeToMinutes(
+  value
+){
 
-  if(!value)
+  const parsed =
+    parseTime(
+      value
+    );
+
+
+  if(!parsed)
     return 0;
 
 
-  const text =
-    String(value)
-      .trim()
-      .toUpperCase();
-
-
-  const match =
-    text.match(
-      /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/
-    );
-
-
-  if(!match)
-    return 0;
-
-
-  let hour =
-    parseInt(
-      match[1],
-      10
-    );
-
-
-  const minute =
-    parseInt(
-      match[2] || "0",
-      10
-    );
-
-
-  const period =
-    match[3];
-
-
-  if(
-    period === "PM" &&
-    hour !== 12
-  )
-    hour += 12;
-
-
-  if(
-    period === "AM" &&
-    hour === 12
-  )
-    hour = 0;
-
-
-  return hour * 60 + minute;
+  return (
+    parsed.hour * 60 +
+    parsed.minute
+  );
 
 }
 
 
-function sortByTime(a,b){
+function sortByTime(
+  a,
+  b
+){
 
-  return timeToMinutes(
-    a.start_time
-  ) -
-  timeToMinutes(
-    b.start_time
+  return (
+    timeToMinutes(
+      a.start_time
+    ) -
+    timeToMinutes(
+      b.start_time
+    )
   );
 
 }
@@ -3609,153 +4410,189 @@ function renderSchedule(){
     );
 
 
-  container.innerHTML = "";
+  container.innerHTML =
+    "";
 
 
   updateBranchDisplay();
 
 
-  days.forEach(day=>{
+  days.forEach(
+    day=>{
 
-    const column =
-      document.createElement(
-        "div"
-      );
-
-    column.className =
-      "dayColumn";
-
-
-    const header =
-      document.createElement(
-        "div"
-      );
-
-    header.className =
-      "dayHeader";
-
-
-    const dayName =
-      document.createElement(
-        "div"
-      );
-
-    dayName.className =
-      "dayName";
-
-    dayName.textContent =
-      day;
-
-
-    const dayNumber =
-      document.createElement(
-        "div"
-      );
-
-    dayNumber.className =
-      "dayNumber";
-
-    dayNumber.textContent =
-      "WEEKLY CLASS";
-
-
-    header.appendChild(dayName);
-    header.appendChild(dayNumber);
-
-    column.appendChild(header);
-
-
-    const dayClasses =
-      classes
-        .filter(
-          c =>
-            c.branch ===
-            currentBranch &&
-            c.day ===
-            day
-        )
-        .sort(sortByTime);
-
-
-    studios.forEach(studio=>{
-
-      const studioClasses =
-        dayClasses.filter(
-          c =>
-            c.studio === studio
-        );
-
-
-      if(!studioClasses.length)
-        return;
-
-
-      const block =
+      const column =
         document.createElement(
           "div"
         );
 
-      block.className =
-        "studioBlock";
+
+      column.className =
+        "dayColumn";
 
 
-      const studioName =
+      const header =
         document.createElement(
           "div"
         );
 
-      studioName.className =
-        "studioName";
 
-      studioName.textContent =
-        studio;
+      header.className =
+        "dayHeader";
 
 
-      block.appendChild(
-        studioName
+      const dayName =
+        document.createElement(
+          "div"
+        );
+
+
+      dayName.className =
+        "dayName";
+
+
+      dayName.textContent =
+        day;
+
+
+      const dayNumber =
+        document.createElement(
+          "div"
+        );
+
+
+      dayNumber.className =
+        "dayNumber";
+
+
+      dayNumber.textContent =
+        "WEEKLY CLASS";
+
+
+      header.appendChild(
+        dayName
       );
 
 
-      studioClasses.forEach(c=>{
-
-        block.appendChild(
-          createLesson(c)
-        );
-
-      });
+      header.appendChild(
+        dayNumber
+      );
 
 
       column.appendChild(
-        block
+        header
       );
 
-    });
+
+      const dayClasses =
+        classes
+          .filter(
+            c =>
+              c.branch ===
+              currentBranch &&
+              c.day ===
+              day
+          )
+          .sort(
+            sortByTime
+          );
 
 
-    if(!dayClasses.length){
+      studios.forEach(
+        studio=>{
 
-      const empty =
-        document.createElement(
-          "div"
+          const studioClasses =
+            dayClasses.filter(
+              c =>
+                c.studio ===
+                studio
+            );
+
+
+          if(
+            !studioClasses.length
+          )
+            return;
+
+
+          const block =
+            document.createElement(
+              "div"
+            );
+
+
+          block.className =
+            "studioBlock";
+
+
+          const studioName =
+            document.createElement(
+              "div"
+            );
+
+
+          studioName.className =
+            "studioName";
+
+
+          studioName.textContent =
+            studio;
+
+
+          block.appendChild(
+            studioName
+          );
+
+
+          studioClasses.forEach(
+            c=>{
+
+              block.appendChild(
+                createLesson(c)
+              );
+
+            }
+          );
+
+
+          column.appendChild(
+            block
+          );
+
+        }
+      );
+
+
+      if(
+        !dayClasses.length
+      ){
+
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+
+        empty.className =
+          "empty";
+
+
+        empty.textContent =
+          "No classes";
+
+
+        column.appendChild(
+          empty
         );
 
-      empty.className =
-        "empty";
-
-      empty.textContent =
-        "No classes";
+      }
 
 
-      column.appendChild(empty);
+      container.appendChild(
+        column
+      );
 
     }
-
-
-    container.appendChild(
-      column
-    );
-
-  });
+  );
 
 }
 
@@ -3764,12 +4601,15 @@ function renderSchedule(){
    LESSON
 ========================================================= */
 
-function createLesson(c){
+function createLesson(
+  c
+){
 
   const lesson =
     document.createElement(
       "div"
     );
+
 
   lesson.className =
     "lesson";
@@ -3796,8 +4636,10 @@ function createLesson(c){
       "div"
     );
 
+
   time.className =
     "lessonTime";
+
 
   time.textContent =
     `${c.start_time} – ${c.end_time}`;
@@ -3808,8 +4650,10 @@ function createLesson(c){
       "div"
     );
 
+
   name.className =
     "lessonName";
+
 
   name.textContent =
     normalizeClassName(
@@ -3817,8 +4661,14 @@ function createLesson(c){
     );
 
 
-  lesson.appendChild(time);
-  lesson.appendChild(name);
+  lesson.appendChild(
+    time
+  );
+
+
+  lesson.appendChild(
+    name
+  );
 
 
   if(c.teacher){
@@ -3828,11 +4678,14 @@ function createLesson(c){
         "div"
       );
 
+
     teacher.className =
       "lessonTeacher";
 
+
     teacher.textContent =
       c.teacher;
+
 
     lesson.appendChild(
       teacher
@@ -3858,7 +4711,8 @@ function renderLegend(){
     );
 
 
-  grid.innerHTML = "";
+  grid.innerHTML =
+    "";
 
 
   Object.entries(
@@ -3876,6 +4730,7 @@ function renderLegend(){
           "div"
         );
 
+
       item.className =
         "legendItem";
 
@@ -3885,8 +4740,10 @@ function renderLegend(){
           "div"
         );
 
+
       colorBox.className =
         "legendColor";
+
 
       colorBox.style.background =
         color;
@@ -3897,14 +4754,24 @@ function renderLegend(){
           "span"
         );
 
+
       text.textContent =
         teacher;
 
 
-      item.appendChild(colorBox);
-      item.appendChild(text);
+      item.appendChild(
+        colorBox
+      );
 
-      grid.appendChild(item);
+
+      item.appendChild(
+        text
+      );
+
+
+      grid.appendChild(
+        item
+      );
 
     }
   );
@@ -3946,18 +4813,25 @@ function runSearch(){
     input.value;
 
 
-  if(!normalizeText(query)){
+  if(
+    !normalizeText(query)
+  ){
 
     results.style.display =
       "none";
 
-    grid.innerHTML = "";
+
+    grid.innerHTML =
+      "";
+
 
     calendarButton.classList.add(
       "hidden"
     );
 
+
     clearSearchActions();
+
 
     return;
 
@@ -3978,14 +4852,17 @@ function runSearch(){
             query
           )
       )
-      .sort(sortByTime);
+      .sort(
+        sortByTime
+      );
 
 
   results.style.display =
     "block";
 
 
-  grid.innerHTML = "";
+  grid.innerHTML =
+    "";
 
 
   const visibleIds =
@@ -4009,195 +4886,241 @@ function runSearch(){
     );
 
 
-  if(!matches.length){
+  if(
+    !matches.length
+  ){
 
     const card =
       document.createElement(
         "div"
       );
 
+
     card.className =
       "resultCard";
+
 
     card.style.background =
       "#242128";
 
+
     card.style.color =
       "#fff";
+
 
     card.textContent =
       "No matching classes found.";
 
 
-    grid.appendChild(card);
+    grid.appendChild(
+      card
+    );
 
 
     calendarButton.classList.add(
       "hidden"
     );
 
+
     clearSearchActions();
+
 
     return;
 
   }
 
 
-  matches.forEach(c=>{
+  matches.forEach(
+    c=>{
 
-    const card =
-      document.createElement(
-        "div"
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        "resultCard";
+
+
+      if(c.teacher){
+
+        card.style.background =
+          teacherColors[c.teacher] ||
+          "#D9D5DF";
+
+      }
+      else{
+
+        card.style.background =
+          "linear-gradient(145deg,#302d36,#242128)";
+
+        card.style.color =
+          "#fff";
+
+      }
+
+
+      const top =
+        document.createElement(
+          "div"
+        );
+
+
+      top.className =
+        "resultTop";
+
+
+      const left =
+        document.createElement(
+          "div"
+        );
+
+
+      const time =
+        document.createElement(
+          "div"
+        );
+
+
+      time.className =
+        "resultTime";
+
+
+      time.textContent =
+        `${c.start_time} – ${c.end_time}`;
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+
+      name.className =
+        "resultClass";
+
+
+      name.textContent =
+        normalizeClassName(
+          c.class_name
+        );
+
+
+      left.appendChild(
+        time
       );
 
-    card.className =
-      "resultCard";
 
-
-    if(c.teacher){
-
-      card.style.background =
-        teacherColors[c.teacher] ||
-        "#D9D5DF";
-
-    }
-    else{
-
-      card.style.background =
-        "linear-gradient(145deg,#302d36,#242128)";
-
-      card.style.color =
-        "#fff";
-
-    }
-
-
-    const top =
-      document.createElement(
-        "div"
-      );
-
-    top.className =
-      "resultTop";
-
-
-    const left =
-      document.createElement(
-        "div"
+      left.appendChild(
+        name
       );
 
 
-    const time =
-      document.createElement(
-        "div"
-      );
-
-    time.className =
-      "resultTime";
-
-    time.textContent =
-      `${c.start_time} – ${c.end_time}`;
+      const select =
+        document.createElement(
+          "button"
+        );
 
 
-    const name =
-      document.createElement(
-        "div"
-      );
+      select.className =
+        "selectClass";
 
-    name.className =
-      "resultClass";
 
-    name.textContent =
-      normalizeClassName(
-        c.class_name
+      select.setAttribute(
+        "aria-label",
+        "Select class"
       );
 
 
-    left.appendChild(time);
-    left.appendChild(name);
+      if(
+        selectedClassIds.has(
+          String(c.id)
+        )
+      ){
 
-
-    const select =
-      document.createElement(
-        "button"
-      );
-
-    select.className =
-      "selectClass";
-
-
-    select.setAttribute(
-      "aria-label",
-      "Select class"
-    );
-
-
-    if(
-      selectedClassIds.has(
-        String(c.id)
-      )
-    ){
-
-      select.classList.add(
-        "selected"
-      );
-
-    }
-    else{
-
-      select.textContent =
-        "＋";
-
-    }
-
-
-    select.addEventListener(
-      "click",
-      event=>{
-
-        event.stopPropagation();
-
-        toggleClassSelection(
-          c.id
+        select.classList.add(
+          "selected"
         );
 
       }
-    );
+      else{
+
+        select.textContent =
+          "＋";
+
+      }
 
 
-    top.appendChild(left);
-    top.appendChild(select);
+      select.addEventListener(
+        "click",
+        event=>{
+
+          event.stopPropagation();
 
 
-    const info =
-      document.createElement(
-        "div"
+          toggleClassSelection(
+            c.id
+          );
+
+        }
       );
 
-    info.className =
-      "resultInfo";
 
-    info.textContent =
-      [
-        c.branch,
-        c.day,
-        c.studio,
-        c.teacher
-      ]
-      .filter(Boolean)
-      .join(" · ");
+      top.appendChild(
+        left
+      );
 
 
-    card.appendChild(top);
-    card.appendChild(info);
+      top.appendChild(
+        select
+      );
 
 
-    grid.appendChild(card);
+      const info =
+        document.createElement(
+          "div"
+        );
 
-  });
+
+      info.className =
+        "resultInfo";
 
 
-  updateCalendarButton(matches);
+      info.textContent =
+        [
+          c.branch,
+          c.day,
+          c.studio,
+          c.teacher
+        ]
+        .filter(Boolean)
+        .join(" · ");
+
+
+      card.appendChild(
+        top
+      );
+
+
+      card.appendChild(
+        info
+      );
+
+
+      grid.appendChild(
+        card
+      );
+
+    }
+  );
+
+
+  updateCalendarButton(
+    matches
+  );
+
+
   updateSearchActions();
 
 }
@@ -4207,22 +5130,30 @@ function runSearch(){
    SELECTION
 ========================================================= */
 
-function toggleClassSelection(id){
+function toggleClassSelection(
+  id
+){
 
   const key =
     String(id);
 
 
   if(
-    selectedClassIds.has(key)
+    selectedClassIds.has(
+      key
+    )
   ){
 
-    selectedClassIds.delete(key);
+    selectedClassIds.delete(
+      key
+    );
 
   }
   else{
 
-    selectedClassIds.add(key);
+    selectedClassIds.add(
+      key
+    );
 
   }
 
@@ -4231,6 +5162,10 @@ function toggleClassSelection(id){
 
 }
 
+
+/* =========================================================
+   CLEAR SEARCH
+========================================================= */
 
 function clearSearchActions(){
 
@@ -4272,380 +5207,6 @@ function updateSearchActions(){
 
     actions.classList.remove(
       "visible"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   GOOGLE CALENDAR BUTTON
-========================================================= */
-
-function updateCalendarButton(matches){
-
-  const button =
-    document.getElementById(
-      "calendarButton"
-    );
-
-
-  const text =
-    document.getElementById(
-      "calendarButtonText"
-    );
-
-
-  if(matches.length === 1){
-
-    text.textContent =
-      "Add Class to Google Calendar";
-
-    button.classList.remove(
-      "hidden"
-    );
-
-
-    button.onclick =
-      ()=>addClassesToGoogleCalendar(
-        [matches[0]]
-      );
-
-
-    return;
-
-  }
-
-
-  if(selectedClassIds.size > 0){
-
-    text.textContent =
-      selectedClassIds.size === 1
-        ? "Add Selected Class to Google Calendar"
-        : "Add Selected Classes to Google Calendar";
-
-
-    button.classList.remove(
-      "hidden"
-    );
-
-
-    button.onclick =
-      ()=>{
-
-        const selected =
-          matches.filter(
-            c =>
-              selectedClassIds.has(
-                String(c.id)
-              )
-          );
-
-
-        addClassesToGoogleCalendar(
-          selected
-        );
-
-      };
-
-
-    return;
-
-  }
-
-
-  button.classList.add(
-    "hidden"
-  );
-
-}
-
-
-/* =========================================================
-   NEXT OCCURRENCE
-========================================================= */
-
-function nextOccurrence(dayName){
-
-  const dayIndex = {
-
-    Sunday:0,
-    Monday:1,
-    Tuesday:2,
-    Wednesday:3,
-    Thursday:4,
-    Friday:5,
-    Saturday:6
-
-  };
-
-
-  const now =
-    new Date();
-
-
-  const today =
-    now.getDay();
-
-
-  let difference =
-    dayIndex[dayName] -
-    today;
-
-
-  if(difference < 0)
-    difference += 7;
-
-
-  const date =
-    new Date(now);
-
-
-  date.setDate(
-    now.getDate() +
-    difference
-  );
-
-
-  date.setHours(
-    0,
-    0,
-    0,
-    0
-  );
-
-
-  return date;
-
-}
-
-
-/* =========================================================
-   GOOGLE DATE TIME
-========================================================= */
-
-function googleDateTime(
-  date,
-  time
-){
-
-  const text =
-    String(time || "")
-      .trim()
-      .toUpperCase();
-
-
-  const match =
-    text.match(
-      /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/
-    );
-
-
-  if(!match)
-    return null;
-
-
-  let hour =
-    parseInt(
-      match[1],
-      10
-    );
-
-
-  const minute =
-    parseInt(
-      match[2] || "0",
-      10
-    );
-
-
-  const period =
-    match[3];
-
-
-  if(
-    period === "PM" &&
-    hour !== 12
-  )
-    hour += 12;
-
-
-  if(
-    period === "AM" &&
-    hour === 12
-  )
-    hour = 0;
-
-
-  const y =
-    date.getFullYear();
-
-
-  const m =
-    String(
-      date.getMonth()+1
-    ).padStart(2,"0");
-
-
-  const d =
-    String(
-      date.getDate()
-    ).padStart(2,"0");
-
-
-  const h =
-    String(hour)
-      .padStart(2,"0");
-
-
-  const min =
-    String(minute)
-      .padStart(2,"0");
-
-
-  return `${y}${m}${d}T${h}${min}00`;
-
-}
-
-
-/* =========================================================
-   ADD CLASSES TO GOOGLE CALENDAR
-========================================================= */
-
-async function addClassesToGoogleCalendar(matches){
-
-  if(
-    !matches ||
-    !matches.length
-  )
-    return;
-
-
-  const button =
-    document.getElementById(
-      "calendarButton"
-    );
-
-
-  const originalText =
-    document.getElementById(
-      "calendarButtonText"
-    ).textContent;
-
-
-  try{
-
-    button.disabled =
-      true;
-
-
-    document.getElementById(
-      "calendarButtonText"
-    ).textContent =
-      "Connecting to Google Calendar...";
-
-
-    /*
-      This opens Google's official OAuth window.
-      The user signs into Google and grants access
-      to their calendar.
-    */
-
-    await requestGoogleCalendarAccess();
-
-
-    document.getElementById(
-      "calendarButtonText"
-    ).textContent =
-      "Adding to Google Calendar...";
-
-
-    let added = 0;
-
-
-    for(
-      const c of matches
-    ){
-
-      try{
-
-        await createGoogleCalendarEvent(c);
-
-        added++;
-
-      }
-      catch(error){
-
-        console.error(
-          "Could not add event:",
-          c,
-          error
-        );
-
-      }
-
-    }
-
-
-    document.getElementById(
-      "calendarButtonText"
-    ).textContent =
-      added === 1
-        ? "Added to Google Calendar ✓"
-        : `${added} Classes Added ✓`;
-
-
-    setTimeout(
-      ()=>{
-        document.getElementById(
-          "calendarButtonText"
-        ).textContent =
-          originalText;
-
-        button.disabled =
-          false;
-
-      },
-      2500
-    );
-
-
-  }
-  catch(error){
-
-    console.error(
-      "Google Calendar error:",
-      error
-    );
-
-
-    button.disabled =
-      false;
-
-
-    document.getElementById(
-      "calendarButtonText"
-    ).textContent =
-      "Google Calendar Connection Failed";
-
-
-    alert(
-      "Google Calendar could not be connected.\n\n" +
-      "Please make sure you are signed into Google and " +
-      "that the Google Calendar API is enabled for this website."
-    );
-
-
-    setTimeout(
-      ()=>{
-        document.getElementById(
-          "calendarButtonText"
-        ).textContent =
-          originalText;
-
-      },
-      2500
     );
 
   }
@@ -4714,6 +5275,61 @@ document.getElementById(
 
 
 /* =========================================================
+   CALENDAR MODAL BUTTONS
+========================================================= */
+
+document.getElementById(
+  "calendarUpcomingButton"
+).addEventListener(
+  "click",
+  ()=>{
+    beginCalendarAdd(
+      "upcoming"
+    );
+  }
+);
+
+
+document.getElementById(
+  "calendarYearButton"
+).addEventListener(
+  "click",
+  ()=>{
+    beginCalendarAdd(
+      "year"
+    );
+  }
+);
+
+
+document.getElementById(
+  "calendarChoiceCancel"
+).addEventListener(
+  "click",
+  closeCalendarChoice
+);
+
+
+document.getElementById(
+  "calendarChoiceOverlay"
+).addEventListener(
+  "click",
+  event=>{
+
+    if(
+      event.target.id ===
+      "calendarChoiceOverlay"
+    ){
+
+      closeCalendarChoice();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
    ADMIN SHORTCUT
 ========================================================= */
 
@@ -4724,7 +5340,8 @@ document.addEventListener(
     if(
       event.ctrlKey &&
       event.shiftKey &&
-      event.key.toLowerCase() === "a"
+      event.key.toLowerCase() ===
+      "a"
     ){
 
       event.preventDefault();
@@ -4778,9 +5395,13 @@ document.getElementById(
   event=>{
 
     if(
-      event.key === "Enter"
-    )
+      event.key ===
+      "Enter"
+    ){
+
       adminLogin();
+
+    }
 
   }
 );
@@ -4806,7 +5427,8 @@ async function adminLogin(){
     );
 
 
-  error.textContent = "";
+  error.textContent =
+    "";
 
 
   if(
@@ -4891,7 +5513,9 @@ async function restoreAdminSession(){
   } =
   await supabaseClient
     .from("admins")
-    .select("id,email,role")
+    .select(
+      "id,email,role"
+    )
     .eq(
       "id",
       user.id
@@ -4916,7 +5540,8 @@ async function restoreAdminSession(){
 
 
   currentUser.adminRole =
-    admin.role || "admin";
+    admin.role ||
+    "admin";
 
 }
 
@@ -4936,7 +5561,9 @@ async function finishAdminLogin(
   } =
   await supabaseClient
     .from("admins")
-    .select("id,email,role")
+    .select(
+      "id,email,role"
+    )
     .eq(
       "id",
       user.id
@@ -4948,9 +5575,11 @@ async function finishAdminLogin(
 
     await supabaseClient.auth.signOut();
 
+
     errorElement.textContent =
       "Admin database error: " +
       adminError.message;
+
 
     return;
 
@@ -4961,8 +5590,10 @@ async function finishAdminLogin(
 
     await supabaseClient.auth.signOut();
 
+
     errorElement.textContent =
       "This account is not authorized as an administrator.";
+
 
     return;
 
@@ -4974,7 +5605,8 @@ async function finishAdminLogin(
 
 
   currentUser.adminRole =
-    admin.role || "admin";
+    admin.role ||
+    "admin";
 
 
   document.getElementById(
@@ -5003,7 +5635,8 @@ async function openAdmin(){
   document.getElementById(
     "adminUser"
   ).textContent =
-    currentUser?.email || "";
+    currentUser?.email ||
+    "";
 
 
   await loadBranches();
@@ -5075,47 +5708,49 @@ document.getElementById(
 
 document.querySelectorAll(
   ".adminTab"
-).forEach(button=>{
+).forEach(
+  button=>{
 
-  button.addEventListener(
-    "click",
-    ()=>{
+    button.addEventListener(
+      "click",
+      ()=>{
 
-      document.querySelectorAll(
-        ".adminTab"
-      ).forEach(
-        b =>
-          b.classList.remove(
-            "active"
-          )
-      );
-
-
-      document.querySelectorAll(
-        ".adminSection"
-      ).forEach(
-        section =>
-          section.classList.remove(
-            "active"
-          )
-      );
+        document.querySelectorAll(
+          ".adminTab"
+        ).forEach(
+          b =>
+            b.classList.remove(
+              "active"
+            )
+        );
 
 
-      button.classList.add(
-        "active"
-      );
+        document.querySelectorAll(
+          ".adminSection"
+        ).forEach(
+          section =>
+            section.classList.remove(
+              "active"
+            )
+        );
 
 
-      document.getElementById(
-        button.dataset.tab
-      ).classList.add(
-        "active"
-      );
+        button.classList.add(
+          "active"
+        );
 
-    }
-  );
 
-});
+        document.getElementById(
+          button.dataset.tab
+        ).classList.add(
+          "active"
+        );
+
+      }
+    );
+
+  }
+);
 
 
 /* =========================================================
@@ -5143,9 +5778,15 @@ async function loadAdminClasses(){
     .select(
       "id,branch,day,studio,start_time,end_time,class_name,teacher"
     )
-    .order("branch")
-    .order("day")
-    .order("start_time");
+    .order(
+      "branch"
+    )
+    .order(
+      "day"
+    )
+    .order(
+      "start_time"
+    );
 
 
   if(error){
@@ -5158,118 +5799,155 @@ async function loadAdminClasses(){
   }
 
 
-  list.innerHTML = "";
+  list.innerHTML =
+    "";
 
 
-  (data || []).forEach(c=>{
+  (data || []).forEach(
+    c=>{
 
-    c.class_name =
-      normalizeClassName(
-        c.class_name
+      c.class_name =
+        normalizeClassName(
+          c.class_name
+        );
+
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "adminItem";
+
+
+      const info =
+        document.createElement(
+          "div"
+        );
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+
+      name.className =
+        "adminItemName";
+
+
+      name.textContent =
+        c.class_name;
+
+
+      const details =
+        document.createElement(
+          "div"
+        );
+
+
+      details.className =
+        "adminItemDetails";
+
+
+      details.textContent =
+        [
+          c.branch,
+          c.day,
+          c.studio,
+          `${c.start_time} – ${c.end_time}`,
+          c.teacher
+        ]
+        .filter(Boolean)
+        .join(" · ");
+
+
+      info.appendChild(
+        name
       );
 
 
-    const item =
-      document.createElement(
-        "div"
-      );
-
-    item.className =
-      "adminItem";
-
-
-    const info =
-      document.createElement(
-        "div"
+      info.appendChild(
+        details
       );
 
 
-    const name =
-      document.createElement(
-        "div"
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+
+      actions.className =
+        "adminActions";
+
+
+      const edit =
+        document.createElement(
+          "button"
+        );
+
+
+      edit.className =
+        "btn btnGold";
+
+
+      edit.textContent =
+        "Edit";
+
+
+      edit.onclick =
+        ()=>startEdit(c);
+
+
+      const del =
+        document.createElement(
+          "button"
+        );
+
+
+      del.className =
+        "btn btnDanger";
+
+
+      del.textContent =
+        "Delete";
+
+
+      del.onclick =
+        ()=>deleteClass(
+          c.id
+        );
+
+
+      actions.appendChild(
+        edit
       );
 
-    name.className =
-      "adminItemName";
 
-    name.textContent =
-      c.class_name;
-
-
-    const details =
-      document.createElement(
-        "div"
+      actions.appendChild(
+        del
       );
 
-    details.className =
-      "adminItemDetails";
 
-    details.textContent =
-      [
-        c.branch,
-        c.day,
-        c.studio,
-        `${c.start_time} – ${c.end_time}`,
-        c.teacher
-      ]
-      .filter(Boolean)
-      .join(" · ");
-
-
-    info.appendChild(name);
-    info.appendChild(details);
-
-
-    const actions =
-      document.createElement(
-        "div"
+      item.appendChild(
+        info
       );
 
-    actions.className =
-      "adminActions";
 
-
-    const edit =
-      document.createElement(
-        "button"
+      item.appendChild(
+        actions
       );
 
-    edit.className =
-      "btn btnGold";
 
-    edit.textContent =
-      "Edit";
-
-    edit.onclick =
-      ()=>startEdit(c);
-
-
-    const del =
-      document.createElement(
-        "button"
+      list.appendChild(
+        item
       );
 
-    del.className =
-      "btn btnDanger";
-
-    del.textContent =
-      "Delete";
-
-    del.onclick =
-      ()=>deleteClass(c.id);
-
-
-    actions.appendChild(edit);
-    actions.appendChild(del);
-
-
-    item.appendChild(info);
-    item.appendChild(actions);
-
-
-    list.appendChild(item);
-
-  });
+    }
+  );
 
 }
 
@@ -5364,7 +6042,9 @@ async function saveClass(){
     result =
       await supabaseClient
         .from("classes")
-        .update(record)
+        .update(
+          record
+        )
         .eq(
           "id",
           id
@@ -5376,7 +6056,9 @@ async function saveClass(){
     result =
       await supabaseClient
         .from("classes")
-        .insert(record);
+        .insert(
+          record
+        );
 
   }
 
@@ -5463,7 +6145,8 @@ function startEdit(c){
   document.getElementById(
     "adminTeacher"
   ).value =
-    c.teacher || "";
+    c.teacher ||
+    "";
 
 
   document.getElementById(
@@ -5480,13 +6163,14 @@ function startEdit(c){
 
   document.getElementById(
     "adminMessage"
-  ).textContent = "";
+  ).textContent =
+    "";
 
 }
 
 
 /* =========================================================
-   CANCEL EDIT
+   CANCEL CLASS EDIT
 ========================================================= */
 
 document.getElementById(
@@ -5501,27 +6185,32 @@ function cancelEdit(){
 
   document.getElementById(
     "editId"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "adminStart"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "adminEnd"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "adminClassName"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "adminTeacher"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
@@ -5542,7 +6231,9 @@ function cancelEdit(){
    DELETE CLASS
 ========================================================= */
 
-async function deleteClass(id){
+async function deleteClass(
+  id
+){
 
   if(
     !confirm(
@@ -5603,150 +6294,201 @@ function renderTeacherList(){
     return;
 
 
-  list.innerHTML = "";
+  list.innerHTML =
+    "";
 
 
-  teachers.forEach(t=>{
+  teachers.forEach(
+    t=>{
 
-    const row =
-      document.createElement(
-        "div"
+      const row =
+        document.createElement(
+          "div"
+        );
+
+
+      row.className =
+        "teacherRow";
+
+
+      const left =
+        document.createElement(
+          "div"
+        );
+
+
+      left.className =
+        "rowLeft";
+
+
+      const dot =
+        document.createElement(
+          "div"
+        );
+
+
+      dot.className =
+        "colorDot";
+
+
+      dot.style.background =
+        t.color ||
+        "#D9D5DF";
+
+
+      const text =
+        document.createElement(
+          "div"
+        );
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+
+      name.className =
+        "rowText";
+
+
+      name.textContent =
+        t.name;
+
+
+      const id =
+        document.createElement(
+          "div"
+        );
+
+
+      id.className =
+        "rowSub";
+
+
+      id.textContent =
+        t.id;
+
+
+      text.appendChild(
+        name
       );
 
-    row.className =
-      "teacherRow";
 
-
-    const left =
-      document.createElement(
-        "div"
-      );
-
-    left.className =
-      "rowLeft";
-
-
-    const dot =
-      document.createElement(
-        "div"
-      );
-
-    dot.className =
-      "colorDot";
-
-    dot.style.background =
-      t.color ||
-      "#D9D5DF";
-
-
-    const text =
-      document.createElement(
-        "div"
+      text.appendChild(
+        id
       );
 
 
-    const name =
-      document.createElement(
-        "div"
+      left.appendChild(
+        dot
       );
 
-    name.className =
-      "rowText";
 
-    name.textContent =
-      t.name;
-
-
-    const id =
-      document.createElement(
-        "div"
+      left.appendChild(
+        text
       );
 
-    id.className =
-      "rowSub";
 
-    id.textContent =
-      t.id;
-
-
-    text.appendChild(name);
-    text.appendChild(id);
+      const actions =
+        document.createElement(
+          "div"
+        );
 
 
-    left.appendChild(dot);
-    left.appendChild(text);
+      actions.className =
+        "adminActions";
 
 
-    const actions =
-      document.createElement(
-        "div"
+      if(
+        String(t.id).startsWith(
+          "default-"
+        )
+      ){
+
+        row.appendChild(
+          left
+        );
+
+
+        list.appendChild(
+          row
+        );
+
+
+        return;
+
+      }
+
+
+      const edit =
+        document.createElement(
+          "button"
+        );
+
+
+      edit.className =
+        "btn btnGold";
+
+
+      edit.textContent =
+        "Edit";
+
+
+      edit.onclick =
+        ()=>startTeacherEdit(t);
+
+
+      const del =
+        document.createElement(
+          "button"
+        );
+
+
+      del.className =
+        "btn btnDanger";
+
+
+      del.textContent =
+        "Delete";
+
+
+      del.onclick =
+        ()=>deleteTeacher(t);
+
+
+      actions.appendChild(
+        edit
       );
 
-    actions.className =
-      "adminActions";
+
+      actions.appendChild(
+        del
+      );
 
 
-    if(
-      String(t.id).startsWith(
-        "default-"
-      )
-    ){
+      row.appendChild(
+        left
+      );
 
-      row.appendChild(left);
-      list.appendChild(row);
 
-      return;
+      row.appendChild(
+        actions
+      );
+
+
+      list.appendChild(
+        row
+      );
 
     }
-
-
-    const edit =
-      document.createElement(
-        "button"
-      );
-
-    edit.className =
-      "btn btnGold";
-
-    edit.textContent =
-      "Edit";
-
-    edit.onclick =
-      ()=>startTeacherEdit(t);
-
-
-    const del =
-      document.createElement(
-        "button"
-      );
-
-    del.className =
-      "btn btnDanger";
-
-    del.textContent =
-      "Delete";
-
-    del.onclick =
-      ()=>deleteTeacher(t);
-
-
-    actions.appendChild(edit);
-    actions.appendChild(del);
-
-
-    row.appendChild(left);
-    row.appendChild(actions);
-
-
-    list.appendChild(row);
-
-  });
+  );
 
 }
 
 
 /* =========================================================
-   TEACHERS
+   ADD / UPDATE TEACHER
 ========================================================= */
 
 document.getElementById(
@@ -5911,12 +6653,14 @@ function cancelTeacherEdit(){
 
   document.getElementById(
     "editTeacherId"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "newTeacherName"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
@@ -6012,7 +6756,9 @@ async function loadAdmins(){
     .select(
       "id,email,role"
     )
-    .order("email");
+    .order(
+      "email"
+    );
 
 
   if(error){
@@ -6029,113 +6775,146 @@ async function loadAdmins(){
     data || [];
 
 
-  list.innerHTML = "";
+  list.innerHTML =
+    "";
 
 
-  admins.forEach(admin=>{
+  admins.forEach(
+    admin=>{
 
-    const row =
-      document.createElement(
-        "div"
-      );
-
-    row.className =
-      "adminRow";
-
-
-    const left =
-      document.createElement(
-        "div"
-      );
-
-    left.className =
-      "rowLeft";
-
-
-    const text =
-      document.createElement(
-        "div"
-      );
-
-
-    const email =
-      document.createElement(
-        "div"
-      );
-
-    email.className =
-      "rowText";
-
-    email.textContent =
-      admin.email ||
-      "Administrator";
-
-
-    const role =
-      document.createElement(
-        "div"
-      );
-
-    role.className =
-      "rowSub";
-
-    role.textContent =
-      admin.role ===
-      "superior"
-        ? "Superior Administrator"
-        : "Administrator";
-
-
-    text.appendChild(email);
-    text.appendChild(role);
-
-    left.appendChild(text);
-    row.appendChild(left);
-
-
-    if(
-      currentUser?.adminRole ===
-      "superior" &&
-      admin.id !==
-      currentUser.id
-    ){
-
-      const actions =
+      const row =
         document.createElement(
           "div"
         );
 
-      actions.className =
-        "adminActions";
+
+      row.className =
+        "adminRow";
 
 
-      const del =
+      const left =
         document.createElement(
-          "button"
-        );
-
-      del.className =
-        "btn btnDanger";
-
-      del.textContent =
-        "Delete";
-
-
-      del.onclick =
-        ()=>deleteAdmin(
-          admin
+          "div"
         );
 
 
-      actions.appendChild(del);
-      row.appendChild(actions);
+      left.className =
+        "rowLeft";
+
+
+      const text =
+        document.createElement(
+          "div"
+        );
+
+
+      const email =
+        document.createElement(
+          "div"
+        );
+
+
+      email.className =
+        "rowText";
+
+
+      email.textContent =
+        admin.email ||
+        "Administrator";
+
+
+      const role =
+        document.createElement(
+          "div"
+        );
+
+
+      role.className =
+        "rowSub";
+
+
+      role.textContent =
+        admin.role ===
+        "superior"
+          ? "Superior Administrator"
+          : "Administrator";
+
+
+      text.appendChild(
+        email
+      );
+
+
+      text.appendChild(
+        role
+      );
+
+
+      left.appendChild(
+        text
+      );
+
+
+      row.appendChild(
+        left
+      );
+
+
+      if(
+        currentUser?.adminRole ===
+        "superior" &&
+        admin.id !==
+        currentUser.id
+      ){
+
+        const actions =
+          document.createElement(
+            "div"
+          );
+
+
+        actions.className =
+          "adminActions";
+
+
+        const del =
+          document.createElement(
+            "button"
+          );
+
+
+        del.className =
+          "btn btnDanger";
+
+
+        del.textContent =
+          "Delete";
+
+
+        del.onclick =
+          ()=>deleteAdmin(
+            admin
+          );
+
+
+        actions.appendChild(
+          del
+        );
+
+
+        row.appendChild(
+          actions
+        );
+
+      }
+
+
+      list.appendChild(
+        row
+      );
 
     }
-
-
-    list.appendChild(row);
-
-  });
+  );
 
 }
 
@@ -6144,7 +6923,9 @@ async function loadAdmins(){
    DELETE ADMIN
 ========================================================= */
 
-async function deleteAdmin(admin){
+async function deleteAdmin(
+  admin
+){
 
   if(
     currentUser?.adminRole !==
@@ -6279,6 +7060,7 @@ async function addAdmin(){
         error
       );
 
+
       message.textContent =
         "Failed to send invitation.";
 
@@ -6304,7 +7086,8 @@ async function addAdmin(){
 
     document.getElementById(
       "newAdminEmail"
-    ).value = "";
+    ).value =
+      "";
 
 
     await loadAdmins();
@@ -6312,7 +7095,10 @@ async function addAdmin(){
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     message.textContent =
       "Failed to send invitation.";
@@ -6329,11 +7115,13 @@ async function addAdmin(){
 async function checkInvitation(){
 
   const hash =
-    window.location.hash || "";
+    window.location.hash ||
+    "";
 
 
   const search =
-    window.location.search || "";
+    window.location.search ||
+    "";
 
 
   const params =
@@ -6356,7 +7144,8 @@ async function checkInvitation(){
 
 
   if(
-    type !== "invite"
+    type !==
+    "invite"
   ){
 
     return;
@@ -6559,11 +7348,13 @@ async function setInvitationPassword(){
     );
 
 
-  message.textContent = "";
+  message.textContent =
+    "";
 
 
   if(
-    password.length < 6
+    password.length <
+    6
   ){
 
     message.textContent =
@@ -6597,7 +7388,10 @@ async function setInvitationPassword(){
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     message.textContent =
       error.message;
@@ -6665,38 +7459,20 @@ async function setInvitationPassword(){
 
 async function startup(){
 
-  /*
-    Start Google Calendar initialization.
-  */
-
   initializeGoogleCalendar();
 
 
-  /*
-    Load branches first so all selectors exist
-    before classes are loaded.
-  */
-
   await loadBranches();
 
+
   await loadTeachers();
+
 
   await loadClasses();
 
 
-  /*
-    Restore existing Supabase session.
-
-    This does NOT open the admin panel automatically.
-  */
-
   await restoreAdminSession();
 
-
-  /*
-    Only show password setup if this is genuinely
-    an invitation URL.
-  */
 
   await checkInvitation();
 
@@ -6709,3 +7485,4 @@ startup();
 
 </body>
 </html>
+```
