@@ -2270,6 +2270,91 @@ input[type="search"]{
 
 </div>
 
+  <!-- =========================================================
+     CREATE ADMIN PASSWORD
+========================================================= -->
+
+<div
+  id="createPasswordOverlay"
+  class="overlay"
+>
+  <div class="modal">
+
+    <div class="modalTop">
+
+      <img
+        src="circle-cropped.png"
+        class="modalLogo"
+        alt=""
+      >
+
+      <div>
+
+        <h2>
+          Create Your Password
+        </h2>
+
+        <div class="modalSub">
+          Welcome to Premier Ballet Academy Administration
+        </div>
+
+      </div>
+
+    </div>
+
+    <p
+      style="
+        color:var(--muted);
+        font-size:12px;
+        line-height:1.6;
+        margin:0 0 15px;
+      "
+    >
+      Your administrator invitation has been accepted.
+      Please create a password for your account.
+    </p>
+
+    <label>
+      New Password
+    </label>
+
+    <input
+      id="newAdminPassword"
+      type="password"
+      autocomplete="new-password"
+      placeholder="Enter your password"
+    >
+
+    <label>
+      Confirm Password
+    </label>
+
+    <input
+      id="confirmAdminPassword"
+      type="password"
+      autocomplete="new-password"
+      placeholder="Enter your password again"
+    >
+
+    <div
+      id="createPasswordError"
+      class="error"
+    ></div>
+
+    <div class="modalActions">
+
+      <button
+        class="btn btnPink"
+        id="createPasswordButton"
+      >
+        Create Password
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
 <!-- =========================================================
      ADMIN LOGIN
 ========================================================= -->
@@ -5622,13 +5707,50 @@ async function finishAdminLogin(
 async function restoreAdminSession(){
 
   const {
-    data
+    data,
+    error
   } =
     await supabaseClient.auth
       .getSession();
 
+  if(error){
+    console.error(
+      "Session error:",
+      error
+    );
+
+    return;
+  }
+
   const session =
     data?.session;
+
+  /*
+    If this is an invitation/password-reset link,
+    Supabase may have created a temporary session.
+    Show the password creation screen instead of
+    loading the normal schedule.
+  */
+
+  const hash =
+    window.location.hash;
+
+  const isInvite =
+    hash.includes("access_token=") &&
+    (
+      hash.includes("type=invite") ||
+      hash.includes("type=recovery")
+    );
+
+  if(isInvite){
+
+    document.getElementById(
+      "createPasswordOverlay"
+    ).style.display =
+      "flex";
+
+    return;
+  }
 
   if(!session)
     return;
@@ -5664,7 +5786,6 @@ async function restoreAdminSession(){
     await supabaseClient.auth.signOut();
 
     return;
-
   }
 
   currentUser =
@@ -5675,7 +5796,6 @@ async function restoreAdminSession(){
     "admin";
 
 }
-
 
 /* =========================================================
    OPEN ADMIN
@@ -7490,6 +7610,97 @@ document.getElementById(
       closeCalendarChoice();
 
     }
+
+  }
+);
+
+  /* CREATE ADMIN PASSWORD */
+
+document.getElementById(
+  "createPasswordButton"
+).addEventListener(
+  "click",
+  async()=>{
+
+    const password =
+      document.getElementById(
+        "newAdminPassword"
+      ).value;
+
+    const confirmPassword =
+      document.getElementById(
+        "confirmAdminPassword"
+      ).value;
+
+    const error =
+      document.getElementById(
+        "createPasswordError"
+      );
+
+    error.textContent =
+      "";
+
+    if(!password || !confirmPassword){
+
+      error.textContent =
+        "Please enter and confirm your password.";
+
+      return;
+    }
+
+    if(password.length < 6){
+
+      error.textContent =
+        "Password must be at least 6 characters.";
+
+      return;
+    }
+
+    if(password !== confirmPassword){
+
+      error.textContent =
+        "The passwords do not match.";
+
+      return;
+    }
+
+    const {
+      data,
+      error:updateError
+    } =
+      await supabaseClient.auth
+        .updateUser({
+          password:password
+        });
+
+    if(updateError){
+
+      console.error(
+        "Password creation error:",
+        updateError
+      );
+
+      error.textContent =
+        updateError.message;
+
+      return;
+    }
+
+    document.getElementById(
+      "createPasswordOverlay"
+    ).style.display =
+      "none";
+
+    alert(
+      "Your password has been created successfully. You can now log in as an administrator."
+    );
+
+    await supabaseClient.auth.signOut();
+
+    document.getElementById(
+      "loginOverlay"
+    ).style.display =
+      "flex";
 
   }
 );
