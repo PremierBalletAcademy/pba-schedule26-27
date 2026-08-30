@@ -3530,7 +3530,7 @@ const dayIndex = {
 };
 
 
-function nextOccurrence(dayName){
+function nextOccurrence(dayName, startTime){
 
   const now =
     new Date();
@@ -3556,6 +3556,21 @@ function nextOccurrence(dayName){
   date.setHours(
     0,0,0,0
   );
+
+  // If the class is today but its start time has already passed,
+  // use the occurrence next week instead of the one that already happened.
+  if(difference === 0 && startTime){
+
+    const start =
+      makeLocalDate(date, startTime);
+
+    if(start && start <= now){
+      date.setDate(
+        date.getDate() + 7
+      );
+    }
+
+  }
 
   return date;
 
@@ -3775,25 +3790,184 @@ function closeCalendarChoice(){
    ADD UPCOMING
 ========================================================= */
 
-async function addUpcomingWeek(
-  matches
+/* =========================================================
+   GOOGLE CALENDAR BULK HELPERS
+========================================================= */
+
+const CALENDAR_BATCH_SIZE = 5;
+const CALENDAR_RETRY_LIMIT = 4;
+
+function getGoogleErrorCode(error){
+
+  return Number(
+    error?.result?.error?.code ||
+    error?.status ||
+    error?.code ||
+    0
+  );
+
+}
+
+function isRetryableGoogleError(error){
+
+  const code =
+    getGoogleErrorCode(error);
+
+  return [
+    408,
+    429,
+    500,
+    502,
+    503,
+    504
+  ].includes(code);
+
+}
+
+function sleep(ms){
+
+  return new Promise(
+    resolve =>
+      setTimeout(resolve,ms)
+  );
+
+}
+
+async function createGoogleCalendarEventWithRetry(
+  c,
+  date
 ){
 
-  for(
-    const c of matches
-  ){
+  let attempt = 0;
 
-    const date =
-      nextOccurrence(
-        c.day
+  while(true){
+
+    try{
+
+      return await createGoogleCalendarEvent(
+        c,
+        date
       );
 
-    await createGoogleCalendarEvent(
-      c,
-      date
-    );
+    }
+    catch(error){
+
+      attempt++;
+
+      if(
+        attempt > CALENDAR_RETRY_LIMIT ||
+        !isRetryableGoogleError(error)
+      ){
+        throw error;
+      }
+
+      const delay =
+        Math.min(8000,1000 * (2 ** (attempt - 1)));
+
+      await sleep(delay);
+
+    }
 
   }
+
+}
+
+async function runCalendarTasksInBatches(
+  tasks,
+  onProgress
+){
+
+  let completed = 0;
+  let added = 0;
+  const failures = [];
+
+  for(
+    let i = 0;
+    i < tasks.length;
+    i += CALENDAR_BATCH_SIZE
+  ){
+
+    const batch =
+      tasks.slice(
+        i,
+        i + CALENDAR_BATCH_SIZE
+      );
+
+    const results =
+      await Promise.allSettled(
+        batch.map(
+          task =>
+            createGoogleCalendarEventWithRetry(
+              task.classItem,
+              task.date
+            )
+        )
+      );
+
+    results.forEach(
+      result=>{
+
+        completed++;
+
+        if(result.status === "fulfilled"){
+          added++;
+        }
+        else{
+          failures.push(
+            result.reason
+          );
+        }
+
+      }
+    );
+
+    if(onProgress){
+      onProgress({
+        completed,
+        total:tasks.length,
+        added,
+        failed:failures.length
+      });
+    }
+
+    // Small pause between batches prevents Google Calendar
+    // from being flooded when a full academy year is selected.
+    if(i + CALENDAR_BATCH_SIZE < tasks.length){
+      await sleep(250);
+    }
+
+  }
+
+  return {
+    added,
+    failed:failures.length,
+    failures
+  };
+
+}
+
+
+/* =========================================================
+   ADD UPCOMING
+========================================================= */
+
+async function addUpcomingWeek(
+  matches,
+  onProgress
+){
+
+  const tasks =
+    matches.map(
+      c=>({
+        classItem:c,
+        date:nextOccurrence(c.day, c.start_time)
+      })
+    );
+
+  return runCalendarTasksInBatches(
+    tasks,
+    onProgress
+  );
 
 }
 
@@ -3803,10 +3977,11 @@ async function addUpcomingWeek(
 ========================================================= */
 
 async function addFullAcademyYear(
-  matches
+  matches,
+  onProgress
 ){
 
-  let added = 0;
+  const tasks = [];
 
   for(
     const c of matches
@@ -3817,28 +3992,27 @@ async function addFullAcademyYear(
         c.day
       );
 
-    for(
-      const date of occurrences
-    ){
+    occurrences.forEach(
+      date=>{
 
-      if(
-        date >=
-        ACADEMY_SEASON_END
-      )
-        continue;
+        if(
+          date < ACADEMY_SEASON_END
+        ){
+          tasks.push({
+            classItem:c,
+            date
+          });
+        }
 
-      await createGoogleCalendarEvent(
-        c,
-        date
-      );
-
-      added++;
-
-    }
+      }
+    );
 
   }
 
-  return added;
+  return runCalendarTasksInBatches(
+    tasks,
+    onProgress
+  );
 
 }
 
@@ -3889,34 +4063,77 @@ async function beginCalendarAdd(
         ? "Adding 2026/27 schedule..."
         : "Adding upcoming class...";
 
-    let added = 0;
+    const progressHandler =
+      progress=>{
+
+        if(mode === "year"){
+          buttonText.textContent =
+            `Adding 2026/27 schedule... ${progress.completed}/${progress.total}`;
+        }
+        else{
+          buttonText.textContent =
+            `Adding upcoming classes... ${progress.completed}/${progress.total}`;
+        }
+
+      };
+
+    let result;
 
     if(
       mode === "upcoming"
     ){
 
-      await addUpcomingWeek(
-        matches
-      );
-
-      added =
-        matches.length;
+      result =
+        await addUpcomingWeek(
+          matches,
+          progressHandler
+        );
 
     }
 
     else{
 
-      added =
+      result =
         await addFullAcademyYear(
-          matches
+          matches,
+          progressHandler
         );
 
     }
 
-    buttonText.textContent =
-      added === 1
-        ? "Added to Google Calendar ✓"
-        : `${added} Calendar Events Added ✓`;
+    const added =
+      result.added;
+
+    const failed =
+      result.failed;
+
+    if(failed === 0){
+
+      buttonText.textContent =
+        added === 1
+          ? "Added to Google Calendar ✓"
+          : `${added} Calendar Events Added ✓`;
+
+    }
+    else if(added > 0){
+
+      buttonText.textContent =
+        `${added} Added · ${failed} Failed`;
+
+      alert(
+        `${added} Google Calendar events were added successfully.\n\n` +
+        `${failed} event${failed === 1 ? "" : "s"} could not be added.\n\n` +
+        "You can try the calendar action again for the missing events."
+      );
+
+    }
+    else{
+
+      throw new Error(
+        "No calendar events could be added."
+      );
+
+    }
 
     selectedClassIds.clear();
 
