@@ -906,6 +906,66 @@ input[type="search"]{
   height:43px;
 }
 
+.adminScheduleTools{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 14px;
+}
+
+.adminScheduleSearch{
+  position:relative;
+  flex:1;
+}
+
+.adminScheduleSearch input{
+  width:100%;
+  height:44px;
+  padding:0 42px 0 15px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#141218;
+  color:var(--text);
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+
+.adminScheduleSearch input:focus{
+  border-color:rgba(232,191,208,.55);
+  box-shadow:0 0 0 3px rgba(232,191,208,.08);
+}
+
+.adminScheduleSearch input::placeholder{
+  color:#77727f;
+}
+
+.adminScheduleSearchIcon{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+  pointer-events:none;
+  font-size:18px;
+}
+
+.adminScheduleCount{
+  color:var(--muted);
+  font-size:10px;
+  white-space:nowrap;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+}
+
+.adminNoResults{
+  padding:28px 15px;
+  text-align:center;
+  color:var(--muted);
+  border:1px dashed var(--border2);
+  border-radius:12px;
+  font-size:12px;
+}
+
 .adminList{
   display:grid;
   gap:8px;
@@ -1819,6 +1879,30 @@ Database
 Schedule Classes
 </h2>
 
+</div>
+
+</div>
+
+<div class="adminScheduleTools">
+
+<div class="adminScheduleSearch">
+
+<input
+  id="adminScheduleSearch"
+  type="search"
+  placeholder="Search classes, teachers, branches..."
+  autocomplete="off"
+>
+
+<span class="adminScheduleSearchIcon">⌕</span>
+
+</div>
+
+<div
+  id="adminScheduleCount"
+  class="adminScheduleCount"
+>
+0 classes
 </div>
 
 </div>
@@ -5757,6 +5841,181 @@ document.querySelectorAll(
    LOAD ADMIN CLASSES
 ========================================================= */
 
+let adminScheduleClasses = [];
+
+
+function renderAdminClasses(){
+
+  const list =
+    document.getElementById(
+      "adminList"
+    );
+
+  const searchInput =
+    document.getElementById(
+      "adminScheduleSearch"
+    );
+
+  const count =
+    document.getElementById(
+      "adminScheduleCount"
+    );
+
+  if(!list)
+    return;
+
+  const query = normalizeText(
+    searchInput
+      ? searchInput.value
+      : ""
+  );
+
+  const words = query
+    ? query.split(" ").filter(Boolean)
+    : [];
+
+  const filtered =
+    adminScheduleClasses.filter(
+      c=>{
+
+        const searchable =
+          normalizeText(
+            [
+              c.class_name,
+              c.teacher,
+              c.branch,
+              c.day,
+              c.studio,
+              c.start_time,
+              c.end_time
+            ]
+            .filter(Boolean)
+            .join(" ")
+          );
+
+        return words.every(
+          word=>searchable.includes(word)
+        );
+
+      }
+    );
+
+  if(count){
+
+    count.textContent =
+      `${filtered.length} ${filtered.length === 1 ? "class" : "classes"}`;
+
+  }
+
+  list.innerHTML = "";
+
+  if(!filtered.length){
+
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "adminNoResults";
+
+    empty.textContent =
+      query
+        ? "No classes match your search."
+        : "No schedule classes found.";
+
+    list.appendChild(empty);
+    return;
+
+  }
+
+  filtered.forEach(
+    c=>{
+
+      const item =
+        document.createElement("div");
+
+      item.className =
+        "adminItem";
+
+      const info =
+        document.createElement("div");
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "adminItemName";
+
+      name.textContent =
+        c.class_name;
+
+      const details =
+        document.createElement("div");
+
+      details.className =
+        "adminItemDetails";
+
+      details.textContent =
+        [
+          c.branch,
+          c.day,
+          c.studio,
+          `${c.start_time} – ${c.end_time}`,
+          c.teacher
+        ]
+        .filter(Boolean)
+        .join(" · ");
+
+      info.appendChild(name);
+      info.appendChild(details);
+
+      const actions =
+        document.createElement("div");
+
+      actions.className =
+        "adminActions";
+
+      const edit =
+        document.createElement("button");
+
+      edit.className =
+        "btn btnGold";
+
+      edit.textContent =
+        "Edit";
+
+      edit.onclick =
+        ()=>startEdit(c);
+
+      const del =
+        document.createElement("button");
+
+      del.className =
+        "btn btnDanger";
+
+      del.textContent =
+        "Delete";
+
+      del.onclick =
+        ()=>deleteClass(c.id);
+
+      actions.appendChild(edit);
+      actions.appendChild(del);
+
+      item.appendChild(info);
+      item.appendChild(actions);
+
+      list.appendChild(item);
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   LOAD ADMIN CLASSES
+========================================================= */
+
 async function loadAdminClasses(){
 
   const list =
@@ -5764,10 +6023,9 @@ async function loadAdminClasses(){
       "adminList"
     );
 
-
-  list.innerHTML =
-    "Loading...";
-
+  if(list)
+    list.innerHTML =
+      "Loading...";
 
   const {
     data,
@@ -5788,168 +6046,50 @@ async function loadAdminClasses(){
       "start_time"
     );
 
-
   if(error){
 
-    list.textContent =
-      error.message;
+    if(list)
+      list.textContent =
+        error.message;
 
     return;
 
   }
 
+  adminScheduleClasses =
+    (data || []).map(
+      c=>({
+        ...c,
+        class_name:
+          normalizeClassName(
+            c.class_name
+          )
+      })
+    );
 
-  list.innerHTML =
-    "";
+  renderAdminClasses();
 
-
-  (data || []).forEach(
-    c=>{
-
-      c.class_name =
-        normalizeClassName(
-          c.class_name
-        );
-
-
-      const item =
-        document.createElement(
-          "div"
-        );
+}
 
 
-      item.className =
-        "adminItem";
+/* =========================================================
+   ADMIN SCHEDULE SEARCH
+========================================================= */
 
+const adminScheduleSearchInput =
+  document.getElementById(
+    "adminScheduleSearch"
+  );
 
-      const info =
-        document.createElement(
-          "div"
-        );
+if(adminScheduleSearchInput){
 
-
-      const name =
-        document.createElement(
-          "div"
-        );
-
-
-      name.className =
-        "adminItemName";
-
-
-      name.textContent =
-        c.class_name;
-
-
-      const details =
-        document.createElement(
-          "div"
-        );
-
-
-      details.className =
-        "adminItemDetails";
-
-
-      details.textContent =
-        [
-          c.branch,
-          c.day,
-          c.studio,
-          `${c.start_time} – ${c.end_time}`,
-          c.teacher
-        ]
-        .filter(Boolean)
-        .join(" · ");
-
-
-      info.appendChild(
-        name
-      );
-
-
-      info.appendChild(
-        details
-      );
-
-
-      const actions =
-        document.createElement(
-          "div"
-        );
-
-
-      actions.className =
-        "adminActions";
-
-
-      const edit =
-        document.createElement(
-          "button"
-        );
-
-
-      edit.className =
-        "btn btnGold";
-
-
-      edit.textContent =
-        "Edit";
-
-
-      edit.onclick =
-        ()=>startEdit(c);
-
-
-      const del =
-        document.createElement(
-          "button"
-        );
-
-
-      del.className =
-        "btn btnDanger";
-
-
-      del.textContent =
-        "Delete";
-
-
-      del.onclick =
-        ()=>deleteClass(
-          c.id
-        );
-
-
-      actions.appendChild(
-        edit
-      );
-
-
-      actions.appendChild(
-        del
-      );
-
-
-      item.appendChild(
-        info
-      );
-
-
-      item.appendChild(
-        actions
-      );
-
-
-      list.appendChild(
-        item
-      );
-
-    }
+  adminScheduleSearchInput.addEventListener(
+    "input",
+    renderAdminClasses
   );
 
 }
+
 
 
 /* =========================================================
