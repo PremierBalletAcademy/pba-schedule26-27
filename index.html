@@ -5706,97 +5706,304 @@ async function finishAdminLogin(
 
 async function restoreAdminSession(){
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.auth
-      .getSession();
+  try{
 
-  if(error){
+    const url =
+      new URL(window.location.href);
+
+    const params =
+      url.searchParams;
+
+    const hash =
+      window.location.hash;
+
+    /*
+      =====================================================
+      1. SUPABASE PKCE INVITATION / RECOVERY LINK
+
+      Newer Supabase email links can return:
+
+      ?code=XXXXXXXX
+
+      instead of putting the access token directly
+      in the URL hash.
+      =====================================================
+    */
+
+    const code =
+      params.get("code");
+
+    if(code){
+
+      console.log(
+        "Supabase authentication code detected."
+      );
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth
+          .exchangeCodeForSession(
+            code
+          );
+
+      if(error){
+
+        console.error(
+          "Could not exchange invitation code:",
+          error
+        );
+
+        alert(
+          "This invitation link is invalid or has expired. " +
+          "Please ask the Superior Administrator to send a new invitation."
+        );
+
+        return;
+
+      }
+
+      if(data?.session){
+
+        console.log(
+          "Invitation session created successfully."
+        );
+
+        /*
+          IMPORTANT:
+          Show password creation instead of
+          opening the normal schedule.
+        */
+
+        document.getElementById(
+          "createPasswordOverlay"
+        ).style.display =
+          "flex";
+
+        /*
+          Remove the authentication code from
+          the browser URL.
+        */
+
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+
+        return;
+
+      }
+
+    }
+
+
+    /*
+      =====================================================
+      2. OLD-STYLE SUPABASE INVITATION LINK
+
+      Some links return:
+
+      #access_token=...
+      &type=invite
+
+      or:
+
+      #access_token=...
+      &type=recovery
+      =====================================================
+    */
+
+    const hashParams =
+      new URLSearchParams(
+        hash.replace(
+          /^#/,
+          ""
+        )
+      );
+
+    const accessToken =
+      hashParams.get(
+        "access_token"
+      );
+
+    const refreshToken =
+      hashParams.get(
+        "refresh_token"
+      );
+
+    const type =
+      hashParams.get(
+        "type"
+      );
+
+    if(
+      accessToken &&
+      (
+        type === "invite" ||
+        type === "recovery"
+      )
+    ){
+
+      console.log(
+        "Supabase invitation/recovery session detected."
+      );
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth
+          .setSession({
+
+            access_token:
+              accessToken,
+
+            refresh_token:
+              refreshToken || ""
+
+          });
+
+      if(error){
+
+        console.error(
+          "Could not create invitation session:",
+          error
+        );
+
+        alert(
+          "This invitation link is invalid or has expired. " +
+          "Please ask the Superior Administrator to send a new invitation."
+        );
+
+        return;
+
+      }
+
+      if(data?.session){
+
+        document.getElementById(
+          "createPasswordOverlay"
+        ).style.display =
+          "flex";
+
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+
+        return;
+
+      }
+
+    }
+
+
+    /*
+      =====================================================
+      3. NORMAL EXISTING SESSION
+      =====================================================
+    */
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .getSession();
+
+    if(error){
+
+      console.error(
+        "Session error:",
+        error
+      );
+
+      return;
+
+    }
+
+    const session =
+      data?.session;
+
+    if(!session)
+      return;
+
+
+    /*
+      =====================================================
+      4. CHECK IF THE LOGGED-IN USER IS AN ADMIN
+      =====================================================
+    */
+
+    const {
+      data:userData
+    } =
+      await supabaseClient.auth
+        .getUser();
+
+    const user =
+      userData?.user;
+
+    if(!user)
+      return;
+
+
+    const {
+      data:admin,
+      error:adminError
+    } =
+      await supabaseClient
+        .from("admins")
+        .select(
+          "id,email,role"
+        )
+        .eq(
+          "id",
+          user.id
+        )
+        .maybeSingle();
+
+    if(adminError){
+
+      console.error(
+        "Admin lookup error:",
+        adminError
+      );
+
+      return;
+
+    }
+
+    if(!admin){
+
+      await supabaseClient.auth.signOut();
+
+      return;
+
+    }
+
+
+    currentUser =
+      user;
+
+    currentUser.adminRole =
+      admin.role ||
+      "admin";
+
+  }
+  catch(error){
+
     console.error(
-      "Session error:",
+      "Admin session restoration error:",
       error
     );
 
-    return;
   }
-
-  const session =
-    data?.session;
-
-  /*
-    If this is an invitation/password-reset link,
-    Supabase may have created a temporary session.
-    Show the password creation screen instead of
-    loading the normal schedule.
-  */
-
-  const hash =
-    window.location.hash;
-
-  const isInvite =
-    hash.includes("access_token=") &&
-    (
-      hash.includes("type=invite") ||
-      hash.includes("type=recovery")
-    );
-
-  if(isInvite){
-
-    document.getElementById(
-      "createPasswordOverlay"
-    ).style.display =
-      "flex";
-
-    return;
-  }
-
-  if(!session)
-    return;
-
-  const {
-    data:userData
-  } =
-    await supabaseClient.auth
-      .getUser();
-
-  const user =
-    userData?.user;
-
-  if(!user)
-    return;
-
-  const {
-    data:admin
-  } =
-    await supabaseClient
-      .from("admins")
-      .select(
-        "id,email,role"
-      )
-      .eq(
-        "id",
-        user.id
-      )
-      .maybeSingle();
-
-  if(!admin){
-
-    await supabaseClient.auth.signOut();
-
-    return;
-  }
-
-  currentUser =
-    user;
-
-  currentUser.adminRole =
-    admin.role ||
-    "admin";
 
 }
-
 /* =========================================================
    OPEN ADMIN
 ========================================================= */
