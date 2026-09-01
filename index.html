@@ -4890,6 +4890,8 @@ async function loadClasses(){
 
     renderSchedule();
 
+    renderLegend();
+
     runSearch();
 
     status.textContent =
@@ -5201,54 +5203,80 @@ function renderLegend(){
       "legendGrid"
     );
 
+  if(!grid)
+    return;
+
   grid.innerHTML =
     "";
 
-  Object.entries(
-    teacherColors
-  )
-  .sort(
-    ([a],[b]) =>
-      a.localeCompare(b)
-  )
-  .forEach(
-    ([teacher,color])=>{
+  /*
+    Only show teachers who actually teach at the currently
+    selected branch. This keeps both the website legend and
+    the PDF legend relevant to the selected branch.
+  */
+  const branchTeachers =
+    new Set(
+      classes
+        .filter(
+          c =>
+            c.branch === currentBranch &&
+            c.teacher
+        )
+        .map(
+          c => c.teacher
+        )
+    );
 
-      const item =
-        document.createElement(
-          "div"
-        );
+  Array.from(branchTeachers)
+    .map(
+      teacher => [
+        teacher,
+        teacherColors[teacher] ||
+          "#D9D5DF"
+      ]
+    )
+    .sort(
+      ([a],[b]) =>
+        a.localeCompare(b)
+    )
+    .forEach(
+      ([teacher,color])=>{
 
-      item.className =
-        "legendItem";
+        const item =
+          document.createElement(
+            "div"
+          );
 
-      const colorBox =
-        document.createElement(
-          "div"
-        );
+        item.className =
+          "legendItem";
 
-      colorBox.className =
-        "legendColor";
+        const colorBox =
+          document.createElement(
+            "div"
+          );
 
-      colorBox.style.background =
-        color;
+        colorBox.className =
+          "legendColor";
 
-      const text =
-        document.createElement(
-          "span"
-        );
+        colorBox.style.background =
+          color;
 
-      text.textContent =
-        teacher;
+        const text =
+          document.createElement(
+            "span"
+          );
 
-      item.appendChild(colorBox);
+        text.textContent =
+          teacher;
 
-      item.appendChild(text);
+        item.appendChild(colorBox);
 
-      grid.appendChild(item);
+        item.appendChild(text);
 
-    }
-  );
+        grid.appendChild(item);
+
+      }
+    );
 
 }
 
@@ -7652,6 +7680,8 @@ document.getElementById(
 
     renderSchedule();
 
+    renderLegend();
+
     runSearch();
 
   }
@@ -7962,8 +7992,13 @@ async function saveScheduleAsPDF(){
   if(!button || !buttonText)
     return;
 
-  if(!daysElement || !daysElement.children.length){
-    alert("The schedule has not finished loading yet.");
+  if(
+    !daysElement ||
+    !daysElement.children.length
+  ){
+    alert(
+      "The schedule has not finished loading yet."
+    );
     return;
   }
 
@@ -7982,46 +8017,68 @@ async function saveScheduleAsPDF(){
     buttonText.textContent;
 
   button.disabled = true;
-  buttonText.textContent = "Preparing PDF...";
+  buttonText.textContent =
+    "Preparing PDF...";
 
   /*
     ============================================================
-    PREMIUM PDF EXPORT
+    PREMIUM PDF EXPORT — DYNAMIC HEIGHT
     ============================================================
 
-    The PDF is built as ONE fixed 1600 × 1131 canvas and then
-    placed onto ONE A4 landscape page.
+    IMPORTANT FIX:
+    The old exporter gave the schedule a fixed height and
+    overflow:hidden. On crowded branches this clipped the lower
+    classes.
 
-    The export has its own professional header containing:
-      • Premier Ballet Academy logo
-      • PREMIER BALLET ACADEMY
-      • Selected branch name
-      • 2026 / 2027 Academy Schedule
-      • Weekly Schedule label
+    This version lets the schedule grow to its real content height.
+    The complete schedule + branch-specific teacher legend are then
+    captured as ONE canvas and fitted onto ONE A4 landscape page.
 
-    This keeps the normal website unchanged while making the
-    saved PDF look like an official academy document.
+    This means the last classes are never clipped just because a
+    branch has more classes than another branch.
   */
 
   const EXPORT_WIDTH = 1600;
-  const EXPORT_HEIGHT = 1131;
 
   const exportArea =
     document.createElement("div");
 
-  exportArea.style.position = "fixed";
-  exportArea.style.left = "-50000px";
-  exportArea.style.top = "0";
-  exportArea.style.width = `${EXPORT_WIDTH}px`;
-  exportArea.style.height = `${EXPORT_HEIGHT}px`;
-  exportArea.style.padding = "34px 38px 30px";
-  exportArea.style.margin = "0";
-  exportArea.style.boxSizing = "border-box";
+  exportArea.style.position =
+    "fixed";
+
+  exportArea.style.left =
+    "-50000px";
+
+  exportArea.style.top =
+    "0";
+
+  exportArea.style.width =
+    `${EXPORT_WIDTH}px`;
+
+  exportArea.style.minHeight =
+    "1px";
+
+  exportArea.style.padding =
+    "34px 38px 30px";
+
+  exportArea.style.margin =
+    "0";
+
+  exportArea.style.boxSizing =
+    "border-box";
+
   exportArea.style.background =
     "linear-gradient(135deg,#0b0a0e 0%,#121017 55%,#0d0c10 100%)";
-  exportArea.style.color = "#fff";
-  exportArea.style.overflow = "hidden";
-  exportArea.style.zIndex = "-9999";
+
+  exportArea.style.color =
+    "#fff";
+
+  exportArea.style.overflow =
+    "visible";
+
+  exportArea.style.zIndex =
+    "-9999";
+
   exportArea.style.fontFamily =
     "Arial, Helvetica, sans-serif";
 
@@ -8032,46 +8089,84 @@ async function saveScheduleAsPDF(){
   const pdfHeader =
     document.createElement("div");
 
-  pdfHeader.style.display = "flex";
-  pdfHeader.style.alignItems = "center";
-  pdfHeader.style.justifyContent = "space-between";
-  pdfHeader.style.gap = "30px";
-  pdfHeader.style.height = "112px";
+  pdfHeader.style.display =
+    "flex";
+
+  pdfHeader.style.alignItems =
+    "center";
+
+  pdfHeader.style.justifyContent =
+    "space-between";
+
+  pdfHeader.style.gap =
+    "30px";
+
+  pdfHeader.style.minHeight =
+    "112px";
+
   pdfHeader.style.padding =
     "18px 24px";
+
   pdfHeader.style.boxSizing =
     "border-box";
+
   pdfHeader.style.border =
     "1px solid rgba(217,196,154,.30)";
+
   pdfHeader.style.borderRadius =
     "18px";
+
   pdfHeader.style.background =
     "linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025))";
+
   pdfHeader.style.boxShadow =
     "0 12px 35px rgba(0,0,0,.28)";
-
-  /* Left side: logo + academy name */
 
   const brandGroup =
     document.createElement("div");
 
-  brandGroup.style.display = "flex";
-  brandGroup.style.alignItems = "center";
-  brandGroup.style.gap = "20px";
-  brandGroup.style.minWidth = "0";
+  brandGroup.style.display =
+    "flex";
+
+  brandGroup.style.alignItems =
+    "center";
+
+  brandGroup.style.gap =
+    "20px";
+
+  brandGroup.style.minWidth =
+    "0";
 
   const logo =
     document.createElement("img");
 
-  logo.src = "circle-cropped.png";
-  logo.alt = "Premier Ballet Academy";
-  logo.crossOrigin = "anonymous";
-  logo.style.width = "76px";
-  logo.style.height = "76px";
-  logo.style.objectFit = "contain";
-  logo.style.borderRadius = "50%";
-  logo.style.flexShrink = "0";
-  logo.style.display = "block";
+  logo.src =
+    "circle-cropped.png";
+
+  logo.alt =
+    "Premier Ballet Academy";
+
+  logo.crossOrigin =
+    "anonymous";
+
+  logo.style.width =
+    "76px";
+
+  logo.style.height =
+    "76px";
+
+  logo.style.objectFit =
+    "contain";
+
+  logo.style.borderRadius =
+    "50%";
+
+  logo.style.flexShrink =
+    "0";
+
+  logo.style.display =
+    "block";
+
   logo.style.filter =
     "drop-shadow(0 5px 12px rgba(0,0,0,.30))";
 
@@ -8086,28 +8181,40 @@ async function saveScheduleAsPDF(){
 
   academyName.style.fontFamily =
     "Georgia, 'Times New Roman', serif";
+
   academyName.style.fontSize =
     "30px";
+
   academyName.style.fontWeight =
     "700";
+
   academyName.style.letterSpacing =
     "3.5px";
+
   academyName.style.lineHeight =
     "1.05";
+
   academyName.style.color =
     "#f8f1e8";
+
   academyName.style.whiteSpace =
     "nowrap";
 
   const academyLine =
     document.createElement("div");
 
-  academyLine.style.width = "115px";
-  academyLine.style.height = "2px";
+  academyLine.style.width =
+    "115px";
+
+  academyLine.style.height =
+    "2px";
+
   academyLine.style.margin =
     "10px 0 8px";
+
   academyLine.style.background =
     "linear-gradient(90deg,#d9c49a,#e8bfd0,transparent)";
+
   academyLine.style.borderRadius =
     "2px";
 
@@ -8119,27 +8226,42 @@ async function saveScheduleAsPDF(){
 
   scheduleLabel.style.fontSize =
     "11px";
+
   scheduleLabel.style.fontWeight =
     "700";
+
   scheduleLabel.style.letterSpacing =
     "2.5px";
+
   scheduleLabel.style.color =
     "#d9c49a";
 
-  brandText.appendChild(academyName);
-  brandText.appendChild(academyLine);
-  brandText.appendChild(scheduleLabel);
+  brandText.appendChild(
+    academyName
+  );
 
-  brandGroup.appendChild(logo);
-  brandGroup.appendChild(brandText);
+  brandText.appendChild(
+    academyLine
+  );
 
-  /* Right side: branch + season */
+  brandText.appendChild(
+    scheduleLabel
+  );
+
+  brandGroup.appendChild(
+    logo
+  );
+
+  brandGroup.appendChild(
+    brandText
+  );
 
   const branchGroup =
     document.createElement("div");
 
   branchGroup.style.textAlign =
     "right";
+
   branchGroup.style.flexShrink =
     "0";
 
@@ -8151,12 +8273,16 @@ async function saveScheduleAsPDF(){
 
   branchSmall.style.fontSize =
     "10px";
+
   branchSmall.style.fontWeight =
     "700";
+
   branchSmall.style.letterSpacing =
     "2px";
+
   branchSmall.style.color =
     "#9d99a5";
+
   branchSmall.style.marginBottom =
     "7px";
 
@@ -8168,14 +8294,19 @@ async function saveScheduleAsPDF(){
 
   branchTitle.style.fontFamily =
     "Georgia, 'Times New Roman', serif";
+
   branchTitle.style.fontSize =
     "27px";
+
   branchTitle.style.fontWeight =
     "700";
+
   branchTitle.style.letterSpacing =
     "1px";
+
   branchTitle.style.lineHeight =
     "1.05";
+
   branchTitle.style.color =
     "#f3dce6";
 
@@ -8187,41 +8318,65 @@ async function saveScheduleAsPDF(){
 
   season.style.marginTop =
     "8px";
+
   season.style.fontSize =
     "12px";
+
   season.style.fontWeight =
     "700";
+
   season.style.letterSpacing =
     "2px";
+
   season.style.color =
     "#d9c49a";
 
-  branchGroup.appendChild(branchSmall);
-  branchGroup.appendChild(branchTitle);
-  branchGroup.appendChild(season);
+  branchGroup.appendChild(
+    branchSmall
+  );
 
-  pdfHeader.appendChild(brandGroup);
-  pdfHeader.appendChild(branchGroup);
+  branchGroup.appendChild(
+    branchTitle
+  );
 
-  exportArea.appendChild(pdfHeader);
+  branchGroup.appendChild(
+    season
+  );
+
+  pdfHeader.appendChild(
+    brandGroup
+  );
+
+  pdfHeader.appendChild(
+    branchGroup
+  );
+
+  exportArea.appendChild(
+    pdfHeader
+  );
 
   /* ------------------------------------------------------------
-     SMALL TITLE STRIP
+     TITLE STRIP
      ------------------------------------------------------------ */
 
   const titleStrip =
     document.createElement("div");
 
-  titleStrip.style.height =
+  titleStrip.style.minHeight =
     "46px";
+
   titleStrip.style.display =
     "flex";
+
   titleStrip.style.alignItems =
     "center";
+
   titleStrip.style.justifyContent =
     "space-between";
+
   titleStrip.style.padding =
     "0 8px";
+
   titleStrip.style.boxSizing =
     "border-box";
 
@@ -8233,10 +8388,13 @@ async function saveScheduleAsPDF(){
 
   weekTitle.style.fontFamily =
     "Georgia, 'Times New Roman', serif";
+
   weekTitle.style.fontSize =
     "19px";
+
   weekTitle.style.fontWeight =
     "700";
+
   weekTitle.style.color =
     "#f8f1e8";
 
@@ -8248,58 +8406,88 @@ async function saveScheduleAsPDF(){
 
   weekMeta.style.fontSize =
     "9px";
+
   weekMeta.style.fontWeight =
     "700";
+
   weekMeta.style.letterSpacing =
     "1.8px";
+
   weekMeta.style.color =
     "#9d99a5";
 
-  titleStrip.appendChild(weekTitle);
-  titleStrip.appendChild(weekMeta);
+  titleStrip.appendChild(
+    weekTitle
+  );
 
-  exportArea.appendChild(titleStrip);
+  titleStrip.appendChild(
+    weekMeta
+  );
+
+  exportArea.appendChild(
+    titleStrip
+  );
 
   /* ------------------------------------------------------------
-     SCHEDULE
+     SCHEDULE — NO FIXED HEIGHT / NO CLIPPING
      ------------------------------------------------------------ */
 
   const schedule =
     daysElement.cloneNode(true);
 
-  schedule.removeAttribute("id");
+  schedule.removeAttribute(
+    "id"
+  );
 
   schedule.style.width =
     "100%";
+
   schedule.style.minWidth =
     "0";
+
   schedule.style.height =
-    "895px";
+    "auto";
+
+  schedule.style.minHeight =
+    "0";
+
   schedule.style.display =
     "grid";
+
   schedule.style.gridTemplateColumns =
     "repeat(7, minmax(0,1fr))";
+
+  schedule.style.alignItems =
+    "start";
+
   schedule.style.gap =
     "8px";
+
   schedule.style.boxSizing =
     "border-box";
+
   schedule.style.margin =
     "0";
 
-  schedule.querySelectorAll(".dayColumn")
-    .forEach(column=>{
+  schedule.style.overflow =
+    "visible";
+
+  schedule.querySelectorAll(
+    ".dayColumn"
+  ).forEach(
+    column=>{
 
       column.style.minWidth =
         "0";
 
       column.style.height =
-        "100%";
+        "auto";
 
       column.style.minHeight =
         "0";
 
       column.style.overflow =
-        "hidden";
+        "visible";
 
       column.style.boxSizing =
         "border-box";
@@ -8307,42 +8495,66 @@ async function saveScheduleAsPDF(){
       column.style.borderRadius =
         "12px";
 
-    });
+      column.style.breakInside =
+        "avoid";
 
-  schedule.querySelectorAll(".dayHeader")
-    .forEach(header=>{
+    }
+  );
+
+  schedule.querySelectorAll(
+    ".dayHeader"
+  ).forEach(
+    header=>{
 
       header.style.padding =
         "8px";
 
-    });
+    }
+  );
 
-  schedule.querySelectorAll(".dayName")
-    .forEach(element=>{
+  schedule.querySelectorAll(
+    ".dayName"
+  ).forEach(
+    element=>{
 
       element.style.fontSize =
         "15px";
 
-    });
+    }
+  );
 
-  schedule.querySelectorAll(".dayNumber")
-    .forEach(element=>{
+  schedule.querySelectorAll(
+    ".dayNumber"
+  ).forEach(
+    element=>{
 
       element.style.fontSize =
         "7px";
 
-    });
+    }
+  );
 
-  schedule.querySelectorAll(".studioBlock")
-    .forEach(block=>{
+  schedule.querySelectorAll(
+    ".studioBlock"
+  ).forEach(
+    block=>{
 
       block.style.padding =
         "6px";
 
-    });
+      block.style.overflow =
+        "visible";
 
-  schedule.querySelectorAll(".studioName")
-    .forEach(element=>{
+      block.style.breakInside =
+        "avoid";
+
+    }
+  );
+
+  schedule.querySelectorAll(
+    ".studioName"
+  ).forEach(
+    element=>{
 
       element.style.fontSize =
         "7px";
@@ -8350,10 +8562,13 @@ async function saveScheduleAsPDF(){
       element.style.marginBottom =
         "4px";
 
-    });
+    }
+  );
 
-  schedule.querySelectorAll(".lesson")
-    .forEach(lesson=>{
+  schedule.querySelectorAll(
+    ".lesson"
+  ).forEach(
+    lesson=>{
 
       lesson.style.padding =
         "6px";
@@ -8364,6 +8579,12 @@ async function saveScheduleAsPDF(){
       lesson.style.minHeight =
         "0";
 
+      lesson.style.height =
+        "auto";
+
+      lesson.style.overflow =
+        "visible";
+
       lesson.style.borderRadius =
         "7px";
 
@@ -8373,18 +8594,27 @@ async function saveScheduleAsPDF(){
       lesson.style.transform =
         "none";
 
-    });
+      lesson.style.breakInside =
+        "avoid";
 
-  schedule.querySelectorAll(".lessonTime")
-    .forEach(element=>{
+    }
+  );
+
+  schedule.querySelectorAll(
+    ".lessonTime"
+  ).forEach(
+    element=>{
 
       element.style.fontSize =
         "7px";
 
-    });
+    }
+  );
 
-  schedule.querySelectorAll(".lessonName")
-    .forEach(element=>{
+  schedule.querySelectorAll(
+    ".lessonName"
+  ).forEach(
+    element=>{
 
       element.style.fontSize =
         "8.5px";
@@ -8395,10 +8625,13 @@ async function saveScheduleAsPDF(){
       element.style.marginTop =
         "2px";
 
-    });
+    }
+  );
 
-  schedule.querySelectorAll(".lessonTeacher")
-    .forEach(element=>{
+  schedule.querySelectorAll(
+    ".lessonTeacher"
+  ).forEach(
+    element=>{
 
       element.style.fontSize =
         "7px";
@@ -8409,37 +8642,266 @@ async function saveScheduleAsPDF(){
       element.style.marginTop =
         "3px";
 
-    });
+    }
+  );
 
-  exportArea.appendChild(schedule);
+  exportArea.appendChild(
+    schedule
+  );
 
-  document.body.appendChild(exportArea);
+  /* ------------------------------------------------------------
+     BRANCH-SPECIFIC TEACHER LEGEND
+     ------------------------------------------------------------ */
+
+  const legendTeachers =
+    Array.from(
+      new Set(
+        classes
+          .filter(
+            c =>
+              c.branch ===
+              currentBranch &&
+              c.teacher
+          )
+          .map(
+            c => c.teacher
+          )
+      )
+    )
+    .map(
+      teacher=>({
+        name:teacher,
+        color:
+          teacherColors[teacher] ||
+          "#D9D5DF"
+      })
+    )
+    .sort(
+      (a,b)=>
+        a.name.localeCompare(
+          b.name
+        )
+    );
+
+  const pdfLegend =
+    document.createElement("div");
+
+  pdfLegend.style.marginTop =
+    "12px";
+
+  pdfLegend.style.padding =
+    "10px 12px";
+
+  pdfLegend.style.boxSizing =
+    "border-box";
+
+  pdfLegend.style.border =
+    "1px solid rgba(255,255,255,.08)";
+
+  pdfLegend.style.borderRadius =
+    "12px";
+
+  pdfLegend.style.background =
+    "rgba(255,255,255,.035)";
+
+  const legendTitle =
+    document.createElement("div");
+
+  legendTitle.textContent =
+    `${currentBranch || "Branch"} Teacher Colour Guide`;
+
+  legendTitle.style.fontFamily =
+    "Georgia, 'Times New Roman', serif";
+
+  legendTitle.style.fontSize =
+    "12px";
+
+  legendTitle.style.fontWeight =
+    "700";
+
+  legendTitle.style.color =
+    "#f8f1e8";
+
+  pdfLegend.appendChild(
+    legendTitle
+  );
+
+  const legendGrid =
+    document.createElement("div");
+
+  legendGrid.style.display =
+    "flex";
+
+  legendGrid.style.flexWrap =
+    "wrap";
+
+  legendGrid.style.alignItems =
+    "center";
+
+  legendGrid.style.gap =
+    "6px";
+
+  legendGrid.style.marginTop =
+    "7px";
+
+  legendTeachers.forEach(
+    teacher=>{
+
+      const item =
+        document.createElement("div");
+
+      item.style.display =
+        "inline-flex";
+
+      item.style.alignItems =
+        "center";
+
+      item.style.gap =
+        "5px";
+
+      item.style.padding =
+        "4px 7px";
+
+      item.style.border =
+        "1px solid rgba(255,255,255,.08)";
+
+      item.style.borderRadius =
+        "7px";
+
+      item.style.background =
+        "#141218";
+
+      item.style.fontSize =
+        "7px";
+
+      item.style.lineHeight =
+        "1";
+
+      const colorBox =
+        document.createElement("span");
+
+      colorBox.style.width =
+        "11px";
+
+      colorBox.style.height =
+        "11px";
+
+      colorBox.style.borderRadius =
+        "3px";
+
+      colorBox.style.background =
+        teacher.color;
+
+      colorBox.style.display =
+        "inline-block";
+
+      colorBox.style.flexShrink =
+        "0";
+
+      const text =
+        document.createElement("span");
+
+      text.textContent =
+        teacher.name;
+
+      item.appendChild(
+        colorBox
+      );
+
+      item.appendChild(
+        text
+      );
+
+      legendGrid.appendChild(
+        item
+      );
+
+    }
+  );
+
+  pdfLegend.appendChild(
+    legendGrid
+  );
+
+  exportArea.appendChild(
+    pdfLegend
+  );
+
+  document.body.appendChild(
+    exportArea
+  );
 
   try{
 
     /* Wait for the academy logo to finish loading. */
-
     if(logo.complete){
-      if(logo.naturalWidth === 0){
+
+      if(
+        logo.naturalWidth === 0
+      ){
+
         console.warn(
           "Premier Ballet Academy logo could not be loaded."
         );
+
       }
+
     }else{
-      await new Promise(resolve=>{
-        logo.onload = resolve;
-        logo.onerror = resolve;
-      });
+
+      await new Promise(
+        resolve=>{
+
+          logo.onload =
+            resolve;
+
+          logo.onerror =
+            resolve;
+
+        }
+      );
+
     }
 
-    if(document.fonts && document.fonts.ready){
+    if(
+      document.fonts &&
+      document.fonts.ready
+    ){
+
       await document.fonts.ready;
+
     }
 
-    await new Promise(resolve =>
-      requestAnimationFrame(() =>
-        requestAnimationFrame(resolve)
-      )
+    /*
+      Let the browser fully calculate the natural height of every
+      day column before html2canvas measures the export.
+    */
+    await new Promise(
+      resolve =>
+        requestAnimationFrame(
+          () =>
+            requestAnimationFrame(
+              resolve
+            )
+        )
+    );
+
+    const exportHeight =
+      Math.ceil(
+        exportArea.scrollHeight
+      );
+
+    exportArea.style.height =
+      `${exportHeight}px`;
+
+    /*
+      Wait one more frame after setting the final height so the
+      canvas includes every class and the complete legend.
+    */
+    await new Promise(
+      resolve =>
+        requestAnimationFrame(
+          resolve
+        )
     );
 
     buttonText.textContent =
@@ -8449,38 +8911,111 @@ async function saveScheduleAsPDF(){
       await html2canvas(
         exportArea,
         {
-          width:EXPORT_WIDTH,
-          height:EXPORT_HEIGHT,
-          scale:2,
-          useCORS:true,
-          allowTaint:false,
-          backgroundColor:"#0d0c10",
-          logging:false,
-          scrollX:0,
-          scrollY:0,
-          windowWidth:EXPORT_WIDTH,
-          windowHeight:EXPORT_HEIGHT
+          width:
+            EXPORT_WIDTH,
+
+          height:
+            exportHeight,
+
+          scale:
+            2,
+
+          useCORS:
+            true,
+
+          allowTaint:
+            false,
+
+          backgroundColor:
+            "#0d0c10",
+
+          logging:
+            false,
+
+          scrollX:
+            0,
+
+          scrollY:
+            0,
+
+          windowWidth:
+            EXPORT_WIDTH,
+
+          windowHeight:
+            Math.max(
+              window.innerHeight,
+              exportHeight
+            )
         }
       );
 
     const { jsPDF } =
       window.jspdf;
 
-    /*
-      A4 LANDSCAPE:
-      297 mm × 210 mm
-
-      One canvas is inserted as one image, so the PDF remains
-      exactly one landscape page.
-    */
-
     const pdf =
       new jsPDF({
-        orientation:"landscape",
-        unit:"mm",
-        format:"a4",
-        compress:true
+        orientation:
+          "landscape",
+
+        unit:
+          "mm",
+
+        format:
+          "a4",
+
+        compress:
+          true
       });
+
+    /*
+      Keep the entire export on exactly ONE A4 landscape page.
+      The image is proportionally fitted to the page so no bottom
+      classes can be lost.
+    */
+    const pageWidth =
+      297;
+
+    const pageHeight =
+      210;
+
+    const imageRatio =
+      canvas.width /
+      canvas.height;
+
+    const pageRatio =
+      pageWidth /
+      pageHeight;
+
+    let imageWidth =
+      pageWidth;
+
+    let imageHeight =
+      imageWidth /
+      imageRatio;
+
+    if(
+      imageHeight >
+      pageHeight
+    ){
+
+      imageHeight =
+        pageHeight;
+
+      imageWidth =
+        imageHeight *
+        imageRatio;
+
+    }
+
+    const offsetX =
+      (pageWidth -
+        imageWidth) /
+      2;
+
+    const offsetY =
+      (pageHeight -
+        imageHeight) /
+      2;
 
     pdf.addImage(
       canvas.toDataURL(
@@ -8488,10 +9023,10 @@ async function saveScheduleAsPDF(){
         0.95
       ),
       "JPEG",
-      0,
-      0,
-      297,
-      210,
+      offsetX,
+      offsetY,
+      imageWidth,
+      imageHeight,
       undefined,
       "FAST"
     );
@@ -8520,11 +9055,13 @@ async function saveScheduleAsPDF(){
 
     setTimeout(
       ()=>{
+
         buttonText.textContent =
           originalText;
 
         button.disabled =
           false;
+
       },
       2000
     );
