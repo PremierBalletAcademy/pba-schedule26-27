@@ -20,7 +20,156 @@
      SUPABASE
 ========================================================= -->
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+/* =========================================================
+   SAVE ONE-PAGE LANDSCAPE PDF
+========================================================= */
+
+async function saveScheduleAsPDF(){
+
+  const exportArea =
+    document.getElementById("scheduleExportArea");
+
+  const button =
+    document.getElementById("saveSchedulePdfButton");
+
+  if(!exportArea){
+    alert("Schedule export area not found.");
+    return;
+  }
+
+  const original =
+    button ? button.innerHTML : "";
+
+  try{
+
+    if(typeof html2pdf === "undefined"){
+      throw new Error("PDF library has not loaded.");
+    }
+
+    if(button){
+      button.disabled = true;
+      button.innerHTML = '<span class="pdfIcon">PDF</span><span>Saving...</span>';
+    }
+
+    document.body.classList.add("pdf-exporting");
+
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const branch =
+      (typeof currentBranch !== "undefined" && currentBranch)
+        ? currentBranch
+        : "Branch";
+
+    const safeBranch =
+      String(branch)
+        .replace(/[^\w-]+/g, "-")
+        .replace(/-+/g, "-");
+
+    const filename =
+      `PBA-${safeBranch}-Schedule-2026-27.pdf`;
+
+    /*
+      The schedule is captured as ONE canvas and placed on exactly
+      ONE A4 landscape page. This prevents html2pdf from splitting
+      the schedule across pages.
+    */
+    const canvas =
+      await html2canvas(exportArea, {
+        scale: 2.5,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false
+      });
+
+    const { jsPDF } = window.jspdf;
+
+    const pdf =
+      new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+        compress: true
+      });
+
+    const pageWidth = 297;
+    const pageHeight = 210;
+    const margin = 4;
+
+    const maxWidth = pageWidth - margin * 2;
+    const maxHeight = pageHeight - margin * 2;
+
+    const canvasRatio =
+      canvas.width / canvas.height;
+
+    let imageWidth = maxWidth;
+    let imageHeight = imageWidth / canvasRatio;
+
+    if(imageHeight > maxHeight){
+      imageHeight = maxHeight;
+      imageWidth = imageHeight * canvasRatio;
+    }
+
+    const x =
+      (pageWidth - imageWidth) / 2;
+
+    const y =
+      (pageHeight - imageHeight) / 2;
+
+    pdf.addImage(
+      canvas.toDataURL("image/jpeg", 0.98),
+      "JPEG",
+      x,
+      y,
+      imageWidth,
+      imageHeight
+    );
+
+    pdf.save(filename);
+
+  }
+  catch(error){
+
+    console.error("PDF export error:", error);
+
+    alert(
+      "The schedule could not be saved as a PDF.\n\n" +
+      (error?.message || "Unknown error")
+    );
+
+  }
+  finally{
+
+    document.body.classList.remove("pdf-exporting");
+
+    if(button){
+      button.disabled = false;
+      button.innerHTML =
+        original ||
+        '<span class="pdfIcon">PDF</span><span>Save Schedule as PDF</span>';
+    }
+
+  }
+
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const pdfButton =
+    document.getElementById("saveSchedulePdfButton");
+
+  if(pdfButton){
+    pdfButton.addEventListener(
+      "click",
+      saveScheduleAsPDF
+    );
+  }
+
+});
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <!-- =========================================================
      GOOGLE CALENDAR
@@ -2006,6 +2155,127 @@ input[type="search"]{
 
   }
 
+}
+
+
+/* PDF EXPORT: one A4 landscape page */
+@page {
+  size: A4 landscape;
+  margin: 4mm;
+}
+
+.pdf-exporting #app{
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.pdf-exporting .pdfHide,
+.pdf-exporting #calendarChoiceOverlay,
+.pdf-exporting #loginOverlay,
+.pdf-exporting #createPasswordOverlay,
+.pdf-exporting #adminPanel{
+  display: none !important;
+}
+
+.pdf-exporting #scheduleExportArea{
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.pdf-exporting #scheduleExportArea #days{
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 2mm !important;
+  box-sizing: border-box !important;
+}
+
+.pdf-exporting #scheduleExportArea .dayColumn{
+  min-width: 0 !important;
+  padding: 2mm !important;
+  box-sizing: border-box !important;
+}
+
+.pdf-exporting #scheduleExportArea .dayHeader{
+  padding: 1.5mm !important;
+  margin-bottom: 1.5mm !important;
+}
+
+.pdf-exporting #scheduleExportArea .dayName{font-size: 10pt !important;}
+.pdf-exporting #scheduleExportArea .dayNumber{font-size: 6pt !important;}
+.pdf-exporting #scheduleExportArea .studioBlock{margin-bottom: 1.5mm !important;}
+.pdf-exporting #scheduleExportArea .studioName{
+  font-size: 6.5pt !important;
+  padding: 1mm !important;
+}
+.pdf-exporting #scheduleExportArea .lesson{
+  padding: 1.1mm !important;
+  margin-bottom: 1mm !important;
+}
+.pdf-exporting #scheduleExportArea .lessonTime{font-size: 6.2pt !important;}
+.pdf-exporting #scheduleExportArea .lessonName{font-size: 7pt !important; line-height: 1.05 !important;}
+.pdf-exporting #scheduleExportArea .lessonTeacher{font-size: 5.8pt !important; line-height: 1.05 !important;}
+.pdf-exporting #scheduleExportArea .legend{
+  margin-top: 2mm !important;
+  padding: 1.5mm !important;
+}
+.pdf-exporting #scheduleExportArea .legendTitle{font-size: 7pt !important;}
+.pdf-exporting #scheduleExportArea .legendItem{font-size: 5.5pt !important;}
+.pdf-exporting #scheduleExportArea .legendColor{
+  width: 3mm !important;
+  height: 3mm !important;
+}
+
+/* PDF button */
+.pdf-toolbar{
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin: 12px 0 10px;
+}
+
+#saveSchedulePdfButton{
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 12px;
+  padding: 10px 15px;
+  background: linear-gradient(135deg,#242128,#39323d);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 5px 18px rgba(0,0,0,.18);
+}
+
+#saveSchedulePdfButton:hover{
+  transform: translateY(-1px);
+}
+
+#saveSchedulePdfButton:disabled{
+  opacity: .65;
+  cursor: wait;
+}
+
+#saveSchedulePdfButton .pdfIcon{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 29px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: #fff;
+  color: #242128;
+  font-size: 9px;
+  font-weight: 900;
 }
 
 </style>
