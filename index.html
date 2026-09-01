@@ -7975,364 +7975,516 @@ async function saveScheduleAsPDF(){
   buttonText.textContent = "Preparing HD PDF...";
 
   /* ============================================================
-     HD ONE-PAGE PDF EXPORT
+     PREMIUM HD PDF EXPORT
      ------------------------------------------------------------
-     • A4 landscape
-     • Entire selected branch schedule is forced to fit
-     • No fixed-height clipping
-     • 3200px render width for very sharp text
-     • PNG instead of JPEG so text and thin lines stay crisp
-     • The normal website is never changed
+     The schedule is laid out at a large working size and then
+     automatically paginated at CLASS boundaries. This means:
+
+       • Classes are made as large as possible.
+       • A class is NEVER split between pages.
+       • A crowded branch automatically continues onto page 2,
+         page 3, etc. instead of becoming tiny or being clipped.
+       • The selected branch only is exported.
+       • The colour guide contains ONLY teachers used by that
+         selected branch.
+       • 4x A4-ish raster working resolution + PNG keeps text crisp.
      ============================================================ */
 
-  const EXPORT_WIDTH = 3200;
-  const EXPORT_HEIGHT = 2263;
-  const PAGE_PADDING_X = 72;
-  const PAGE_PADDING_TOP = 62;
-  const PAGE_PADDING_BOTTOM = 52;
-  const HEADER_HEIGHT = 178;
-  const TITLE_HEIGHT = 72;
-  const SCHEDULE_GAP = 18;
+  const PDF_W = 297;
+  const PDF_H = 210;
+  const PX_PER_MM = 10.8;
+  const EXPORT_WIDTH = Math.round(PDF_W * PX_PER_MM);   // ~3200 px
+  const EXPORT_HEIGHT = Math.round(PDF_H * PX_PER_MM);  // ~2268 px
 
-  const exportArea = document.createElement("div");
+  const PAD_X = 55;
+  const PAD_TOP = 48;
+  const PAD_BOTTOM = 42;
+  const HEADER_H = 145;
+  const TITLE_H = 58;
+  const GAP = 12;
+  const FOOTER_H = 25;
+  const LEGEND_H = 112;
+  const SCHEDULE_W = EXPORT_WIDTH - (PAD_X * 2);
+  const FIRST_PAGE_SCHEDULE_H =
+    EXPORT_HEIGHT - PAD_TOP - HEADER_H - TITLE_H - GAP - PAD_BOTTOM - FOOTER_H;
+  const OTHER_PAGE_SCHEDULE_H =
+    EXPORT_HEIGHT - PAD_TOP - 70 - GAP - PAD_BOTTOM - FOOTER_H;
 
-  Object.assign(exportArea.style,{
+  const exportRoot = document.createElement("div");
+  Object.assign(exportRoot.style,{
     position:"fixed",
-    left:"-50000px",
+    left:"-60000px",
     top:"0",
     width:`${EXPORT_WIDTH}px`,
-    height:`${EXPORT_HEIGHT}px`,
-    padding:`${PAGE_PADDING_TOP}px ${PAGE_PADDING_X}px ${PAGE_PADDING_BOTTOM}px`,
+    minHeight:`${EXPORT_HEIGHT}px`,
     margin:"0",
+    padding:"0",
     boxSizing:"border-box",
-    background:"linear-gradient(135deg,#0b0a0e 0%,#121017 55%,#0d0c10 100%)",
+    background:"#0d0c10",
     color:"#fff",
-    overflow:"hidden",
+    overflow:"visible",
     zIndex:"-9999",
     fontFamily:"Arial, Helvetica, sans-serif"
   });
 
   /* ------------------------------------------------------------
-     PREMIUM HEADER
+     Utility helpers
      ------------------------------------------------------------ */
 
-  const pdfHeader = document.createElement("div");
+  function makeHeader(pageNumber,totalPages){
+    const wrap = document.createElement("div");
+    Object.assign(wrap.style,{
+      width:`${SCHEDULE_W}px`,
+      height:`${pageNumber === 1 ? HEADER_H : 70}px`,
+      margin:`${PAD_TOP}px ${PAD_X}px 0`,
+      boxSizing:"border-box",
+      display:"flex",
+      alignItems:"center",
+      justifyContent:"space-between",
+      gap:"40px",
+      padding: pageNumber === 1 ? "20px 28px" : "12px 24px",
+      border:"1px solid rgba(217,196,154,.34)",
+      borderRadius: pageNumber === 1 ? "20px" : "15px",
+      background:"linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025))"
+    });
 
-  Object.assign(pdfHeader.style,{
-    display:"flex",
-    alignItems:"center",
-    justifyContent:"space-between",
-    gap:"50px",
-    height:`${HEADER_HEIGHT}px`,
-    padding:"24px 32px",
-    boxSizing:"border-box",
-    border:"1px solid rgba(217,196,154,.34)",
-    borderRadius:"24px",
-    background:"linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025))",
-    boxShadow:"0 12px 35px rgba(0,0,0,.28)"
-  });
+    const brand = document.createElement("div");
+    Object.assign(brand.style,{display:"flex",alignItems:"center",gap:"20px",minWidth:"0"});
 
-  const brandGroup = document.createElement("div");
-  Object.assign(brandGroup.style,{
-    display:"flex",
-    alignItems:"center",
-    gap:"26px",
-    minWidth:"0"
-  });
+    const img = document.createElement("img");
+    img.src = "circle-cropped.png";
+    img.crossOrigin = "anonymous";
+    Object.assign(img.style,{
+      width: pageNumber === 1 ? "96px" : "48px",
+      height: pageNumber === 1 ? "96px" : "48px",
+      objectFit:"contain",
+      borderRadius:"50%",
+      flexShrink:"0"
+    });
 
-  const logo = document.createElement("img");
-  logo.src = "circle-cropped.png";
-  logo.alt = "Premier Ballet Academy";
-  logo.crossOrigin = "anonymous";
-  Object.assign(logo.style,{
-    width:"118px",
-    height:"118px",
-    objectFit:"contain",
-    borderRadius:"50%",
-    flexShrink:"0",
-    display:"block",
-    filter:"drop-shadow(0 5px 12px rgba(0,0,0,.30))"
-  });
+    const bt = document.createElement("div");
+    const name = document.createElement("div");
+    name.textContent = "PREMIER BALLET ACADEMY";
+    Object.assign(name.style,{
+      fontFamily:"Georgia, 'Times New Roman', serif",
+      fontSize: pageNumber === 1 ? "35px" : "20px",
+      fontWeight:"700",
+      letterSpacing: pageNumber === 1 ? "3px" : "2px",
+      lineHeight:"1.05",
+      color:"#f8f1e8",
+      whiteSpace:"nowrap"
+    });
+    bt.appendChild(name);
 
-  const brandText = document.createElement("div");
+    const sub = document.createElement("div");
+    sub.textContent = pageNumber === 1
+      ? "OFFICIAL ACADEMY SCHEDULE"
+      : `${currentBranch || "Branch"} BRANCH · 2026 / 2027`;
+    Object.assign(sub.style,{
+      marginTop:"8px",
+      fontSize: pageNumber === 1 ? "12px" : "10px",
+      fontWeight:"700",
+      letterSpacing:"2px",
+      color:"#d9c49a"
+    });
+    bt.appendChild(sub);
 
-  const academyName = document.createElement("div");
-  academyName.textContent = "PREMIER BALLET ACADEMY";
-  Object.assign(academyName.style,{
-    fontFamily:"Georgia, 'Times New Roman', serif",
-    fontSize:"43px",
-    fontWeight:"700",
-    letterSpacing:"4px",
-    lineHeight:"1.05",
-    color:"#f8f1e8",
-    whiteSpace:"nowrap"
-  });
+    brand.appendChild(img);
+    brand.appendChild(bt);
 
-  const academyLine = document.createElement("div");
-  Object.assign(academyLine.style,{
-    width:"180px",
-    height:"3px",
-    margin:"13px 0 11px",
-    background:"linear-gradient(90deg,#d9c49a,#e8bfd0,transparent)",
-    borderRadius:"3px"
-  });
+    const right = document.createElement("div");
+    Object.assign(right.style,{textAlign:"right",flexShrink:"0"});
 
-  const scheduleLabel = document.createElement("div");
-  scheduleLabel.textContent = "OFFICIAL ACADEMY SCHEDULE";
-  Object.assign(scheduleLabel.style,{
-    fontSize:"15px",
-    fontWeight:"700",
-    letterSpacing:"3px",
-    color:"#d9c49a"
-  });
+    const branch = document.createElement("div");
+    branch.textContent = `${currentBranch || "Schedule"} BRANCH`;
+    Object.assign(branch.style,{
+      fontFamily:"Georgia, 'Times New Roman', serif",
+      fontSize: pageNumber === 1 ? "30px" : "17px",
+      fontWeight:"700",
+      color:"#f3dce6",
+      whiteSpace:"nowrap"
+    });
+    right.appendChild(branch);
 
-  brandText.appendChild(academyName);
-  brandText.appendChild(academyLine);
-  brandText.appendChild(scheduleLabel);
-  brandGroup.appendChild(logo);
-  brandGroup.appendChild(brandText);
+    const page = document.createElement("div");
+    page.textContent = `PAGE ${pageNumber} OF ${totalPages}`;
+    Object.assign(page.style,{
+      marginTop:"6px",
+      fontSize:"9px",
+      fontWeight:"700",
+      letterSpacing:"1.5px",
+      color:"#9d99a5"
+    });
+    right.appendChild(page);
 
-  const branchGroup = document.createElement("div");
-  Object.assign(branchGroup.style,{
-    textAlign:"right",
-    flexShrink:"0"
-  });
+    wrap.appendChild(brand);
+    wrap.appendChild(right);
+    return wrap;
+  }
 
-  const branchSmall = document.createElement("div");
-  branchSmall.textContent = "SELECTED BRANCH";
-  Object.assign(branchSmall.style,{
-    fontSize:"13px",
-    fontWeight:"700",
-    letterSpacing:"2.5px",
-    color:"#9d99a5",
-    marginBottom:"9px"
-  });
+  function makeTitle(pageNumber){
+    const title = document.createElement("div");
+    Object.assign(title.style,{
+      width:`${SCHEDULE_W}px`,
+      height:`${TITLE_H}px`,
+      margin:`0 ${PAD_X}px`,
+      display:"flex",
+      alignItems:"center",
+      justifyContent:"space-between",
+      padding:"0 7px",
+      boxSizing:"border-box"
+    });
 
-  const branchTitle = document.createElement("div");
-  branchTitle.textContent = `${currentBranch || "Schedule"} BRANCH`;
-  Object.assign(branchTitle.style,{
-    fontFamily:"Georgia, 'Times New Roman', serif",
-    fontSize:"37px",
-    fontWeight:"700",
-    letterSpacing:"1px",
-    lineHeight:"1.05",
-    color:"#f3dce6"
-  });
+    const left = document.createElement("div");
+    left.textContent = pageNumber === 1
+      ? `${currentBranch || "Branch"} — Weekly Class Schedule`
+      : `${currentBranch || "Branch"} — Schedule Continued`;
+    Object.assign(left.style,{
+      fontFamily:"Georgia, 'Times New Roman', serif",
+      fontSize:"22px",
+      fontWeight:"700",
+      color:"#f8f1e8"
+    });
 
-  const season = document.createElement("div");
-  season.textContent = "2026 / 2027";
-  Object.assign(season.style,{
-    marginTop:"10px",
-    fontSize:"15px",
-    fontWeight:"700",
-    letterSpacing:"2.5px",
-    color:"#d9c49a"
-  });
+    const right = document.createElement("div");
+    right.textContent = "2026 / 2027 ACADEMIC YEAR";
+    Object.assign(right.style,{
+      fontSize:"10px",
+      fontWeight:"700",
+      letterSpacing:"1.8px",
+      color:"#9d99a5"
+    });
 
-  branchGroup.appendChild(branchSmall);
-  branchGroup.appendChild(branchTitle);
-  branchGroup.appendChild(season);
-  pdfHeader.appendChild(brandGroup);
-  pdfHeader.appendChild(branchGroup);
-  exportArea.appendChild(pdfHeader);
+    title.appendChild(left);
+    title.appendChild(right);
+    return title;
+  }
 
-  /* ------------------------------------------------------------
-     TITLE STRIP
-     ------------------------------------------------------------ */
-
-  const titleStrip = document.createElement("div");
-  Object.assign(titleStrip.style,{
-    height:`${TITLE_HEIGHT}px`,
-    display:"flex",
-    alignItems:"center",
-    justifyContent:"space-between",
-    padding:"0 8px",
-    boxSizing:"border-box"
-  });
-
-  const weekTitle = document.createElement("div");
-  weekTitle.textContent = `${currentBranch || "Branch"} — Weekly Class Schedule`;
-  Object.assign(weekTitle.style,{
-    fontFamily:"Georgia, 'Times New Roman', serif",
-    fontSize:"27px",
-    fontWeight:"700",
-    color:"#f8f1e8"
-  });
-
-  const weekMeta = document.createElement("div");
-  weekMeta.textContent = "2026 / 2027 ACADEMIC YEAR";
-  Object.assign(weekMeta.style,{
-    fontSize:"12px",
-    fontWeight:"700",
-    letterSpacing:"2px",
-    color:"#9d99a5"
-  });
-
-  titleStrip.appendChild(weekTitle);
-  titleStrip.appendChild(weekMeta);
-  exportArea.appendChild(titleStrip);
-
-  /* ------------------------------------------------------------
-     SCHEDULE — CLONE THE CURRENTLY SELECTED BRANCH ONLY
-     ------------------------------------------------------------ */
-
-  const schedule = daysElement.cloneNode(true);
-  schedule.removeAttribute("id");
-
-  const scheduleAvailableHeight =
-    EXPORT_HEIGHT -
-    PAGE_PADDING_TOP -
-    HEADER_HEIGHT -
-    TITLE_HEIGHT -
-    SCHEDULE_GAP -
-    PAGE_PADDING_BOTTOM;
-
-  Object.assign(schedule.style,{
-    width:"100%",
-    minWidth:"0",
-    height:"auto",
-    minHeight:"0",
-    display:"grid",
-    gridTemplateColumns:"repeat(7,minmax(0,1fr))",
-    gap:"12px",
-    boxSizing:"border-box",
-    margin:"0",
-    transform:"none",
-    transformOrigin:"top left"
-  });
-
-  schedule.querySelectorAll(".dayColumn").forEach(column=>{
-    Object.assign(column.style,{
+  function cloneDayShell(source){
+    const day = source.cloneNode(false);
+    day.removeAttribute("id");
+    Object.assign(day.style,{
       minWidth:"0",
       width:"100%",
       height:"auto",
       minHeight:"0",
       overflow:"hidden",
       boxSizing:"border-box",
-      borderRadius:"15px"
+      borderRadius:"12px",
+      margin:"0"
     });
-  });
 
-  schedule.querySelectorAll(".dayHeader").forEach(header=>{
-    header.style.padding = "11px 10px";
-  });
+    const header = source.querySelector(":scope > .dayHeader");
+    if(header){
+      const h = header.cloneNode(true);
+      h.style.padding = "9px 9px";
+      const dn = h.querySelector(".dayName");
+      const dnum = h.querySelector(".dayNumber");
+      if(dn) dn.style.fontSize = "14px";
+      if(dnum){dnum.style.fontSize="8px";dnum.style.marginTop="3px";}
+      day.appendChild(h);
+    }
+    return day;
+  }
 
-  schedule.querySelectorAll(".dayName").forEach(element=>{
-    element.style.fontSize = "16px";
-  });
-
-  schedule.querySelectorAll(".dayNumber").forEach(element=>{
-    element.style.fontSize = "9px";
-    element.style.marginTop = "4px";
-  });
-
-  schedule.querySelectorAll(".studioBlock").forEach(block=>{
-    block.style.padding = "8px";
-  });
-
-  schedule.querySelectorAll(".studioName").forEach(element=>{
-    element.style.fontSize = "8px";
-    element.style.marginBottom = "5px";
-  });
-
-  schedule.querySelectorAll(".lesson").forEach(lesson=>{
-    Object.assign(lesson.style,{
-      padding:"8px",
+  function styleLesson(lesson){
+    const x = lesson.cloneNode(true);
+    Object.assign(x.style,{
+      padding:"9px",
       marginBottom:"5px",
       minHeight:"0",
       borderRadius:"8px",
       boxShadow:"none",
-      transform:"none"
+      transform:"none",
+      boxSizing:"border-box",
+      breakInside:"avoid",
+      pageBreakInside:"avoid"
+    });
+    const time=x.querySelector(".lessonTime");
+    const name=x.querySelector(".lessonName");
+    const teacher=x.querySelector(".lessonTeacher");
+    if(time) time.style.fontSize="8px";
+    if(name){name.style.fontSize="11px";name.style.lineHeight="1.1";name.style.marginTop="3px";}
+    if(teacher){teacher.style.fontSize="8px";teacher.style.lineHeight="1.08";teacher.style.marginTop="4px";}
+    return x;
+  }
+
+  function buildStudioPieces(sourceStudio,availableHeight){
+    const pieces=[];
+    const lessons=[...sourceStudio.querySelectorAll(":scope > .lesson")];
+    const baseName=sourceStudio.querySelector(":scope > .studioName");
+    let current=null;
+    let currentHeight=0;
+
+    function newPiece(){
+      const p=document.createElement("div");
+      p.className="studioBlock";
+      Object.assign(p.style,{
+        padding:"7px",
+        borderBottom:"1px solid rgba(255,255,255,.045)",
+        boxSizing:"border-box",
+        minWidth:"0"
+      });
+      if(baseName){
+        const n=baseName.cloneNode(true);
+        n.style.fontSize="8px";
+        n.style.marginBottom="5px";
+        p.appendChild(n);
+      }
+      current=p;
+      currentHeight=baseName ? 28 : 7;
+    }
+
+    lessons.forEach(original=>{
+      const lesson=styleLesson(original);
+      const h=lesson.getBoundingClientRect().height || 55;
+      if(!current || (current.childElementCount>1 && currentHeight+h>availableHeight)){
+        if(current && current.childElementCount>1) pieces.push(current);
+        newPiece();
+      }
+      current.appendChild(lesson);
+      currentHeight += h+5;
+    });
+
+    if(current && current.childElementCount>1) pieces.push(current);
+
+    if(!pieces.length){
+      const empty=sourceStudio.cloneNode(true);
+      empty.style.padding="7px";
+      pieces.push(empty);
+    }
+    return pieces;
+  }
+
+  /* ------------------------------------------------------------
+     Build logical pages. We pack complete lessons, never half
+     of a lesson. The schedule remains seven columns on every
+     page so the visual structure stays consistent.
+     ------------------------------------------------------------ */
+
+  document.body.appendChild(exportRoot);
+
+  /* Let the browser resolve the current schedule dimensions. */
+  await new Promise(r=>requestAnimationFrame(r));
+
+  const sourceDays=[...daysElement.querySelectorAll(":scope > .dayColumn")];
+  const pageData=[];
+  let remaining=sourceDays.map(day=>({source:day, blocks:[...day.querySelectorAll(":scope > .studioBlock")] }));
+
+  /* First pass: determine page breaks by studio/lesson groups. */
+  let pageIndex=0;
+  let safety=0;
+
+  while(remaining.some(d=>d.blocks.length) && safety++<1000){
+    const avail=pageIndex===0 ? FIRST_PAGE_SCHEDULE_H : OTHER_PAGE_SCHEDULE_H;
+    const pageCols=remaining.map(d=>({source:d.source,blocks:[]}));
+    let placedAnything=false;
+
+    for(let i=0;i<remaining.length;i++){
+      let used=0;
+      const blocks=remaining[i].blocks;
+      const day=remaining[i].source;
+      const out=pageCols[i];
+
+      while(blocks.length){
+        const candidate=blocks[0];
+        const pieces=buildStudioPieces(candidate,Math.max(260,avail-used-25));
+        const firstPiece=pieces[0];
+        const temp=document.createElement("div");
+        temp.style.position="absolute";
+        temp.style.visibility="hidden";
+        temp.style.width=`${Math.floor(SCHEDULE_W/7)-12}px`;
+        temp.appendChild(firstPiece.cloneNode(true));
+        exportRoot.appendChild(temp);
+        const h=temp.getBoundingClientRect().height;
+        temp.remove();
+
+        if(used+h<=avail || !out.blocks.length){
+          out.blocks.push(...pieces);
+          blocks.shift();
+          /* If pieces were split, only consume the first piece now;
+             remaining pieces become a continuation for this page. */
+          if(pieces.length>1){
+            out.blocks=out.blocks.slice(0,-pieces.length);
+            out.blocks.push(pieces[0]);
+            blocks.unshift(...pieces.slice(1));
+          }
+          used+=h;
+          placedAnything=true;
+          if(used>=avail) break;
+        }else{
+          break;
+        }
+      }
+    }
+
+    /* If nothing could be placed, force one complete lesson onto
+       the page; it will be scaled down uniformly rather than cut. */
+    if(!placedAnything){
+      const first=remaining.findIndex(d=>d.blocks.length);
+      if(first>=0){
+        const d=remaining[first];
+        const b=d.blocks.shift();
+        pageCols[first].blocks.push(b);
+      }
+    }
+
+    pageData.push(pageCols);
+    remaining=remaining.map((d,i)=>({source:d.source,blocks:pageCols[i].blocks.length ? d.blocks : d.blocks}));
+    pageIndex++;
+  }
+
+  /* If there was no schedule content, still produce one page. */
+  if(!pageData.length) pageData.push(sourceDays.map(day=>({source:day,blocks:[]})));
+
+  /* ------------------------------------------------------------
+     Render pages one at a time. The colour guide gets its own
+     final page when the schedule is too full to fit it without
+     making the classes smaller. This keeps class text as large
+     as possible.
+     ------------------------------------------------------------ */
+
+  const totalSchedulePages=pageData.length;
+  const totalPages=totalSchedulePages+1;
+  const canvases=[];
+
+  /* Determine teachers actually used by THIS selected branch. */
+  const usedTeachers=new Set();
+  sourceDays.forEach(day=>{
+    day.querySelectorAll(".lessonTeacher").forEach(el=>{
+      const name=el.textContent.trim();
+      if(name) usedTeachers.add(name);
     });
   });
 
-  schedule.querySelectorAll(".lessonTime").forEach(element=>{
-    element.style.fontSize = "8px";
-  });
+  function makeLegend(){
+    const box=document.createElement("div");
+    Object.assign(box.style,{
+      width:`${SCHEDULE_W}px`,
+      minHeight:`${LEGEND_H}px`,
+      margin:`10px ${PAD_X}px 0`,
+      padding:"10px 14px",
+      boxSizing:"border-box",
+      borderTop:"1px solid rgba(255,255,255,.10)",
+      background:"rgba(255,255,255,.025)"
+    });
 
-  schedule.querySelectorAll(".lessonName").forEach(element=>{
-    element.style.fontSize = "10px";
-    element.style.lineHeight = "1.08";
-    element.style.marginTop = "3px";
-  });
+    const title=document.createElement("div");
+    title.textContent="TEACHER COLOUR GUIDE";
+    Object.assign(title.style,{
+      fontSize:"9px",
+      fontWeight:"800",
+      letterSpacing:"2px",
+      color:"#d9c49a",
+      marginBottom:"8px"
+    });
+    box.appendChild(title);
 
-  schedule.querySelectorAll(".lessonTeacher").forEach(element=>{
-    element.style.fontSize = "8px";
-    element.style.lineHeight = "1.08";
-    element.style.marginTop = "4px";
-  });
+    const grid=document.createElement("div");
+    Object.assign(grid.style,{
+      display:"grid",
+      gridTemplateColumns:"repeat(5,minmax(0,1fr))",
+      gap:"6px 12px"
+    });
 
-  exportArea.appendChild(schedule);
-  document.body.appendChild(exportArea);
-
-  try{
-
-    /* Wait for the logo and web fonts before rasterising. */
-    if(logo.complete){
-      if(logo.naturalWidth === 0){
-        console.warn("Premier Ballet Academy logo could not be loaded.");
-      }
-    }else{
-      await new Promise(resolve=>{
-        logo.onload = resolve;
-        logo.onerror = resolve;
+    [...usedTeachers].sort((a,b)=>a.localeCompare(b)).forEach(teacher=>{
+      const item=document.createElement("div");
+      Object.assign(item.style,{display:"flex",alignItems:"center",gap:"6px",minWidth:"0"});
+      const sw=document.createElement("div");
+      Object.assign(sw.style,{
+        width:"15px",height:"15px",borderRadius:"4px",flexShrink:"0",
+        background:teacherColors[teacher] || "#D9D5DF",
+        border:"1px solid rgba(0,0,0,.12)"
       });
+      const text=document.createElement("div");
+      text.textContent=teacher;
+      Object.assign(text.style,{fontSize:"8px",fontWeight:"700",color:"#eee",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"});
+      item.appendChild(sw);item.appendChild(text);grid.appendChild(item);
+    });
+
+    if(!usedTeachers.size){
+      const none=document.createElement("div");
+      none.textContent="No teacher colours assigned for this branch.";
+      none.style.fontSize="8px";
+      none.style.color="#9d99a5";
+      grid.appendChild(none);
     }
 
-    if(document.fonts && document.fonts.ready){
-      await document.fonts.ready;
-    }
+    box.appendChild(grid);
+    return box;
+  }
 
-    await new Promise(resolve=>
-      requestAnimationFrame(()=>
-        requestAnimationFrame(resolve)
-      )
-    );
+  for(let p=0;p<pageData.length;p++){
+    const page=document.createElement("div");
+    Object.assign(page.style,{
+      width:`${EXPORT_WIDTH}px`,
+      height:`${EXPORT_HEIGHT}px`,
+      boxSizing:"border-box",
+      overflow:"hidden",
+      background:"linear-gradient(135deg,#0b0a0e 0%,#121017 55%,#0d0c10 100%)",
+      position:"relative"
+    });
 
-    /* ----------------------------------------------------------
-       AUTOMATIC FIT
-       ----------------------------------------------------------
-       Measure the real schedule height first. If a branch has
-       many lessons, the complete schedule is uniformly reduced
-       until ALL seven days fit inside the printable A4 area.
-       No lesson is cut off at the bottom.
-       ---------------------------------------------------------- */
+    page.appendChild(makeHeader(p+1,totalPages));
+    page.appendChild(makeTitle(p+1));
 
-    const naturalHeight = Math.max(
-      schedule.scrollHeight,
-      schedule.getBoundingClientRect().height
-    );
+    const grid=document.createElement("div");
+    Object.assign(grid.style,{
+      width:`${SCHEDULE_W}px`,
+      height:`${p===0 ? FIRST_PAGE_SCHEDULE_H : OTHER_PAGE_SCHEDULE_H}px`,
+      margin:`0 ${PAD_X}px`,
+      display:"grid",
+      gridTemplateColumns:"repeat(7,minmax(0,1fr))",
+      gap:"9px",
+      boxSizing:"border-box",
+      alignItems:"start"
+    });
 
-    const fitScale = Math.min(
-      1,
-      scheduleAvailableHeight / Math.max(1,naturalHeight)
-    );
+    pageData[p].forEach((colData,idx)=>{
+      const col=cloneDayShell(colData.source);
+      colData.blocks.forEach(block=>{
+        const b=block.cloneNode(true);
+        Object.assign(b.style,{padding:"7px",boxSizing:"border-box"});
+        b.querySelectorAll(".lesson").forEach(lesson=>{
+          const x=styleLesson(lesson);
+          lesson.replaceWith(x);
+        });
+        col.appendChild(b);
+      });
+      if(!colData.blocks.length){
+        const empty=document.createElement("div");
+        empty.className="empty";
+        empty.textContent="No classes";
+        empty.style.padding="30px 10px";
+        empty.style.fontSize="9px";
+        col.appendChild(empty);
+      }
+      grid.appendChild(col);
+    });
 
-    if(fitScale < 1){
-      /* CSS zoom keeps the final schedule full-width while
-         shrinking only its contents vertically/horizontally. */
-      schedule.style.zoom = fitScale;
-      schedule.style.width = `${100 / fitScale}%`;
-    }
+    page.appendChild(grid);
+    const footer=document.createElement("div");
+    footer.textContent=`PREMIER BALLET ACADEMY · ${currentBranch || "Schedule"} · 2026 / 2027`;
+    Object.assign(footer.style,{
+      position:"absolute",
+      left:`${PAD_X}px`,
+      right:`${PAD_X}px`,
+      bottom:"12px",
+      height:`${FOOTER_H}px`,
+      display:"flex",
+      alignItems:"center",
+      justifyContent:"center",
+      fontSize:"8px",
+      letterSpacing:"1.5px",
+      color:"#77727d"
+    });
+    page.appendChild(footer);
 
-    await new Promise(resolve=>
-      requestAnimationFrame(()=>
-        requestAnimationFrame(resolve)
-      )
-    );
+    exportRoot.appendChild(page);
 
-    buttonText.textContent = "Creating HD PDF...";
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
-    /* ----------------------------------------------------------
-       HD RENDER
-       ----------------------------------------------------------
-       The export itself is 3200 × 2263 pixels — substantially
-       higher resolution than the previous 1600 × 1131 render.
-       PNG preserves text, borders and small teacher names far
-       better than JPEG.
-       ---------------------------------------------------------- */
-
-    const canvas = await html2canvas(exportArea,{
+    const canvas=await html2canvas(page,{
       width:EXPORT_WIDTH,
       height:EXPORT_HEIGHT,
       scale:1,
@@ -8348,9 +8500,134 @@ async function saveScheduleAsPDF(){
       removeContainer:true
     });
 
-    const { jsPDF } = window.jspdf;
+    canvases.push(canvas);
+    page.remove();
+  }
 
-    const pdf = new jsPDF({
+  /* ------------------------------------------------------------
+     FINAL COLOUR-GUIDE PAGE
+     ------------------------------------------------------------
+     The guide is deliberately kept off the schedule pages so it
+     never forces the class cards to become smaller. It includes
+     only teachers that actually appear in the selected branch.
+     ------------------------------------------------------------ */
+
+  const legendPage=document.createElement("div");
+  Object.assign(legendPage.style,{
+    width:`${EXPORT_WIDTH}px`,
+    height:`${EXPORT_HEIGHT}px`,
+    boxSizing:"border-box",
+    overflow:"hidden",
+    background:"linear-gradient(135deg,#0b0a0e 0%,#121017 55%,#0d0c10 100%)",
+    position:"relative"
+  });
+
+  legendPage.appendChild(makeHeader(totalPages,totalPages));
+
+  const legendTitle=document.createElement("div");
+  Object.assign(legendTitle.style,{
+    margin:`38px ${PAD_X}px 18px`,
+    fontFamily:"Georgia, 'Times New Roman', serif",
+    fontSize:"34px",
+    fontWeight:"700",
+    color:"#f8f1e8"
+  });
+  legendTitle.textContent="Teacher Colour Guide";
+  legendPage.appendChild(legendTitle);
+
+  const legendSub=document.createElement("div");
+  Object.assign(legendSub.style,{
+    margin:`0 ${PAD_X}px 28px`,
+    fontSize:"12px",
+    color:"#9d99a5",
+    letterSpacing:"1px"
+  });
+  legendSub.textContent=`Colours used in the ${currentBranch || "selected"} Branch schedule`;
+  legendPage.appendChild(legendSub);
+
+  const bigLegend=makeLegend();
+  Object.assign(bigLegend.style,{
+    margin:`0 ${PAD_X}px`,
+    minHeight:"0",
+    padding:"24px",
+    border:"1px solid rgba(255,255,255,.10)",
+    borderRadius:"18px",
+    background:"rgba(255,255,255,.025)"
+  });
+  const bigGrid=bigLegend.querySelector("div:nth-child(2)");
+  if(bigGrid){
+    bigGrid.style.gridTemplateColumns="repeat(3,minmax(0,1fr))";
+    bigGrid.style.gap="16px 28px";
+    bigGrid.querySelectorAll("div").forEach(item=>{
+      item.style.gap="12px";
+      const sw=item.querySelector("div");
+      const tx=item.querySelector("div:nth-child(2)");
+      if(sw){sw.style.width="28px";sw.style.height="28px";sw.style.borderRadius="7px";}
+      if(tx){tx.style.fontSize="12px";tx.style.whiteSpace="normal";tx.style.overflow="visible";tx.style.textOverflow="clip";}
+    });
+  }
+  const smallTitle=bigLegend.querySelector("div:first-child");
+  if(smallTitle){smallTitle.style.fontSize="12px";smallTitle.style.marginBottom="16px";}
+  legendPage.appendChild(bigLegend);
+
+  const legendNote=document.createElement("div");
+  Object.assign(legendNote.style,{
+    margin:`28px ${PAD_X}px`,
+    padding:"18px 20px",
+    borderLeft:"3px solid #d9c49a",
+    background:"rgba(217,196,154,.06)",
+    color:"#b7b1bc",
+    fontSize:"11px",
+    lineHeight:"1.6"
+  });
+  legendNote.textContent="Only teachers assigned to classes in the selected branch are shown in this guide.";
+  legendPage.appendChild(legendNote);
+
+  const legendFooter=document.createElement("div");
+  legendFooter.textContent=`PREMIER BALLET ACADEMY · ${currentBranch || "Schedule"} · 2026 / 2027 · PAGE ${totalPages} OF ${totalPages}`;
+  Object.assign(legendFooter.style,{
+    position:"absolute",
+    left:`${PAD_X}px`,
+    right:`${PAD_X}px`,
+    bottom:"12px",
+    height:`${FOOTER_H}px`,
+    display:"flex",
+    alignItems:"center",
+    justifyContent:"center",
+    fontSize:"8px",
+    letterSpacing:"1.5px",
+    color:"#77727d"
+  });
+  legendPage.appendChild(legendFooter);
+
+  exportRoot.appendChild(legendPage);
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+
+  const legendCanvas=await html2canvas(legendPage,{
+    width:EXPORT_WIDTH,
+    height:EXPORT_HEIGHT,
+    scale:1,
+    useCORS:true,
+    allowTaint:false,
+    backgroundColor:"#0d0c10",
+    logging:false,
+    scrollX:0,
+    scrollY:0,
+    windowWidth:EXPORT_WIDTH,
+    windowHeight:EXPORT_HEIGHT,
+    imageTimeout:15000,
+    removeContainer:true
+  });
+  canvases.push(legendCanvas);
+  legendPage.remove();
+
+  try{
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+
+    buttonText.textContent="Creating HD PDF...";
+
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({
       orientation:"landscape",
       unit:"mm",
       format:"a4",
@@ -8358,48 +8635,36 @@ async function saveScheduleAsPDF(){
       putOnlyUsedFonts:true
     });
 
-    const pngData = canvas.toDataURL("image/png");
+    canvases.forEach((canvas,index)=>{
+      if(index>0) pdf.addPage("a4","landscape");
+      pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,0,PDF_W,PDF_H,undefined,"NONE");
+    });
 
-    pdf.addImage(
-      pngData,
-      "PNG",
-      0,
-      0,
-      297,
-      210,
-      undefined,
-      "NONE"
-    );
-
-    const safeBranch = String(currentBranch || "Schedule")
+    const safeBranch=String(currentBranch || "Schedule")
       .replace(/[^a-z0-9]+/gi,"-")
       .replace(/^-+|-+$/g,"") || "Schedule";
 
     pdf.save(`PBA-${safeBranch}-Schedule-2026-27.pdf`);
 
-    buttonText.textContent = "HD PDF Saved ✓";
+    buttonText.textContent=totalPages>1
+      ? `HD PDF Saved · ${totalPages} Pages ✓`
+      : "HD PDF Saved ✓";
 
     setTimeout(()=>{
-      buttonText.textContent = originalText;
-      button.disabled = false;
-    },2200);
+      buttonText.textContent=originalText;
+      button.disabled=false;
+    },2500);
 
   }catch(error){
-
     console.error("HD PDF export error:",error);
-
-    alert(
-      "Unable to create the PDF.\n\n" +
-      (error?.message || "Unknown error")
-    );
-
-    buttonText.textContent = originalText;
-    button.disabled = false;
-
+    alert("Unable to create the PDF.\n\n"+(error?.message || "Unknown error"));
+    buttonText.textContent=originalText;
+    button.disabled=false;
   }finally{
-    exportArea.remove();
+    exportRoot.remove();
   }
 }
+
 
 /* =========================================================
    PDF BUTTON
