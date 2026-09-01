@@ -20,156 +20,8 @@
      SUPABASE
 ========================================================= -->
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-/* =========================================================
-   SAVE ONE-PAGE LANDSCAPE PDF
-========================================================= */
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-async function saveScheduleAsPDF(){
-
-  const exportArea =
-    document.getElementById("scheduleExportArea");
-
-  const button =
-    document.getElementById("saveSchedulePdfButton");
-
-  if(!exportArea){
-    alert("Schedule export area not found.");
-    return;
-  }
-
-  const original =
-    button ? button.innerHTML : "";
-
-  try{
-
-    if(typeof html2pdf === "undefined"){
-      throw new Error("PDF library has not loaded.");
-    }
-
-    if(button){
-      button.disabled = true;
-      button.innerHTML = '<span class="pdfIcon">PDF</span><span>Saving...</span>';
-    }
-
-    document.body.classList.add("pdf-exporting");
-
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const branch =
-      (typeof currentBranch !== "undefined" && currentBranch)
-        ? currentBranch
-        : "Branch";
-
-    const safeBranch =
-      String(branch)
-        .replace(/[^\w-]+/g, "-")
-        .replace(/-+/g, "-");
-
-    const filename =
-      `PBA-${safeBranch}-Schedule-2026-27.pdf`;
-
-    /*
-      The schedule is captured as ONE canvas and placed on exactly
-      ONE A4 landscape page. This prevents html2pdf from splitting
-      the schedule across pages.
-    */
-    const canvas =
-      await html2canvas(exportArea, {
-        scale: 2.5,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false
-      });
-
-    const { jsPDF } = window.jspdf;
-
-    const pdf =
-      new jsPDF({
-        orientation: "landscape",
-        unit: "mm",
-        format: "a4",
-        compress: true
-      });
-
-    const pageWidth = 297;
-    const pageHeight = 210;
-    const margin = 4;
-
-    const maxWidth = pageWidth - margin * 2;
-    const maxHeight = pageHeight - margin * 2;
-
-    const canvasRatio =
-      canvas.width / canvas.height;
-
-    let imageWidth = maxWidth;
-    let imageHeight = imageWidth / canvasRatio;
-
-    if(imageHeight > maxHeight){
-      imageHeight = maxHeight;
-      imageWidth = imageHeight * canvasRatio;
-    }
-
-    const x =
-      (pageWidth - imageWidth) / 2;
-
-    const y =
-      (pageHeight - imageHeight) / 2;
-
-    pdf.addImage(
-      canvas.toDataURL("image/jpeg", 0.98),
-      "JPEG",
-      x,
-      y,
-      imageWidth,
-      imageHeight
-    );
-
-    pdf.save(filename);
-
-  }
-  catch(error){
-
-    console.error("PDF export error:", error);
-
-    alert(
-      "The schedule could not be saved as a PDF.\n\n" +
-      (error?.message || "Unknown error")
-    );
-
-  }
-  finally{
-
-    document.body.classList.remove("pdf-exporting");
-
-    if(button){
-      button.disabled = false;
-      button.innerHTML =
-        original ||
-        '<span class="pdfIcon">PDF</span><span>Save Schedule as PDF</span>';
-    }
-
-  }
-
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-
-  const pdfButton =
-    document.getElementById("saveSchedulePdfButton");
-
-  if(pdfButton){
-    pdfButton.addEventListener(
-      "click",
-      saveScheduleAsPDF
-    );
-  }
-
-});
-
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <!-- =========================================================
      GOOGLE CALENDAR
@@ -8092,6 +7944,10 @@ document.getElementById(
    SAVE SCHEDULE AS PDF
 ========================================================= */
 
+/* =========================================================
+   SAVE SCHEDULE AS PDF — EXACTLY ONE A4 LANDSCAPE PAGE
+========================================================= */
+
 async function saveScheduleAsPDF(){
 
   const button =
@@ -8100,83 +7956,284 @@ async function saveScheduleAsPDF(){
   const buttonText =
     document.getElementById("saveSchedulePdfText");
 
-  if(!button || !buttonText)
-    return;
-
-  if(typeof html2canvas === "undefined" ||
-     !window.jspdf || !window.jspdf.jsPDF){
-    alert("The PDF tools have not finished loading. Please wait a moment and try again.");
-    return;
-  }
-
   const daysElement =
     document.getElementById("days");
 
+  if(!button || !buttonText)
+    return;
+
   if(!daysElement || !daysElement.children.length){
+
     alert("The schedule has not finished loading yet.");
     return;
+
   }
+
+  if(
+    typeof html2canvas === "undefined" ||
+    !window.jspdf ||
+    !window.jspdf.jsPDF
+  ){
+
+    alert(
+      "The PDF tools have not finished loading. Please wait a moment and try again."
+    );
+
+    return;
+
+  }
+
+  const originalText =
+    buttonText.textContent;
 
   button.disabled = true;
   buttonText.textContent = "Preparing PDF...";
 
+  /*
+    We create a completely separate export canvas.
+
+    IMPORTANT:
+    - 1600 × 1131 is the exact A4 landscape ratio.
+    - The schedule is forced into this landscape canvas.
+    - html2canvas creates ONE image.
+    - jsPDF receives ONE image on ONE page.
+    - There is no html2pdf pagination at all.
+  */
+
   const exportArea =
     document.createElement("div");
 
-  exportArea.className = "pdfExportArea";
-
-  const header =
-    document.createElement("div");
-
-  header.className = "pdfExportHeader";
-
-  const titleBox =
-    document.createElement("div");
+  exportArea.style.position = "fixed";
+  exportArea.style.left = "-50000px";
+  exportArea.style.top = "0";
+  exportArea.style.width = "1600px";
+  exportArea.style.height = "1131px";
+  exportArea.style.padding = "24px";
+  exportArea.style.margin = "0";
+  exportArea.style.boxSizing = "border-box";
+  exportArea.style.background = "#0d0c10";
+  exportArea.style.color = "#fff";
+  exportArea.style.overflow = "hidden";
+  exportArea.style.zIndex = "-9999";
 
   const title =
-    document.createElement("h1");
+    document.createElement("div");
 
-  title.className = "pdfExportTitle";
   title.textContent =
     `${currentBranch} Branch — 2026/27 Schedule`;
 
-  const sub =
+  title.style.fontFamily =
+    "Arial, sans-serif";
+
+  title.style.fontSize =
+    "30px";
+
+  title.style.fontWeight =
+    "800";
+
+  title.style.lineHeight =
+    "1.1";
+
+  title.style.marginBottom =
+    "18px";
+
+  const subtitle =
     document.createElement("div");
 
-  sub.className = "pdfExportSub";
-  sub.textContent =
+  subtitle.textContent =
     "Premier Ballet Academy · Weekly Schedule";
 
-  titleBox.appendChild(title);
-  titleBox.appendChild(sub);
-  header.appendChild(titleBox);
-  exportArea.appendChild(header);
+  subtitle.style.fontFamily =
+    "Arial, sans-serif";
 
-  const scheduleClone =
+  subtitle.style.fontSize =
+    "14px";
+
+  subtitle.style.color =
+    "#9d99a5";
+
+  subtitle.style.marginTop =
+    "-12px";
+
+  subtitle.style.marginBottom =
+    "16px";
+
+  exportArea.appendChild(title);
+  exportArea.appendChild(subtitle);
+
+  const schedule =
     daysElement.cloneNode(true);
 
-  scheduleClone.removeAttribute("id");
-  scheduleClone.classList.add("pdfExportDays");
-  exportArea.appendChild(scheduleClone);
+  schedule.removeAttribute("id");
 
-  const legendSource =
-    document.querySelector(".legendWrap");
+  schedule.style.width =
+    "100%";
 
-  if(legendSource){
-    const legendClone =
-      legendSource.cloneNode(true);
+  schedule.style.minWidth =
+    "0";
 
-    legendClone.classList.add("pdfExportLegend");
-    exportArea.appendChild(legendClone);
-  }
+  schedule.style.height =
+    "100%";
+
+  schedule.style.display =
+    "grid";
+
+  schedule.style.gridTemplateColumns =
+    "repeat(7, minmax(0, 1fr))";
+
+  schedule.style.gap =
+    "10px";
+
+  schedule.style.boxSizing =
+    "border-box";
+
+  schedule.style.margin =
+    "0";
+
+  /*
+    The title uses about 70px, leaving the remaining area for
+    the seven-day schedule. Everything is clipped inside the
+    fixed landscape export page, so it can NEVER create page 2.
+  */
+
+  const scheduleHeight =
+    1000;
+
+  schedule.style.height =
+    `${scheduleHeight}px`;
+
+  schedule.querySelectorAll(".dayColumn")
+    .forEach(column=>{
+
+      column.style.minWidth =
+        "0";
+
+      column.style.height =
+        "100%";
+
+      column.style.minHeight =
+        "0";
+
+      column.style.overflow =
+        "hidden";
+
+      column.style.boxSizing =
+        "border-box";
+
+    });
+
+  schedule.querySelectorAll(".dayHeader")
+    .forEach(header=>{
+
+      header.style.padding =
+        "10px";
+
+    });
+
+  schedule.querySelectorAll(".dayName")
+    .forEach(element=>{
+
+      element.style.fontSize =
+        "18px";
+
+    });
+
+  schedule.querySelectorAll(".dayNumber")
+    .forEach(element=>{
+
+      element.style.fontSize =
+        "8px";
+
+    });
+
+  schedule.querySelectorAll(".studioBlock")
+    .forEach(block=>{
+
+      block.style.padding =
+        "7px";
+
+    });
+
+  schedule.querySelectorAll(".studioName")
+    .forEach(element=>{
+
+      element.style.fontSize =
+        "8px";
+
+      element.style.marginBottom =
+        "5px";
+
+    });
+
+  schedule.querySelectorAll(".lesson")
+    .forEach(lesson=>{
+
+      lesson.style.padding =
+        "7px";
+
+      lesson.style.marginBottom =
+        "5px";
+
+      lesson.style.minHeight =
+        "0";
+
+      lesson.style.borderRadius =
+        "8px";
+
+      lesson.style.boxShadow =
+        "none";
+
+      lesson.style.transform =
+        "none";
+
+    });
+
+  schedule.querySelectorAll(".lessonTime")
+    .forEach(element=>{
+
+      element.style.fontSize =
+        "8px";
+
+    });
+
+  schedule.querySelectorAll(".lessonName")
+    .forEach(element=>{
+
+      element.style.fontSize =
+        "10px";
+
+      element.style.lineHeight =
+        "1.05";
+
+      element.style.marginTop =
+        "3px";
+
+    });
+
+  schedule.querySelectorAll(".lessonTeacher")
+    .forEach(element=>{
+
+      element.style.fontSize =
+        "8px";
+
+      element.style.lineHeight =
+        "1.05";
+
+      element.style.marginTop =
+        "4px";
+
+    });
+
+  exportArea.appendChild(schedule);
 
   document.body.appendChild(exportArea);
 
   try{
 
-    // Wait for fonts/layout to settle before rendering.
     if(document.fonts && document.fonts.ready){
+
       await document.fonts.ready;
+
     }
 
     await new Promise(resolve =>
@@ -8185,19 +8242,37 @@ async function saveScheduleAsPDF(){
       )
     );
 
-    buttonText.textContent = "Creating PDF...";
+    buttonText.textContent =
+      "Creating PDF...";
 
     const canvas =
-      await html2canvas(exportArea,{
-        scale:2,
-        useCORS:true,
-        backgroundColor:"#0d0c10",
-        logging:false,
-        width:1200,
-        windowWidth:1200
-      });
+      await html2canvas(
+        exportArea,
+        {
+          width:1600,
+          height:1131,
+          scale:2,
+          useCORS:true,
+          backgroundColor:"#0d0c10",
+          logging:false,
+          scrollX:0,
+          scrollY:0,
+          windowWidth:1600,
+          windowHeight:1131
+        }
+      );
 
-    const { jsPDF } = window.jspdf;
+    const { jsPDF } =
+      window.jspdf;
+
+    /*
+      A4 LANDSCAPE:
+      297 mm × 210 mm
+
+      The image is placed from corner to corner.
+      Therefore the PDF is exactly ONE page and completely
+      landscape — it cannot become a portrait page.
+    */
 
     const pdf =
       new jsPDF({
@@ -8207,88 +8282,73 @@ async function saveScheduleAsPDF(){
         compress:true
       });
 
-    const pageWidth =
-      pdf.internal.pageSize.getWidth();
-
-    const pageHeight =
-      pdf.internal.pageSize.getHeight();
-
-    /*
-      IMPORTANT:
-      The entire schedule is scaled proportionally to fit
-      inside ONE A4 landscape page. No extra pages are created.
-    */
-    const margin = 5;
-    const usableWidth =
-      pageWidth - margin * 2;
-
-    const usableHeight =
-      pageHeight - margin * 2;
-
-    const scale =
-      Math.min(
-        usableWidth / canvas.width,
-        usableHeight / canvas.height
-      );
-
-    const renderedWidth =
-      canvas.width * scale;
-
-    const renderedHeight =
-      canvas.height * scale;
-
-    const x =
-      (pageWidth - renderedWidth) / 2;
-
-    const y =
-      (pageHeight - renderedHeight) / 2;
-
-    const image =
+    pdf.addImage(
       canvas.toDataURL(
         "image/jpeg",
-        0.92
-      );
-
-    pdf.addImage(
-      image,
+        0.95
+      ),
       "JPEG",
-      x,
-      y,
-      renderedWidth,
-      renderedHeight,
+      0,
+      0,
+      297,
+      210,
       undefined,
       "FAST"
     );
 
     const safeBranch =
-      String(currentBranch || "Schedule")
-        .replace(/[^a-z0-9]+/gi,"-")
-        .replace(/^-+|-+$/g,"") ||
+      String(
+        currentBranch ||
+        "Schedule"
+      )
+      .replace(
+        /[^a-z0-9]+/gi,
+        "-"
+      )
+      .replace(
+        /^-+|-+$/g,
+        ""
+      ) ||
       "Schedule";
 
     pdf.save(
       `PBA-${safeBranch}-Schedule-2026-27.pdf`
     );
 
-    buttonText.textContent = "PDF Saved ✓";
+    buttonText.textContent =
+      "PDF Saved ✓";
 
-    setTimeout(()=>{
-      buttonText.textContent = "Save Schedule as PDF";
-      button.disabled = false;
-    },2000);
+    setTimeout(
+      ()=>{
+        buttonText.textContent =
+          originalText;
+        button.disabled =
+          false;
+      },
+      2000
+    );
 
   }
   catch(error){
 
-    console.error("PDF export error:",error);
-
-    alert(
-      "Unable to create the PDF. Please try again.\n\n" +
-      (error?.message || "Unknown error")
+    console.error(
+      "PDF export error:",
+      error
     );
 
-    buttonText.textContent = "Save Schedule as PDF";
-    button.disabled = false;
+    alert(
+      "Unable to create the PDF.\n\n" +
+      (
+        error?.message ||
+        "Unknown error"
+      )
+    );
+
+    buttonText.textContent =
+      originalText;
+
+    button.disabled =
+      false;
 
   }
   finally{
@@ -8298,6 +8358,7 @@ async function saveScheduleAsPDF(){
   }
 
 }
+
 
 /* =========================================================
    PDF BUTTON
