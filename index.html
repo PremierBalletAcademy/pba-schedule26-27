@@ -7996,7 +7996,7 @@ async function saveScheduleAsPDF(){
   const HEADER_H = 86;
   const TITLE_H = 40;
   const TITLE_GAP = 1;
-  const LEGEND_H_BASE = 72;
+  const LEGEND_H_BASE = 92;
   const FOOTER_H = 10;
 
   const PAGE_W = EXPORT_WIDTH;
@@ -8051,12 +8051,12 @@ async function saveScheduleAsPDF(){
     const text=document.createElement("div");
     const name=document.createElement("div");
     name.textContent="PREMIER BALLET ACADEMY";
-    Object.assign(name.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"48px",fontWeight:"800",letterSpacing:"2.5px",lineHeight:"1.05",color:"#f8f1e8",whiteSpace:"nowrap"});
+    Object.assign(name.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"64px",fontWeight:"800",letterSpacing:"2.5px",lineHeight:"1.05",color:"#f8f1e8",whiteSpace:"nowrap"});
     text.appendChild(name);
 
     const sub=document.createElement("div");
     sub.textContent="OFFICIAL ACADEMY SCHEDULE";
-    Object.assign(sub.style,{marginTop:"6px",fontSize:"16px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
+    Object.assign(sub.style,{marginTop:"6px",fontSize:"22px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
     text.appendChild(sub);
 
     brand.appendChild(img);
@@ -8067,12 +8067,12 @@ async function saveScheduleAsPDF(){
 
     const branch=document.createElement("div");
     branch.textContent=`${currentBranch || "Schedule"} BRANCH`;
-    Object.assign(branch.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"42px",fontWeight:"800",color:"#f3dce6",whiteSpace:"nowrap"});
+    Object.assign(branch.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"58px",fontWeight:"800",color:"#f3dce6",whiteSpace:"nowrap"});
     right.appendChild(branch);
 
     const season=document.createElement("div");
     season.textContent="2026 / 2027";
-    Object.assign(season.style,{marginTop:"5px",fontSize:"15px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
+    Object.assign(season.style,{marginTop:"5px",fontSize:"21px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
     right.appendChild(season);
 
     wrap.appendChild(brand);
@@ -8086,12 +8086,12 @@ async function saveScheduleAsPDF(){
 
     const left=document.createElement("div");
     left.textContent=`${currentBranch || "Branch"} — Weekly Class Schedule`;
-    Object.assign(left.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"34px",fontWeight:"800",color:"#f8f1e8"});
+    Object.assign(left.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"46px",fontWeight:"800",color:"#f8f1e8"});
     title.appendChild(left);
 
     const right=document.createElement("div");
     right.textContent="2026 / 2027 ACADEMIC YEAR";
-    Object.assign(right.style,{fontSize:"15px",fontWeight:"800",letterSpacing:"1.8px",color:"#9d99a5"});
+    Object.assign(right.style,{fontSize:"21px",fontWeight:"800",letterSpacing:"1.8px",color:"#9d99a5"});
     title.appendChild(right);
     return title;
   }
@@ -8114,7 +8114,7 @@ async function saveScheduleAsPDF(){
       top:`${PAGE_H - LEGEND_H - FOOTER_H - PAD_BOTTOM}px`,
       width:`${CONTENT_W}px`,
       height:`${LEGEND_H}px`,
-      padding:"12px 16px 10px",
+      padding:"14px 18px 14px",
       boxSizing:"border-box",
       borderTop:"1px solid rgba(255,255,255,.14)",
       background:"rgba(255,255,255,.025)"
@@ -8122,22 +8122,22 @@ async function saveScheduleAsPDF(){
 
     const title=document.createElement("div");
     title.textContent="TEACHER COLOUR GUIDE";
-    Object.assign(title.style,{fontSize:"28px",fontWeight:"900",letterSpacing:"2px",color:"#d9c49a",marginBottom:"8px"});
+    Object.assign(title.style,{fontSize:"38px",fontWeight:"900",letterSpacing:"2px",color:"#d9c49a",marginBottom:"8px"});
     box.appendChild(title);
 
     const grid=document.createElement("div");
     const count=Math.max(1,usedTeachers.size);
     const cols=Math.min(4,Math.max(1,Math.ceil(count / 1)));
-    Object.assign(grid.style,{display:"grid",gridTemplateColumns:`repeat(${cols},minmax(0,1fr))`,gridAutoRows:"62px",gap:"8px 20px",alignItems:"center"});
+    Object.assign(grid.style,{display:"grid",gridTemplateColumns:`repeat(${cols},minmax(0,1fr))`,gridAutoRows:"78px",gap:"12px 24px",alignItems:"center"});
 
     [...usedTeachers].sort((a,b)=>a.localeCompare(b)).forEach(teacher=>{
       const item=document.createElement("div");
-      Object.assign(item.style,{display:"flex",alignItems:"center",gap:"9px",minWidth:"0"});
+      Object.assign(item.style,{display:"flex",alignItems:"center",gap:"14px",minWidth:"0"});
       const sw=document.createElement("div");
-      Object.assign(sw.style,{width:"50px",height:"50px",borderRadius:"5px",flexShrink:"0",background:teacherColors[teacher] || "#D9D5DF",border:"1px solid rgba(0,0,0,.16)"});
+      Object.assign(sw.style,{width:"62px",height:"62px",borderRadius:"5px",flexShrink:"0",background:teacherColors[teacher] || "#D9D5DF",border:"1px solid rgba(0,0,0,.16)"});
       const tx=document.createElement("div");
       tx.textContent=teacher;
-      Object.assign(tx.style,{fontSize:"23px",fontWeight:"800",color:"#eee",whiteSpace:"normal",overflow:"visible",textOverflow:"clip",lineHeight:"1.08",wordBreak:"break-word"});
+      Object.assign(tx.style,{fontSize:"28px",fontWeight:"800",color:"#eee",whiteSpace:"normal",overflow:"visible",textOverflow:"clip",lineHeight:"1.12",wordBreak:"break-word",overflowWrap:"anywhere"});
       item.appendChild(sw); item.appendChild(tx); grid.appendChild(item);
     });
 
@@ -8192,7 +8192,7 @@ async function saveScheduleAsPDF(){
       const dn=h.querySelector(".dayName");
       const dnum=h.querySelector(".dayNumber");
       if(dn){dn.style.fontSize="38px";dn.style.lineHeight="1.05";dn.style.fontWeight="900";}
-      if(dnum){dnum.style.fontSize="20px";dnum.style.marginTop="4px";}
+      if(dnum){dnum.style.fontSize="28px";dnum.style.marginTop="4px";}
       day.appendChild(h);
     }
 
@@ -8203,8 +8203,8 @@ async function saveScheduleAsPDF(){
       const sn=sourceStudio.querySelector(":scope > .studioName");
       if(sn){
         const n=sn.cloneNode(true);
-        n.style.fontSize="29px";
-        n.style.marginBottom="12px";
+        n.style.fontSize="43px";
+        n.style.marginBottom="16px";
         n.style.letterSpacing="1.1px";
         studio.appendChild(n);
       }
@@ -8212,8 +8212,8 @@ async function saveScheduleAsPDF(){
       sourceStudio.querySelectorAll(":scope > .lesson").forEach(sourceLesson=>{
         const lesson=sourceLesson.cloneNode(true);
         Object.assign(lesson.style,{
-          padding:"30px",
-          marginBottom:"16px",
+          padding:"40px",
+          marginBottom:"22px",
           minHeight:"0",
           borderRadius:"8px",
           boxShadow:"0 3px 10px rgba(0,0,0,.15)",
@@ -8225,9 +8225,9 @@ async function saveScheduleAsPDF(){
         const time=lesson.querySelector(".lessonTime");
         const name=lesson.querySelector(".lessonName");
         const teacher=lesson.querySelector(".lessonTeacher");
-        if(time){time.style.fontSize="31px";time.style.lineHeight="1.05";time.style.fontWeight="900";}
-        if(name){name.style.fontSize="70px";name.style.lineHeight="1.12";name.style.whiteSpace="normal";name.style.overflowWrap="anywhere";name.style.marginTop="6px";name.style.fontWeight="800";}
-        if(teacher){teacher.style.fontSize="40px";teacher.style.lineHeight="1.1";teacher.style.whiteSpace="normal";teacher.style.overflowWrap="anywhere";teacher.style.marginTop="7px";teacher.style.fontWeight="700";}
+        if(time){time.style.fontSize="42px";time.style.lineHeight="1.08";time.style.fontWeight="900";}
+        if(name){name.style.fontSize="100px";name.style.lineHeight="1.08";name.style.whiteSpace="normal";name.style.overflowWrap="anywhere";name.style.marginTop="6px";name.style.fontWeight="800";}
+        if(teacher){teacher.style.fontSize="56px";teacher.style.lineHeight="1.08";teacher.style.whiteSpace="normal";teacher.style.overflowWrap="anywhere";teacher.style.marginTop="10px";teacher.style.fontWeight="700";}
         studio.appendChild(lesson);
       });
 
@@ -8254,7 +8254,7 @@ async function saveScheduleAsPDF(){
 
   const footer=document.createElement("div");
   footer.textContent=`PREMIER BALLET ACADEMY · ${currentBranch || "Schedule"} · 2026 / 2027`;
-  Object.assign(footer.style,{position:"absolute",left:`${PAD_X}px`,right:`${PAD_X}px`,bottom:"3px",height:`${FOOTER_H}px`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",letterSpacing:"1.5px",color:"#77727d"});
+  Object.assign(footer.style,{position:"absolute",left:`${PAD_X}px`,right:`${PAD_X}px`,bottom:"3px",height:`${FOOTER_H}px`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",letterSpacing:"1.8px",color:"#77727d"});
   exportRoot.appendChild(footer);
 
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
