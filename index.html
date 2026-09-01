@@ -7963,10 +7963,8 @@ async function saveScheduleAsPDF(){
     return;
 
   if(!daysElement || !daysElement.children.length){
-
     alert("The schedule has not finished loading yet.");
     return;
-
   }
 
   if(
@@ -7974,13 +7972,10 @@ async function saveScheduleAsPDF(){
     !window.jspdf ||
     !window.jspdf.jsPDF
   ){
-
     alert(
       "The PDF tools have not finished loading. Please wait a moment and try again."
     );
-
     return;
-
   }
 
   const originalText =
@@ -7990,15 +7985,26 @@ async function saveScheduleAsPDF(){
   buttonText.textContent = "Preparing PDF...";
 
   /*
-    We create a completely separate export canvas.
+    ============================================================
+    PREMIUM PDF EXPORT
+    ============================================================
 
-    IMPORTANT:
-    - 1600 × 1131 is the exact A4 landscape ratio.
-    - The schedule is forced into this landscape canvas.
-    - html2canvas creates ONE image.
-    - jsPDF receives ONE image on ONE page.
-    - There is no html2pdf pagination at all.
+    The PDF is built as ONE fixed 1600 × 1131 canvas and then
+    placed onto ONE A4 landscape page.
+
+    The export has its own professional header containing:
+      • Premier Ballet Academy logo
+      • PREMIER BALLET ACADEMY
+      • Selected branch name
+      • 2026 / 2027 Academy Schedule
+      • Weekly Schedule label
+
+    This keeps the normal website unchanged while making the
+    saved PDF look like an official academy document.
   */
+
+  const EXPORT_WIDTH = 1600;
+  const EXPORT_HEIGHT = 1131;
 
   const exportArea =
     document.createElement("div");
@@ -8006,60 +8012,257 @@ async function saveScheduleAsPDF(){
   exportArea.style.position = "fixed";
   exportArea.style.left = "-50000px";
   exportArea.style.top = "0";
-  exportArea.style.width = "1600px";
-  exportArea.style.height = "1131px";
-  exportArea.style.padding = "24px";
+  exportArea.style.width = `${EXPORT_WIDTH}px`;
+  exportArea.style.height = `${EXPORT_HEIGHT}px`;
+  exportArea.style.padding = "34px 38px 30px";
   exportArea.style.margin = "0";
   exportArea.style.boxSizing = "border-box";
-  exportArea.style.background = "#0d0c10";
+  exportArea.style.background =
+    "linear-gradient(135deg,#0b0a0e 0%,#121017 55%,#0d0c10 100%)";
   exportArea.style.color = "#fff";
   exportArea.style.overflow = "hidden";
   exportArea.style.zIndex = "-9999";
+  exportArea.style.fontFamily =
+    "Arial, Helvetica, sans-serif";
 
-  const title =
+  /* ------------------------------------------------------------
+     HEADER
+     ------------------------------------------------------------ */
+
+  const pdfHeader =
     document.createElement("div");
 
-  title.textContent =
-    `${currentBranch} Branch — 2026/27 Schedule`;
-
-  title.style.fontFamily =
-    "Arial, sans-serif";
-
-  title.style.fontSize =
-    "30px";
-
-  title.style.fontWeight =
-    "800";
-
-  title.style.lineHeight =
-    "1.1";
-
-  title.style.marginBottom =
+  pdfHeader.style.display = "flex";
+  pdfHeader.style.alignItems = "center";
+  pdfHeader.style.justifyContent = "space-between";
+  pdfHeader.style.gap = "30px";
+  pdfHeader.style.height = "112px";
+  pdfHeader.style.padding =
+    "18px 24px";
+  pdfHeader.style.boxSizing =
+    "border-box";
+  pdfHeader.style.border =
+    "1px solid rgba(217,196,154,.30)";
+  pdfHeader.style.borderRadius =
     "18px";
+  pdfHeader.style.background =
+    "linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025))";
+  pdfHeader.style.boxShadow =
+    "0 12px 35px rgba(0,0,0,.28)";
 
-  const subtitle =
+  /* Left side: logo + academy name */
+
+  const brandGroup =
     document.createElement("div");
 
-  subtitle.textContent =
-    "Premier Ballet Academy · Weekly Schedule";
+  brandGroup.style.display = "flex";
+  brandGroup.style.alignItems = "center";
+  brandGroup.style.gap = "20px";
+  brandGroup.style.minWidth = "0";
 
-  subtitle.style.fontFamily =
-    "Arial, sans-serif";
+  const logo =
+    document.createElement("img");
 
-  subtitle.style.fontSize =
-    "14px";
+  logo.src = "circle-cropped.png";
+  logo.alt = "Premier Ballet Academy";
+  logo.crossOrigin = "anonymous";
+  logo.style.width = "76px";
+  logo.style.height = "76px";
+  logo.style.objectFit = "contain";
+  logo.style.borderRadius = "50%";
+  logo.style.flexShrink = "0";
+  logo.style.display = "block";
+  logo.style.filter =
+    "drop-shadow(0 5px 12px rgba(0,0,0,.30))";
 
-  subtitle.style.color =
+  const brandText =
+    document.createElement("div");
+
+  const academyName =
+    document.createElement("div");
+
+  academyName.textContent =
+    "PREMIER BALLET ACADEMY";
+
+  academyName.style.fontFamily =
+    "Georgia, 'Times New Roman', serif";
+  academyName.style.fontSize =
+    "30px";
+  academyName.style.fontWeight =
+    "700";
+  academyName.style.letterSpacing =
+    "3.5px";
+  academyName.style.lineHeight =
+    "1.05";
+  academyName.style.color =
+    "#f8f1e8";
+  academyName.style.whiteSpace =
+    "nowrap";
+
+  const academyLine =
+    document.createElement("div");
+
+  academyLine.style.width = "115px";
+  academyLine.style.height = "2px";
+  academyLine.style.margin =
+    "10px 0 8px";
+  academyLine.style.background =
+    "linear-gradient(90deg,#d9c49a,#e8bfd0,transparent)";
+  academyLine.style.borderRadius =
+    "2px";
+
+  const scheduleLabel =
+    document.createElement("div");
+
+  scheduleLabel.textContent =
+    "OFFICIAL ACADEMY SCHEDULE";
+
+  scheduleLabel.style.fontSize =
+    "11px";
+  scheduleLabel.style.fontWeight =
+    "700";
+  scheduleLabel.style.letterSpacing =
+    "2.5px";
+  scheduleLabel.style.color =
+    "#d9c49a";
+
+  brandText.appendChild(academyName);
+  brandText.appendChild(academyLine);
+  brandText.appendChild(scheduleLabel);
+
+  brandGroup.appendChild(logo);
+  brandGroup.appendChild(brandText);
+
+  /* Right side: branch + season */
+
+  const branchGroup =
+    document.createElement("div");
+
+  branchGroup.style.textAlign =
+    "right";
+  branchGroup.style.flexShrink =
+    "0";
+
+  const branchSmall =
+    document.createElement("div");
+
+  branchSmall.textContent =
+    "SELECTED BRANCH";
+
+  branchSmall.style.fontSize =
+    "10px";
+  branchSmall.style.fontWeight =
+    "700";
+  branchSmall.style.letterSpacing =
+    "2px";
+  branchSmall.style.color =
+    "#9d99a5";
+  branchSmall.style.marginBottom =
+    "7px";
+
+  const branchTitle =
+    document.createElement("div");
+
+  branchTitle.textContent =
+    `${currentBranch || "Schedule"} BRANCH`;
+
+  branchTitle.style.fontFamily =
+    "Georgia, 'Times New Roman', serif";
+  branchTitle.style.fontSize =
+    "27px";
+  branchTitle.style.fontWeight =
+    "700";
+  branchTitle.style.letterSpacing =
+    "1px";
+  branchTitle.style.lineHeight =
+    "1.05";
+  branchTitle.style.color =
+    "#f3dce6";
+
+  const season =
+    document.createElement("div");
+
+  season.textContent =
+    "2026 / 2027";
+
+  season.style.marginTop =
+    "8px";
+  season.style.fontSize =
+    "12px";
+  season.style.fontWeight =
+    "700";
+  season.style.letterSpacing =
+    "2px";
+  season.style.color =
+    "#d9c49a";
+
+  branchGroup.appendChild(branchSmall);
+  branchGroup.appendChild(branchTitle);
+  branchGroup.appendChild(season);
+
+  pdfHeader.appendChild(brandGroup);
+  pdfHeader.appendChild(branchGroup);
+
+  exportArea.appendChild(pdfHeader);
+
+  /* ------------------------------------------------------------
+     SMALL TITLE STRIP
+     ------------------------------------------------------------ */
+
+  const titleStrip =
+    document.createElement("div");
+
+  titleStrip.style.height =
+    "46px";
+  titleStrip.style.display =
+    "flex";
+  titleStrip.style.alignItems =
+    "center";
+  titleStrip.style.justifyContent =
+    "space-between";
+  titleStrip.style.padding =
+    "0 8px";
+  titleStrip.style.boxSizing =
+    "border-box";
+
+  const weekTitle =
+    document.createElement("div");
+
+  weekTitle.textContent =
+    `${currentBranch || "Branch"} — Weekly Class Schedule`;
+
+  weekTitle.style.fontFamily =
+    "Georgia, 'Times New Roman', serif";
+  weekTitle.style.fontSize =
+    "19px";
+  weekTitle.style.fontWeight =
+    "700";
+  weekTitle.style.color =
+    "#f8f1e8";
+
+  const weekMeta =
+    document.createElement("div");
+
+  weekMeta.textContent =
+    "2026 / 2027 ACADEMIC YEAR";
+
+  weekMeta.style.fontSize =
+    "9px";
+  weekMeta.style.fontWeight =
+    "700";
+  weekMeta.style.letterSpacing =
+    "1.8px";
+  weekMeta.style.color =
     "#9d99a5";
 
-  subtitle.style.marginTop =
-    "-12px";
+  titleStrip.appendChild(weekTitle);
+  titleStrip.appendChild(weekMeta);
 
-  subtitle.style.marginBottom =
-    "16px";
+  exportArea.appendChild(titleStrip);
 
-  exportArea.appendChild(title);
-  exportArea.appendChild(subtitle);
+  /* ------------------------------------------------------------
+     SCHEDULE
+     ------------------------------------------------------------ */
 
   const schedule =
     daysElement.cloneNode(true);
@@ -8068,39 +8271,20 @@ async function saveScheduleAsPDF(){
 
   schedule.style.width =
     "100%";
-
   schedule.style.minWidth =
     "0";
-
   schedule.style.height =
-    "100%";
-
+    "895px";
   schedule.style.display =
     "grid";
-
   schedule.style.gridTemplateColumns =
-    "repeat(7, minmax(0, 1fr))";
-
+    "repeat(7, minmax(0,1fr))";
   schedule.style.gap =
-    "10px";
-
+    "8px";
   schedule.style.boxSizing =
     "border-box";
-
   schedule.style.margin =
     "0";
-
-  /*
-    The title uses about 70px, leaving the remaining area for
-    the seven-day schedule. Everything is clipped inside the
-    fixed landscape export page, so it can NEVER create page 2.
-  */
-
-  const scheduleHeight =
-    1000;
-
-  schedule.style.height =
-    `${scheduleHeight}px`;
 
   schedule.querySelectorAll(".dayColumn")
     .forEach(column=>{
@@ -8120,13 +8304,16 @@ async function saveScheduleAsPDF(){
       column.style.boxSizing =
         "border-box";
 
+      column.style.borderRadius =
+        "12px";
+
     });
 
   schedule.querySelectorAll(".dayHeader")
     .forEach(header=>{
 
       header.style.padding =
-        "10px";
+        "8px";
 
     });
 
@@ -8134,7 +8321,7 @@ async function saveScheduleAsPDF(){
     .forEach(element=>{
 
       element.style.fontSize =
-        "18px";
+        "15px";
 
     });
 
@@ -8142,7 +8329,7 @@ async function saveScheduleAsPDF(){
     .forEach(element=>{
 
       element.style.fontSize =
-        "8px";
+        "7px";
 
     });
 
@@ -8150,7 +8337,7 @@ async function saveScheduleAsPDF(){
     .forEach(block=>{
 
       block.style.padding =
-        "7px";
+        "6px";
 
     });
 
@@ -8158,10 +8345,10 @@ async function saveScheduleAsPDF(){
     .forEach(element=>{
 
       element.style.fontSize =
-        "8px";
+        "7px";
 
       element.style.marginBottom =
-        "5px";
+        "4px";
 
     });
 
@@ -8169,16 +8356,16 @@ async function saveScheduleAsPDF(){
     .forEach(lesson=>{
 
       lesson.style.padding =
-        "7px";
+        "6px";
 
       lesson.style.marginBottom =
-        "5px";
+        "4px";
 
       lesson.style.minHeight =
         "0";
 
       lesson.style.borderRadius =
-        "8px";
+        "7px";
 
       lesson.style.boxShadow =
         "none";
@@ -8192,7 +8379,7 @@ async function saveScheduleAsPDF(){
     .forEach(element=>{
 
       element.style.fontSize =
-        "8px";
+        "7px";
 
     });
 
@@ -8200,7 +8387,21 @@ async function saveScheduleAsPDF(){
     .forEach(element=>{
 
       element.style.fontSize =
-        "10px";
+        "8.5px";
+
+      element.style.lineHeight =
+        "1.05";
+
+      element.style.marginTop =
+        "2px";
+
+    });
+
+  schedule.querySelectorAll(".lessonTeacher")
+    .forEach(element=>{
+
+      element.style.fontSize =
+        "7px";
 
       element.style.lineHeight =
         "1.05";
@@ -8210,30 +8411,29 @@ async function saveScheduleAsPDF(){
 
     });
 
-  schedule.querySelectorAll(".lessonTeacher")
-    .forEach(element=>{
-
-      element.style.fontSize =
-        "8px";
-
-      element.style.lineHeight =
-        "1.05";
-
-      element.style.marginTop =
-        "4px";
-
-    });
-
   exportArea.appendChild(schedule);
 
   document.body.appendChild(exportArea);
 
   try{
 
+    /* Wait for the academy logo to finish loading. */
+
+    if(logo.complete){
+      if(logo.naturalWidth === 0){
+        console.warn(
+          "Premier Ballet Academy logo could not be loaded."
+        );
+      }
+    }else{
+      await new Promise(resolve=>{
+        logo.onload = resolve;
+        logo.onerror = resolve;
+      });
+    }
+
     if(document.fonts && document.fonts.ready){
-
       await document.fonts.ready;
-
     }
 
     await new Promise(resolve =>
@@ -8249,16 +8449,17 @@ async function saveScheduleAsPDF(){
       await html2canvas(
         exportArea,
         {
-          width:1600,
-          height:1131,
+          width:EXPORT_WIDTH,
+          height:EXPORT_HEIGHT,
           scale:2,
           useCORS:true,
+          allowTaint:false,
           backgroundColor:"#0d0c10",
           logging:false,
           scrollX:0,
           scrollY:0,
-          windowWidth:1600,
-          windowHeight:1131
+          windowWidth:EXPORT_WIDTH,
+          windowHeight:EXPORT_HEIGHT
         }
       );
 
@@ -8269,9 +8470,8 @@ async function saveScheduleAsPDF(){
       A4 LANDSCAPE:
       297 mm × 210 mm
 
-      The image is placed from corner to corner.
-      Therefore the PDF is exactly ONE page and completely
-      landscape — it cannot become a portrait page.
+      One canvas is inserted as one image, so the PDF remains
+      exactly one landscape page.
     */
 
     const pdf =
@@ -8322,6 +8522,7 @@ async function saveScheduleAsPDF(){
       ()=>{
         buttonText.textContent =
           originalText;
+
         button.disabled =
           false;
       },
@@ -8358,7 +8559,6 @@ async function saveScheduleAsPDF(){
   }
 
 }
-
 
 /* =========================================================
    PDF BUTTON
