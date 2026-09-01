@@ -2059,29 +2059,29 @@ input[type="search"]{
   margin-bottom: 1.5mm !important;
 }
 
-.pdf-exporting #scheduleExportArea .dayName{font-size: 10pt !important;}
-.pdf-exporting #scheduleExportArea .dayNumber{font-size: 6pt !important;}
+.pdf-exporting #scheduleExportArea .dayName{font-size: 14pt !important;}
+.pdf-exporting #scheduleExportArea .dayNumber{font-size: 9pt !important;}
 .pdf-exporting #scheduleExportArea .studioBlock{margin-bottom: 1.5mm !important;}
 .pdf-exporting #scheduleExportArea .studioName{
-  font-size: 6.5pt !important;
+  font-size: 11pt !important;
   padding: 1mm !important;
 }
 .pdf-exporting #scheduleExportArea .lesson{
   padding: 1.1mm !important;
   margin-bottom: 1mm !important;
 }
-.pdf-exporting #scheduleExportArea .lessonTime{font-size: 6.2pt !important;}
-.pdf-exporting #scheduleExportArea .lessonName{font-size: 7pt !important; line-height: 1.05 !important;}
-.pdf-exporting #scheduleExportArea .lessonTeacher{font-size: 5.8pt !important; line-height: 1.05 !important;}
+.pdf-exporting #scheduleExportArea .lessonTime{font-size: 14pt !important;}
+.pdf-exporting #scheduleExportArea .lessonName{font-size: 19pt !important; line-height: 1.12 !important;}
+.pdf-exporting #scheduleExportArea .lessonTeacher{font-size: 14pt !important; line-height: 1.12 !important;}
 .pdf-exporting #scheduleExportArea .legend{
   margin-top: 2mm !important;
   padding: 1.5mm !important;
 }
 .pdf-exporting #scheduleExportArea .legendTitle{font-size: 7pt !important;}
-.pdf-exporting #scheduleExportArea .legendItem{font-size: 5.5pt !important;}
+.pdf-exporting #scheduleExportArea .legendItem{font-size: 11pt !important;}
 .pdf-exporting #scheduleExportArea .legendColor{
-  width: 3mm !important;
-  height: 3mm !important;
+  width: 6mm !important;
+  height: 6mm !important;
 }
 
 /* PDF button */
@@ -8051,12 +8051,12 @@ async function saveScheduleAsPDF(){
     const text=document.createElement("div");
     const name=document.createElement("div");
     name.textContent="PREMIER BALLET ACADEMY";
-    Object.assign(name.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"31px",fontWeight:"800",letterSpacing:"2.5px",lineHeight:"1.05",color:"#f8f1e8",whiteSpace:"nowrap"});
+    Object.assign(name.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"40px",fontWeight:"800",letterSpacing:"2.5px",lineHeight:"1.05",color:"#f8f1e8",whiteSpace:"nowrap"});
     text.appendChild(name);
 
     const sub=document.createElement("div");
     sub.textContent="OFFICIAL ACADEMY SCHEDULE";
-    Object.assign(sub.style,{marginTop:"6px",fontSize:"11px",fontWeight:"700",letterSpacing:"2px",color:"#d9c49a"});
+    Object.assign(sub.style,{marginTop:"6px",fontSize:"14px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
     text.appendChild(sub);
 
     brand.appendChild(img);
@@ -8067,12 +8067,12 @@ async function saveScheduleAsPDF(){
 
     const branch=document.createElement("div");
     branch.textContent=`${currentBranch || "Schedule"} BRANCH`;
-    Object.assign(branch.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"27px",fontWeight:"800",color:"#f3dce6",whiteSpace:"nowrap"});
+    Object.assign(branch.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"34px",fontWeight:"800",color:"#f3dce6",whiteSpace:"nowrap"});
     right.appendChild(branch);
 
     const season=document.createElement("div");
     season.textContent="2026 / 2027";
-    Object.assign(season.style,{marginTop:"5px",fontSize:"9px",fontWeight:"700",letterSpacing:"1.8px",color:"#d9c49a"});
+    Object.assign(season.style,{marginTop:"5px",fontSize:"12px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
     right.appendChild(season);
 
     wrap.appendChild(brand);
@@ -8086,12 +8086,12 @@ async function saveScheduleAsPDF(){
 
     const left=document.createElement("div");
     left.textContent=`${currentBranch || "Branch"} — Weekly Class Schedule`;
-    Object.assign(left.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"21px",fontWeight:"800",color:"#f8f1e8"});
+    Object.assign(left.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"26px",fontWeight:"800",color:"#f8f1e8"});
     title.appendChild(left);
 
     const right=document.createElement("div");
     right.textContent="2026 / 2027 ACADEMIC YEAR";
-    Object.assign(right.style,{fontSize:"10px",fontWeight:"700",letterSpacing:"1.6px",color:"#9d99a5"});
+    Object.assign(right.style,{fontSize:"13px",fontWeight:"800",letterSpacing:"1.8px",color:"#9d99a5"});
     title.appendChild(right);
     return title;
   }
@@ -8119,22 +8119,22 @@ async function saveScheduleAsPDF(){
 
     const title=document.createElement("div");
     title.textContent="TEACHER COLOUR GUIDE";
-    Object.assign(title.style,{fontSize:"13px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a",marginBottom:"8px"});
+    Object.assign(title.style,{fontSize:"18px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a",marginBottom:"8px"});
     box.appendChild(title);
 
     const grid=document.createElement("div");
     const count=Math.max(1,usedTeachers.size);
     const cols=Math.min(5,Math.max(1,Math.ceil(count / 2)));
-    Object.assign(grid.style,{display:"grid",gridTemplateColumns:`repeat(${cols},minmax(0,1fr))`,gridAutoRows:"28px",gap:"5px 16px",alignItems:"center"});
+    Object.assign(grid.style,{display:"grid",gridTemplateColumns:`repeat(${cols},minmax(0,1fr))`,gridAutoRows:"36px",gap:"5px 16px",alignItems:"center"});
 
     [...usedTeachers].sort((a,b)=>a.localeCompare(b)).forEach(teacher=>{
       const item=document.createElement("div");
       Object.assign(item.style,{display:"flex",alignItems:"center",gap:"9px",minWidth:"0"});
       const sw=document.createElement("div");
-      Object.assign(sw.style,{width:"25px",height:"25px",borderRadius:"5px",flexShrink:"0",background:teacherColors[teacher] || "#D9D5DF",border:"1px solid rgba(0,0,0,.16)"});
+      Object.assign(sw.style,{width:"32px",height:"32px",borderRadius:"5px",flexShrink:"0",background:teacherColors[teacher] || "#D9D5DF",border:"1px solid rgba(0,0,0,.16)"});
       const tx=document.createElement("div");
       tx.textContent=teacher;
-      Object.assign(tx.style,{fontSize:"12px",fontWeight:"700",color:"#eee",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"});
+      Object.assign(tx.style,{fontSize:"16px",fontWeight:"800",color:"#eee",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"});
       item.appendChild(sw); item.appendChild(tx); grid.appendChild(item);
     });
 
@@ -8188,8 +8188,8 @@ async function saveScheduleAsPDF(){
       Object.assign(h.style,{padding:"9px 8px",boxSizing:"border-box"});
       const dn=h.querySelector(".dayName");
       const dnum=h.querySelector(".dayNumber");
-      if(dn){dn.style.fontSize="17px";dn.style.lineHeight="1.1";}
-      if(dnum){dnum.style.fontSize="10px";dnum.style.marginTop="3px";}
+      if(dn){dn.style.fontSize="24px";dn.style.lineHeight="1.1";}
+      if(dnum){dnum.style.fontSize="13px";dnum.style.marginTop="3px";}
       day.appendChild(h);
     }
 
@@ -8200,7 +8200,7 @@ async function saveScheduleAsPDF(){
       const sn=sourceStudio.querySelector(":scope > .studioName");
       if(sn){
         const n=sn.cloneNode(true);
-        n.style.fontSize="11px";
+        n.style.fontSize="16px";
         n.style.marginBottom="7px";
         n.style.letterSpacing="1.1px";
         studio.appendChild(n);
@@ -8209,8 +8209,8 @@ async function saveScheduleAsPDF(){
       sourceStudio.querySelectorAll(":scope > .lesson").forEach(sourceLesson=>{
         const lesson=sourceLesson.cloneNode(true);
         Object.assign(lesson.style,{
-          padding:"14px",
-          marginBottom:"7px",
+          padding:"18px",
+          marginBottom:"9px",
           minHeight:"0",
           borderRadius:"8px",
           boxShadow:"0 3px 10px rgba(0,0,0,.15)",
@@ -8222,9 +8222,9 @@ async function saveScheduleAsPDF(){
         const time=lesson.querySelector(".lessonTime");
         const name=lesson.querySelector(".lessonName");
         const teacher=lesson.querySelector(".lessonTeacher");
-        if(time){time.style.fontSize="15px";time.style.lineHeight="1.1";}
-        if(name){name.style.fontSize="27px";name.style.lineHeight="1.15";name.style.marginTop="6px";name.style.fontWeight="800";}
-        if(teacher){teacher.style.fontSize="17px";teacher.style.lineHeight="1.1";teacher.style.marginTop="7px";teacher.style.fontWeight="700";}
+        if(time){time.style.fontSize="19px";time.style.lineHeight="1.1";}
+        if(name){name.style.fontSize="36px";name.style.lineHeight="1.15";name.style.marginTop="6px";name.style.fontWeight="800";}
+        if(teacher){teacher.style.fontSize="23px";teacher.style.lineHeight="1.1";teacher.style.marginTop="7px";teacher.style.fontWeight="700";}
         studio.appendChild(lesson);
       });
 
