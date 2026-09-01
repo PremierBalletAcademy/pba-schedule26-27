@@ -7955,12 +7955,10 @@ async function saveScheduleAsPDF(){
   const daysElement = document.getElementById("days");
 
   if(!button || !buttonText) return;
-
   if(!daysElement || !daysElement.children.length){
     alert("The schedule has not finished loading yet.");
     return;
   }
-
   if(typeof html2canvas === "undefined" || !window.jspdf || !window.jspdf.jsPDF){
     alert("The PDF tools have not finished loading. Please wait a moment and try again.");
     return;
@@ -7971,46 +7969,49 @@ async function saveScheduleAsPDF(){
   buttonText.textContent = "Preparing HD PDF...";
 
   /* ============================================================
-     PREMIUM ONE-PAGE A4 LANDSCAPE EXPORT
-     ------------------------------------------------------------
-     IMPORTANT:
-       • ALWAYS exactly ONE A4 landscape page.
-       • Selected branch only.
-       • Logo + academy header.
-       • Full weekly schedule.
-       • Teacher colour guide on the SAME page.
-       • Classes start at the normal website font sizes and are
-         uniformly scaled down ONLY as much as necessary to make
-         the complete schedule fit. This makes them as large as
-         physically possible while guaranteeing nothing is clipped.
-       • No class is ever split or moved to another PDF page.
-       • PNG at 3200px wide keeps the exported PDF sharp.
+     PBA PREMIUM PDF EXPORT — HARD ONE PAGE
+     A4 LANDSCAPE / 297 × 210 mm
+
+     Layout priority:
+       1. Keep ALL seven days on one page.
+       2. Keep every class completely visible.
+       3. Make the classes as large as possible.
+       4. Keep the logo + academy heading at the top.
+       5. Put the teacher colour guide LAST, at the bottom.
+
+     There is NEVER a second PDF page. The schedule is measured
+     before rendering and scaled only by the smallest amount needed
+     to fit the complete schedule into the available one-page area.
      ============================================================ */
 
   const PDF_W = 297;
   const PDF_H = 210;
-  const EXPORT_WIDTH = 3200;
+  const EXPORT_WIDTH = 4800;
   const EXPORT_HEIGHT = Math.round(EXPORT_WIDTH * PDF_H / PDF_W);
-  const PAD_X = 42;
-  const PAD_TOP = 34;
-  const PAD_BOTTOM = 24;
-  const HEADER_H = 118;
-  const TITLE_H = 46;
-  const TITLE_GAP = 4;
-  const LEGEND_H = 128;
-  const FOOTER_H = 20;
-  const SCHEDULE_W = EXPORT_WIDTH - PAD_X * 2;
-  const SCHEDULE_X = PAD_X;
+
+  /* Compact top/bottom furniture leaves maximum space for classes. */
+  const PAD_X = 34;
+  const PAD_TOP = 22;
+  const PAD_BOTTOM = 16;
+  const HEADER_H = 88;
+  const TITLE_H = 34;
+  const TITLE_GAP = 2;
+  const LEGEND_H = 118;
+  const FOOTER_H = 14;
+
+  const PAGE_W = EXPORT_WIDTH;
+  const PAGE_H = EXPORT_HEIGHT;
+  const CONTENT_W = PAGE_W - PAD_X * 2;
   const SCHEDULE_TOP = PAD_TOP + HEADER_H + TITLE_H + TITLE_GAP;
-  const SCHEDULE_H = EXPORT_HEIGHT - SCHEDULE_TOP - LEGEND_H - FOOTER_H - PAD_BOTTOM;
+  const SCHEDULE_H = PAGE_H - SCHEDULE_TOP - LEGEND_H - FOOTER_H - PAD_BOTTOM;
 
   const exportRoot = document.createElement("div");
   Object.assign(exportRoot.style,{
     position:"fixed",
     left:"-60000px",
     top:"0",
-    width:`${EXPORT_WIDTH}px`,
-    height:`${EXPORT_HEIGHT}px`,
+    width:`${PAGE_W}px`,
+    height:`${PAGE_H}px`,
     margin:"0",
     padding:"0",
     boxSizing:"border-box",
@@ -8018,44 +8019,44 @@ async function saveScheduleAsPDF(){
     color:"#fff",
     overflow:"hidden",
     zIndex:"-9999",
-    fontFamily:"Arial, Helvetica, sans-serif"
+    fontFamily:"Inter, Arial, Helvetica, sans-serif"
   });
   document.body.appendChild(exportRoot);
 
   function makeHeader(){
     const wrap=document.createElement("div");
     Object.assign(wrap.style,{
-      width:`${SCHEDULE_W}px`,
+      width:`${CONTENT_W}px`,
       height:`${HEADER_H}px`,
       margin:`${PAD_TOP}px ${PAD_X}px 0`,
       boxSizing:"border-box",
       display:"flex",
       alignItems:"center",
       justifyContent:"space-between",
-      gap:"30px",
-      padding:"15px 24px",
+      gap:"24px",
+      padding:"10px 20px",
       border:"1px solid rgba(217,196,154,.34)",
-      borderRadius:"18px",
+      borderRadius:"15px",
       background:"linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025))"
     });
 
     const brand=document.createElement("div");
-    Object.assign(brand.style,{display:"flex",alignItems:"center",gap:"18px",minWidth:"0"});
+    Object.assign(brand.style,{display:"flex",alignItems:"center",gap:"15px",minWidth:"0"});
 
     const img=document.createElement("img");
     img.src="circle-cropped.png";
     img.crossOrigin="anonymous";
-    Object.assign(img.style,{width:"82px",height:"82px",objectFit:"contain",borderRadius:"50%",flexShrink:"0"});
+    Object.assign(img.style,{width:"66px",height:"66px",objectFit:"contain",borderRadius:"50%",flexShrink:"0"});
 
     const text=document.createElement("div");
     const name=document.createElement("div");
     name.textContent="PREMIER BALLET ACADEMY";
-    Object.assign(name.style,{fontFamily:"Georgia, 'Times New Roman', serif",fontSize:"30px",fontWeight:"700",letterSpacing:"2.5px",lineHeight:"1.05",color:"#f8f1e8",whiteSpace:"nowrap"});
+    Object.assign(name.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"28px",fontWeight:"800",letterSpacing:"2.2px",lineHeight:"1.05",color:"#f8f1e8",whiteSpace:"nowrap"});
     text.appendChild(name);
 
     const sub=document.createElement("div");
     sub.textContent="OFFICIAL ACADEMY SCHEDULE";
-    Object.assign(sub.style,{marginTop:"7px",fontSize:"10px",fontWeight:"700",letterSpacing:"2px",color:"#d9c49a"});
+    Object.assign(sub.style,{marginTop:"6px",fontSize:"9px",fontWeight:"700",letterSpacing:"2px",color:"#d9c49a"});
     text.appendChild(sub);
 
     brand.appendChild(img);
@@ -8066,12 +8067,12 @@ async function saveScheduleAsPDF(){
 
     const branch=document.createElement("div");
     branch.textContent=`${currentBranch || "Schedule"} BRANCH`;
-    Object.assign(branch.style,{fontFamily:"Georgia, 'Times New Roman', serif",fontSize:"27px",fontWeight:"700",color:"#f3dce6",whiteSpace:"nowrap"});
+    Object.assign(branch.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"23px",fontWeight:"800",color:"#f3dce6",whiteSpace:"nowrap"});
     right.appendChild(branch);
 
     const season=document.createElement("div");
     season.textContent="2026 / 2027";
-    Object.assign(season.style,{marginTop:"6px",fontSize:"10px",fontWeight:"700",letterSpacing:"1.8px",color:"#d9c49a"});
+    Object.assign(season.style,{marginTop:"5px",fontSize:"9px",fontWeight:"700",letterSpacing:"1.8px",color:"#d9c49a"});
     right.appendChild(season);
 
     wrap.appendChild(brand);
@@ -8081,21 +8082,21 @@ async function saveScheduleAsPDF(){
 
   function makeTitle(){
     const title=document.createElement("div");
-    Object.assign(title.style,{width:`${SCHEDULE_W}px`,height:`${TITLE_H}px`,margin:`0 ${PAD_X}px`,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 6px",boxSizing:"border-box"});
+    Object.assign(title.style,{width:`${CONTENT_W}px`,height:`${TITLE_H}px`,margin:`0 ${PAD_X}px`,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 4px",boxSizing:"border-box"});
 
     const left=document.createElement("div");
     left.textContent=`${currentBranch || "Branch"} — Weekly Class Schedule`;
-    Object.assign(left.style,{fontFamily:"Georgia, 'Times New Roman', serif",fontSize:"20px",fontWeight:"700",color:"#f8f1e8"});
+    Object.assign(left.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"18px",fontWeight:"800",color:"#f8f1e8"});
     title.appendChild(left);
 
     const right=document.createElement("div");
     right.textContent="2026 / 2027 ACADEMIC YEAR";
-    Object.assign(right.style,{fontSize:"9px",fontWeight:"700",letterSpacing:"1.7px",color:"#9d99a5"});
+    Object.assign(right.style,{fontSize:"8px",fontWeight:"700",letterSpacing:"1.6px",color:"#9d99a5"});
     title.appendChild(right);
     return title;
   }
 
-  /* Only teachers appearing in the selected branch are shown. */
+  /* ONLY teachers actually used in the selected branch. */
   const usedTeachers=new Set();
   daysElement.querySelectorAll(".lessonTeacher").forEach(el=>{
     const n=el.textContent.trim();
@@ -8105,12 +8106,14 @@ async function saveScheduleAsPDF(){
   function makeLegend(){
     const box=document.createElement("div");
     Object.assign(box.style,{
-      width:`${SCHEDULE_W}px`,
-      height:`${LEGEND_H-8}px`,
-      margin:`8px ${PAD_X}px 0`,
-      padding:"9px 12px",
+      position:"absolute",
+      left:`${PAD_X}px`,
+      top:`${PAGE_H - LEGEND_H - FOOTER_H - PAD_BOTTOM}px`,
+      width:`${CONTENT_W}px`,
+      height:`${LEGEND_H}px`,
+      padding:"10px 12px 7px",
       boxSizing:"border-box",
-      borderTop:"1px solid rgba(255,255,255,.12)",
+      borderTop:"1px solid rgba(255,255,255,.14)",
       background:"rgba(255,255,255,.025)"
     });
 
@@ -8120,23 +8123,25 @@ async function saveScheduleAsPDF(){
     box.appendChild(title);
 
     const grid=document.createElement("div");
-    Object.assign(grid.style,{display:"grid",gridTemplateColumns:"repeat(5,minmax(0,1fr))",gap:"7px 14px"});
+    const count=Math.max(1,usedTeachers.size);
+    const cols=Math.min(5,Math.max(1,Math.ceil(count / 2)));
+    Object.assign(grid.style,{display:"grid",gridTemplateColumns:`repeat(${cols},minmax(0,1fr))`,gridAutoRows:"24px",gap:"6px 16px",alignItems:"center"});
 
     [...usedTeachers].sort((a,b)=>a.localeCompare(b)).forEach(teacher=>{
       const item=document.createElement("div");
-      Object.assign(item.style,{display:"flex",alignItems:"center",gap:"6px",minWidth:"0"});
+      Object.assign(item.style,{display:"flex",alignItems:"center",gap:"7px",minWidth:"0"});
       const sw=document.createElement("div");
-      Object.assign(sw.style,{width:"18px",height:"18px",borderRadius:"5px",flexShrink:"0",background:teacherColors[teacher] || "#D9D5DF",border:"1px solid rgba(0,0,0,.12)"});
+      Object.assign(sw.style,{width:"20px",height:"20px",borderRadius:"5px",flexShrink:"0",background:teacherColors[teacher] || "#D9D5DF",border:"1px solid rgba(0,0,0,.16)"});
       const tx=document.createElement("div");
       tx.textContent=teacher;
-      Object.assign(tx.style,{fontSize:"8px",fontWeight:"700",color:"#eee",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"});
-      item.appendChild(sw);item.appendChild(tx);grid.appendChild(item);
+      Object.assign(tx.style,{fontSize:"9px",fontWeight:"700",color:"#eee",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"});
+      item.appendChild(sw); item.appendChild(tx); grid.appendChild(item);
     });
 
     if(!usedTeachers.size){
       const none=document.createElement("div");
       none.textContent="No teacher colours assigned for this branch.";
-      none.style.fontSize="8px";
+      none.style.fontSize="9px";
       none.style.color="#9d99a5";
       grid.appendChild(none);
     }
@@ -8145,13 +8150,13 @@ async function saveScheduleAsPDF(){
     return box;
   }
 
-  /* Build the schedule at full, readable website-like sizing first. */
+  /* Build a clean seven-column schedule. No horizontal scrolling. */
   const scheduleWrap=document.createElement("div");
   Object.assign(scheduleWrap.style,{
     position:"absolute",
-    left:`${SCHEDULE_X}px`,
+    left:`${PAD_X}px`,
     top:`${SCHEDULE_TOP}px`,
-    width:`${SCHEDULE_W}px`,
+    width:`${CONTENT_W}px`,
     height:`${SCHEDULE_H}px`,
     boxSizing:"border-box",
     overflow:"visible"
@@ -8162,7 +8167,7 @@ async function saveScheduleAsPDF(){
     width:"100%",
     display:"grid",
     gridTemplateColumns:"repeat(7,minmax(0,1fr))",
-    gap:"8px",
+    gap:"6px",
     alignItems:"start",
     boxSizing:"border-box",
     transformOrigin:"top left"
@@ -8174,53 +8179,51 @@ async function saveScheduleAsPDF(){
     const day=source.cloneNode(false);
     Object.assign(day.style,{
       minWidth:"0",width:"100%",height:"auto",minHeight:"0",
-      overflow:"hidden",boxSizing:"border-box",borderRadius:"12px",margin:"0",
-      transform:"none"
+      overflow:"hidden",boxSizing:"border-box",borderRadius:"10px",margin:"0"
     });
 
     const header=source.querySelector(":scope > .dayHeader");
     if(header){
       const h=header.cloneNode(true);
-      h.style.padding="9px 10px";
+      Object.assign(h.style,{padding:"8px 8px",boxSizing:"border-box"});
       const dn=h.querySelector(".dayName");
       const dnum=h.querySelector(".dayNumber");
-      if(dn) dn.style.fontSize="13px";
+      if(dn){dn.style.fontSize="12px";dn.style.lineHeight="1.1";}
       if(dnum){dnum.style.fontSize="8px";dnum.style.marginTop="3px";}
       day.appendChild(h);
     }
 
     source.querySelectorAll(":scope > .studioBlock").forEach(sourceStudio=>{
       const studio=sourceStudio.cloneNode(false);
-      Object.assign(studio.style,{padding:"8px",boxSizing:"border-box",minWidth:"0"});
+      Object.assign(studio.style,{padding:"6px",boxSizing:"border-box",minWidth:"0"});
 
       const sn=sourceStudio.querySelector(":scope > .studioName");
       if(sn){
         const n=sn.cloneNode(true);
-        n.style.fontSize="8px";
-        n.style.marginBottom="6px";
+        n.style.fontSize="7px";
+        n.style.marginBottom="5px";
+        n.style.letterSpacing="1.1px";
         studio.appendChild(n);
       }
 
       sourceStudio.querySelectorAll(":scope > .lesson").forEach(sourceLesson=>{
         const lesson=sourceLesson.cloneNode(true);
         Object.assign(lesson.style,{
-          padding:"9px",
-          marginBottom:"6px",
+          padding:"8px",
+          marginBottom:"5px",
           minHeight:"0",
-          borderRadius:"9px",
-          boxShadow:"0 4px 12px rgba(0,0,0,.16)",
+          borderRadius:"8px",
+          boxShadow:"0 3px 10px rgba(0,0,0,.15)",
           transform:"none",
           boxSizing:"border-box",
-          breakInside:"avoid",
-          pageBreakInside:"avoid",
           overflow:"hidden"
         });
 
         const time=lesson.querySelector(".lessonTime");
         const name=lesson.querySelector(".lessonName");
         const teacher=lesson.querySelector(".lessonTeacher");
-        if(time){time.style.fontSize="10px";time.style.lineHeight="1.1";}
-        if(name){name.style.fontSize="13px";name.style.lineHeight="1.18";name.style.marginTop="5px";}
+        if(time){time.style.fontSize="9px";time.style.lineHeight="1.08";}
+        if(name){name.style.fontSize="14px";name.style.lineHeight="1.14";name.style.marginTop="5px";}
         if(teacher){teacher.style.fontSize="10px";teacher.style.lineHeight="1.08";teacher.style.marginTop="6px";}
         studio.appendChild(lesson);
       });
@@ -8232,7 +8235,7 @@ async function saveScheduleAsPDF(){
       const empty=document.createElement("div");
       empty.className="empty";
       empty.textContent="No classes";
-      empty.style.padding="30px 10px";
+      empty.style.padding="25px 8px";
       empty.style.fontSize="9px";
       day.appendChild(empty);
     }
@@ -8248,31 +8251,35 @@ async function saveScheduleAsPDF(){
 
   const footer=document.createElement("div");
   footer.textContent=`PREMIER BALLET ACADEMY · ${currentBranch || "Schedule"} · 2026 / 2027`;
-  Object.assign(footer.style,{position:"absolute",left:`${PAD_X}px`,right:`${PAD_X}px`,bottom:"6px",height:`${FOOTER_H}px`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"8px",letterSpacing:"1.4px",color:"#77727d"});
+  Object.assign(footer.style,{position:"absolute",left:`${PAD_X}px`,right:`${PAD_X}px`,bottom:"3px",height:`${FOOTER_H}px`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"7px",letterSpacing:"1.3px",color:"#77727d"});
   exportRoot.appendChild(footer);
 
-  /* Wait for layout/fonts/images, then find the largest scale that
-     fits the COMPLETE seven-column schedule into the reserved area. */
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
 
-  const naturalHeight=scheduleGrid.getBoundingClientRect().height;
-  const naturalWidth=scheduleGrid.getBoundingClientRect().width;
-  const scale=Math.min(1, SCHEDULE_H / Math.max(naturalHeight,1), SCHEDULE_W / Math.max(naturalWidth,1));
+  /* Measure the COMPLETE schedule at full size. */
+  const naturalRect=scheduleGrid.getBoundingClientRect();
+  const naturalHeight=naturalRect.height;
+  const naturalWidth=naturalRect.width;
+
+  /* Largest possible scale that fits every day without clipping. */
+  const scale=Math.min(
+    1,
+    SCHEDULE_H / Math.max(naturalHeight,1),
+    CONTENT_W / Math.max(naturalWidth,1)
+  );
 
   scheduleGrid.style.transform=`scale(${scale})`;
   scheduleGrid.style.width=`${100/scale}%`;
 
-  /* The schedule area itself is never clipped. The scale calculation
-     guarantees the rendered content fits completely. */
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
   try{
     buttonText.textContent="Creating HD PDF...";
 
     const canvas=await html2canvas(exportRoot,{
-      width:EXPORT_WIDTH,
-      height:EXPORT_HEIGHT,
+      width:PAGE_W,
+      height:PAGE_H,
       scale:1,
       useCORS:true,
       allowTaint:false,
@@ -8280,8 +8287,8 @@ async function saveScheduleAsPDF(){
       logging:false,
       scrollX:0,
       scrollY:0,
-      windowWidth:EXPORT_WIDTH,
-      windowHeight:EXPORT_HEIGHT,
+      windowWidth:PAGE_W,
+      windowHeight:PAGE_H,
       imageTimeout:15000,
       removeContainer:true
     });
@@ -8295,7 +8302,7 @@ async function saveScheduleAsPDF(){
       putOnlyUsedFonts:true
     });
 
-    /* EXACTLY ONE PAGE. */
+    /* HARD GUARANTEE: exactly one A4 landscape page. */
     pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,0,PDF_W,PDF_H,undefined,"NONE");
 
     const safeBranch=String(currentBranch || "Schedule")
