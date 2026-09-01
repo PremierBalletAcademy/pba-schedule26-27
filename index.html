@@ -8209,8 +8209,8 @@ async function saveScheduleAsPDF(){
       sourceStudio.querySelectorAll(":scope > .lesson").forEach(sourceLesson=>{
         const lesson=sourceLesson.cloneNode(true);
         Object.assign(lesson.style,{
-          padding:"8px",
-          marginBottom:"5px",
+          padding:"10px",
+          marginBottom:"6px",
           minHeight:"0",
           borderRadius:"8px",
           boxShadow:"0 3px 10px rgba(0,0,0,.15)",
@@ -8222,9 +8222,9 @@ async function saveScheduleAsPDF(){
         const time=lesson.querySelector(".lessonTime");
         const name=lesson.querySelector(".lessonName");
         const teacher=lesson.querySelector(".lessonTeacher");
-        if(time){time.style.fontSize="9px";time.style.lineHeight="1.08";}
-        if(name){name.style.fontSize="14px";name.style.lineHeight="1.14";name.style.marginTop="5px";}
-        if(teacher){teacher.style.fontSize="10px";teacher.style.lineHeight="1.08";teacher.style.marginTop="6px";}
+        if(time){time.style.fontSize="11px";time.style.lineHeight="1.1";}
+        if(name){name.style.fontSize="19px";name.style.lineHeight="1.15";name.style.marginTop="6px";name.style.fontWeight="800";}
+        if(teacher){teacher.style.fontSize="12px";teacher.style.lineHeight="1.1";teacher.style.marginTop="7px";teacher.style.fontWeight="700";}
         studio.appendChild(lesson);
       });
 
