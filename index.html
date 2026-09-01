@@ -7986,17 +7986,17 @@ async function saveScheduleAsPDF(){
 
   const PDF_W = 297;
   const PDF_H = 210;
-  const EXPORT_WIDTH = 4800;
+  const EXPORT_WIDTH = 6000;
   const EXPORT_HEIGHT = Math.round(EXPORT_WIDTH * PDF_H / PDF_W);
 
   /* Compact top/bottom furniture leaves maximum space for classes. */
-  const PAD_X = 28;
-  const PAD_TOP = 14;
-  const PAD_BOTTOM = 10;
-  const HEADER_H = 76;
-  const TITLE_H = 32;
-  const TITLE_GAP = 2;
-  const LEGEND_H = 92;
+  const PAD_X = 24;
+  const PAD_TOP = 10;
+  const PAD_BOTTOM = 8;
+  const HEADER_H = 86;
+  const TITLE_H = 40;
+  const TITLE_GAP = 1;
+  const LEGEND_H_BASE = 58;
   const FOOTER_H = 10;
 
   const PAGE_W = EXPORT_WIDTH;
@@ -8046,17 +8046,17 @@ async function saveScheduleAsPDF(){
     const img=document.createElement("img");
     img.src="circle-cropped.png";
     img.crossOrigin="anonymous";
-    Object.assign(img.style,{width:"62px",height:"62px",objectFit:"contain",borderRadius:"50%",flexShrink:"0"});
+    Object.assign(img.style,{width:"72px",height:"72px",objectFit:"contain",borderRadius:"50%",flexShrink:"0"});
 
     const text=document.createElement("div");
     const name=document.createElement("div");
     name.textContent="PREMIER BALLET ACADEMY";
-    Object.assign(name.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"40px",fontWeight:"800",letterSpacing:"2.5px",lineHeight:"1.05",color:"#f8f1e8",whiteSpace:"nowrap"});
+    Object.assign(name.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"48px",fontWeight:"800",letterSpacing:"2.5px",lineHeight:"1.05",color:"#f8f1e8",whiteSpace:"nowrap"});
     text.appendChild(name);
 
     const sub=document.createElement("div");
     sub.textContent="OFFICIAL ACADEMY SCHEDULE";
-    Object.assign(sub.style,{marginTop:"6px",fontSize:"14px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
+    Object.assign(sub.style,{marginTop:"6px",fontSize:"16px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
     text.appendChild(sub);
 
     brand.appendChild(img);
@@ -8067,12 +8067,12 @@ async function saveScheduleAsPDF(){
 
     const branch=document.createElement("div");
     branch.textContent=`${currentBranch || "Schedule"} BRANCH`;
-    Object.assign(branch.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"34px",fontWeight:"800",color:"#f3dce6",whiteSpace:"nowrap"});
+    Object.assign(branch.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"42px",fontWeight:"800",color:"#f3dce6",whiteSpace:"nowrap"});
     right.appendChild(branch);
 
     const season=document.createElement("div");
     season.textContent="2026 / 2027";
-    Object.assign(season.style,{marginTop:"5px",fontSize:"12px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
+    Object.assign(season.style,{marginTop:"5px",fontSize:"15px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a"});
     right.appendChild(season);
 
     wrap.appendChild(brand);
@@ -8086,12 +8086,12 @@ async function saveScheduleAsPDF(){
 
     const left=document.createElement("div");
     left.textContent=`${currentBranch || "Branch"} — Weekly Class Schedule`;
-    Object.assign(left.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"26px",fontWeight:"800",color:"#f8f1e8"});
+    Object.assign(left.style,{fontFamily:"Inter, Arial, Helvetica, sans-serif",fontSize:"34px",fontWeight:"800",color:"#f8f1e8"});
     title.appendChild(left);
 
     const right=document.createElement("div");
     right.textContent="2026 / 2027 ACADEMIC YEAR";
-    Object.assign(right.style,{fontSize:"13px",fontWeight:"800",letterSpacing:"1.8px",color:"#9d99a5"});
+    Object.assign(right.style,{fontSize:"15px",fontWeight:"800",letterSpacing:"1.8px",color:"#9d99a5"});
     title.appendChild(right);
     return title;
   }
@@ -8103,6 +8103,9 @@ async function saveScheduleAsPDF(){
     if(n) usedTeachers.add(n);
   });
 
+  const LEGEND_ROWS = Math.max(1, Math.ceil(Math.max(1, usedTeachers.size) / 4));
+  const LEGEND_H = LEGEND_H_BASE + LEGEND_ROWS * 48;
+
   function makeLegend(){
     const box=document.createElement("div");
     Object.assign(box.style,{
@@ -8111,7 +8114,7 @@ async function saveScheduleAsPDF(){
       top:`${PAGE_H - LEGEND_H - FOOTER_H - PAD_BOTTOM}px`,
       width:`${CONTENT_W}px`,
       height:`${LEGEND_H}px`,
-      padding:"8px 12px 5px",
+      padding:"10px 14px 8px",
       boxSizing:"border-box",
       borderTop:"1px solid rgba(255,255,255,.14)",
       background:"rgba(255,255,255,.025)"
@@ -8119,22 +8122,22 @@ async function saveScheduleAsPDF(){
 
     const title=document.createElement("div");
     title.textContent="TEACHER COLOUR GUIDE";
-    Object.assign(title.style,{fontSize:"18px",fontWeight:"800",letterSpacing:"2px",color:"#d9c49a",marginBottom:"8px"});
+    Object.assign(title.style,{fontSize:"22px",fontWeight:"900",letterSpacing:"2px",color:"#d9c49a",marginBottom:"8px"});
     box.appendChild(title);
 
     const grid=document.createElement("div");
     const count=Math.max(1,usedTeachers.size);
-    const cols=Math.min(5,Math.max(1,Math.ceil(count / 2)));
-    Object.assign(grid.style,{display:"grid",gridTemplateColumns:`repeat(${cols},minmax(0,1fr))`,gridAutoRows:"36px",gap:"5px 16px",alignItems:"center"});
+    const cols=Math.min(4,Math.max(1,Math.ceil(count / 1)));
+    Object.assign(grid.style,{display:"grid",gridTemplateColumns:`repeat(${cols},minmax(0,1fr))`,gridAutoRows:"48px",gap:"6px 18px",alignItems:"center"});
 
     [...usedTeachers].sort((a,b)=>a.localeCompare(b)).forEach(teacher=>{
       const item=document.createElement("div");
       Object.assign(item.style,{display:"flex",alignItems:"center",gap:"9px",minWidth:"0"});
       const sw=document.createElement("div");
-      Object.assign(sw.style,{width:"32px",height:"32px",borderRadius:"5px",flexShrink:"0",background:teacherColors[teacher] || "#D9D5DF",border:"1px solid rgba(0,0,0,.16)"});
+      Object.assign(sw.style,{width:"40px",height:"40px",borderRadius:"5px",flexShrink:"0",background:teacherColors[teacher] || "#D9D5DF",border:"1px solid rgba(0,0,0,.16)"});
       const tx=document.createElement("div");
       tx.textContent=teacher;
-      Object.assign(tx.style,{fontSize:"16px",fontWeight:"800",color:"#eee",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"});
+      Object.assign(tx.style,{fontSize:"19px",fontWeight:"800",color:"#eee",whiteSpace:"normal",overflow:"visible",textOverflow:"clip",lineHeight:"1.08",wordBreak:"break-word"});
       item.appendChild(sw); item.appendChild(tx); grid.appendChild(item);
     });
 
@@ -8167,7 +8170,7 @@ async function saveScheduleAsPDF(){
     width:"100%",
     display:"grid",
     gridTemplateColumns:"repeat(7,minmax(0,1fr))",
-    gap:"6px",
+    gap:"8px",
     alignItems:"start",
     boxSizing:"border-box",
     transformOrigin:"top left"
@@ -8185,23 +8188,23 @@ async function saveScheduleAsPDF(){
     const header=source.querySelector(":scope > .dayHeader");
     if(header){
       const h=header.cloneNode(true);
-      Object.assign(h.style,{padding:"9px 8px",boxSizing:"border-box"});
+      Object.assign(h.style,{padding:"12px 10px",boxSizing:"border-box"});
       const dn=h.querySelector(".dayName");
       const dnum=h.querySelector(".dayNumber");
-      if(dn){dn.style.fontSize="24px";dn.style.lineHeight="1.1";}
-      if(dnum){dnum.style.fontSize="13px";dnum.style.marginTop="3px";}
+      if(dn){dn.style.fontSize="30px";dn.style.lineHeight="1.1";}
+      if(dnum){dnum.style.fontSize="16px";dnum.style.marginTop="3px";}
       day.appendChild(h);
     }
 
     source.querySelectorAll(":scope > .studioBlock").forEach(sourceStudio=>{
       const studio=sourceStudio.cloneNode(false);
-      Object.assign(studio.style,{padding:"8px",boxSizing:"border-box",minWidth:"0"});
+      Object.assign(studio.style,{padding:"11px",boxSizing:"border-box",minWidth:"0"});
 
       const sn=sourceStudio.querySelector(":scope > .studioName");
       if(sn){
         const n=sn.cloneNode(true);
-        n.style.fontSize="16px";
-        n.style.marginBottom="7px";
+        n.style.fontSize="23px";
+        n.style.marginBottom="9px";
         n.style.letterSpacing="1.1px";
         studio.appendChild(n);
       }
@@ -8209,8 +8212,8 @@ async function saveScheduleAsPDF(){
       sourceStudio.querySelectorAll(":scope > .lesson").forEach(sourceLesson=>{
         const lesson=sourceLesson.cloneNode(true);
         Object.assign(lesson.style,{
-          padding:"18px",
-          marginBottom:"9px",
+          padding:"24px",
+          marginBottom:"12px",
           minHeight:"0",
           borderRadius:"8px",
           boxShadow:"0 3px 10px rgba(0,0,0,.15)",
@@ -8222,9 +8225,9 @@ async function saveScheduleAsPDF(){
         const time=lesson.querySelector(".lessonTime");
         const name=lesson.querySelector(".lessonName");
         const teacher=lesson.querySelector(".lessonTeacher");
-        if(time){time.style.fontSize="19px";time.style.lineHeight="1.1";}
-        if(name){name.style.fontSize="36px";name.style.lineHeight="1.15";name.style.marginTop="6px";name.style.fontWeight="800";}
-        if(teacher){teacher.style.fontSize="23px";teacher.style.lineHeight="1.1";teacher.style.marginTop="7px";teacher.style.fontWeight="700";}
+        if(time){time.style.fontSize="25px";time.style.lineHeight="1.1";}
+        if(name){name.style.fontSize="58px";name.style.lineHeight="1.12";name.style.whiteSpace="normal";name.style.overflowWrap="anywhere";name.style.marginTop="6px";name.style.fontWeight="800";}
+        if(teacher){teacher.style.fontSize="32px";teacher.style.lineHeight="1.1";teacher.style.whiteSpace="normal";teacher.style.overflowWrap="anywhere";teacher.style.marginTop="7px";teacher.style.fontWeight="700";}
         studio.appendChild(lesson);
       });
 
@@ -8251,7 +8254,7 @@ async function saveScheduleAsPDF(){
 
   const footer=document.createElement("div");
   footer.textContent=`PREMIER BALLET ACADEMY · ${currentBranch || "Schedule"} · 2026 / 2027`;
-  Object.assign(footer.style,{position:"absolute",left:`${PAD_X}px`,right:`${PAD_X}px`,bottom:"3px",height:`${FOOTER_H}px`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"9px",letterSpacing:"1.3px",color:"#77727d"});
+  Object.assign(footer.style,{position:"absolute",left:`${PAD_X}px`,right:`${PAD_X}px`,bottom:"3px",height:`${FOOTER_H}px`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"11px",letterSpacing:"1.3px",color:"#77727d"});
   exportRoot.appendChild(footer);
 
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
