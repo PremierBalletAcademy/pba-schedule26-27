@@ -2130,6 +2130,21 @@ input[type="search"]{
   font-weight: 900;
 }
 
+
+/* ADMIN INVITATION PASSWORD SETUP */
+#createPasswordOverlay{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,4,7,.82);backdrop-filter:blur(18px)}
+#createPasswordOverlay .passwordModal{width:min(520px,100%);background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:30px;box-shadow:0 30px 90px rgba(0,0,0,.55)}
+#createPasswordOverlay .passwordBrand{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+#createPasswordOverlay .passwordBrand img{width:64px;height:64px;object-fit:contain}
+#createPasswordOverlay h2{margin:0;font-size:27px}
+#createPasswordOverlay .passwordSub{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.5}
+#createPasswordOverlay label{display:block;margin:14px 0 7px;color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+#createPasswordOverlay input{width:100%;height:48px;padding:0 14px;border:1px solid var(--border2);border-radius:11px;background:#111016;color:#fff;outline:none}
+#createPasswordOverlay input:focus{border-color:rgba(232,191,208,.7)}
+#createPasswordError{min-height:20px;margin-top:12px;color:#f2a5b5;font-size:12px;line-height:1.5}
+#createPasswordOverlay .passwordActions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
+@media(max-width:650px){#createPasswordOverlay .passwordModal{padding:22px}#createPasswordOverlay h2{font-size:23px}}
+
 </style>
 
 </head>
@@ -2515,6 +2530,26 @@ input[type="search"]{
 <!-- =========================================================
      ADMIN LOGIN
 ========================================================= -->
+
+
+<!-- ADMIN INVITATION PASSWORD SETUP -->
+<div id="createPasswordOverlay" class="overlay">
+  <div class="passwordModal">
+    <div class="passwordBrand">
+      <img src="circle-cropped.png" alt="Premier Ballet Academy">
+      <div>
+        <h2>Create Your Admin Password</h2>
+        <div class="passwordSub">Welcome to Premier Ballet Academy. Create a password to activate your administrator account.</div>
+      </div>
+    </div>
+    <label for="invitePassword">New Password</label>
+    <input id="invitePassword" type="password" autocomplete="new-password" placeholder="Enter your password">
+    <label for="invitePasswordConfirm">Confirm Password</label>
+    <input id="invitePasswordConfirm" type="password" autocomplete="new-password" placeholder="Enter your password again">
+    <div id="createPasswordError"></div>
+    <div class="passwordActions"><button class="btn btnPink" id="createPasswordButton">Create Password &amp; Continue</button></div>
+  </div>
+</div>
 
 <div
   id="loginOverlay"
@@ -5728,6 +5763,69 @@ function updateSearchActions(){
 }
 
 
+
+/* ADMIN INVITATION / PASSWORD SETUP */
+function invitationIsPresent(){
+  const hash=window.location.hash||"";
+  const search=window.location.search||"";
+  const hp=new URLSearchParams(hash.startsWith("#")?hash.slice(1):hash);
+  const qp=new URLSearchParams(search);
+  return hp.get("type")==="invite" || qp.get("type")==="invite" || !!qp.get("code");
+}
+function showCreatePassword(){
+  const o=document.getElementById("createPasswordOverlay");
+  if(o)o.style.display="flex";
+  setTimeout(()=>document.getElementById("invitePassword")?.focus(),100);
+}
+function hideCreatePassword(){document.getElementById("createPasswordOverlay").style.display="none";}
+function cleanInvitationUrl(){try{window.history.replaceState({},document.title,window.location.origin+window.location.pathname);}catch(e){}}
+async function handleInvitationFlow(){
+  if(!invitationIsPresent()) return false;
+  const errorElement=document.getElementById("createPasswordError");
+  try{
+    const qp=new URLSearchParams(window.location.search);
+    const code=qp.get("code");
+    if(code){const r=await supabaseClient.auth.exchangeCodeForSession(code);if(r.error)throw r.error;}
+    const r=await supabaseClient.auth.getSession();
+    if(r.error)throw r.error;
+    if(!r.data?.session?.user)throw new Error("This invitation link is invalid or has expired. Please ask the administrator to send a new invitation.");
+    currentUser=r.data.session.user;
+    showCreatePassword();
+    return true;
+  }catch(e){
+    console.error("Invitation setup error:",e);
+    errorElement.textContent=e.message||"Unable to open this administrator invitation.";
+    showCreatePassword();
+    return true;
+  }
+}
+async function createInvitedAdminPassword(){
+  const password=document.getElementById("invitePassword").value;
+  const confirm=document.getElementById("invitePasswordConfirm").value;
+  const errorElement=document.getElementById("createPasswordError");
+  const button=document.getElementById("createPasswordButton");
+  errorElement.textContent="";
+  if(!password||!confirm){errorElement.textContent="Please enter and confirm your password.";return;}
+  if(password.length<6){errorElement.textContent="Your password must be at least 6 characters.";return;}
+  if(password!==confirm){errorElement.textContent="The passwords do not match.";return;}
+  button.disabled=true;button.textContent="Creating Password...";
+  try{
+    const r=await supabaseClient.auth.updateUser({password});
+    if(r.error)throw r.error;
+    const user=r.data?.user||currentUser;
+    if(!user)throw new Error("Your invitation session could not be found. Please open the invitation link again.");
+    const a=await supabaseClient.from("admins").select("id,email,role").eq("id",user.id).maybeSingle();
+    if(a.error)throw a.error;
+    if(!a.data){await supabaseClient.auth.signOut();throw new Error("Your account was not found in the PBA administrator list. Please ask a Superior Administrator to resend the invitation.");}
+    currentUser=user;currentUser.adminRole=a.data.role||"admin";
+    hideCreatePassword();cleanInvitationUrl();await openAdmin();
+  }catch(e){console.error("Create invited admin password error:",e);errorElement.textContent=e.message||"Unable to create your password.";}
+  finally{button.disabled=false;button.textContent="Create Password & Continue";}
+}
+document.getElementById("createPasswordButton").addEventListener("click",createInvitedAdminPassword);
+[document.getElementById("invitePassword"),document.getElementById("invitePasswordConfirm")].forEach(input=>input.addEventListener("keydown",e=>{if(e.key==="Enter")createInvitedAdminPassword();}));
+
+
 /* =========================================================
    ADMIN LOGIN
 ========================================================= */
@@ -8556,7 +8654,11 @@ async function initializeApp(){
 
   initializeGoogleCalendar();
 
-  await restoreAdminSession();
+  const invitationHandled = await handleInvitationFlow();
+
+  if(!invitationHandled){
+    await restoreAdminSession();
+  }
 
   await loadBranches();
 
