@@ -21,12 +21,6 @@
 ========================================================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-<!-- =========================================================
-     GOOGLE CALENDAR
-========================================================= -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -686,6 +680,8 @@ input[type="search"]{
 
 }
 
+
+
 .statusWrap{
 
   padding:
@@ -1026,6 +1022,107 @@ input[type="search"]{
 
 }
 
+.selectClass{
+
+  flex-shrink:0;
+
+  width:34px;
+
+  height:34px;
+
+  border-radius:50%;
+
+  border:
+    1px solid rgba(40,35,30,.28);
+
+  background:
+    rgba(255,255,255,.32);
+
+  color:#4d4030;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  font-size:16px;
+
+  font-weight:800;
+
+}
+
+.selectClass.selected{
+
+  background:#171419;
+
+  color:#f1dfb2;
+
+}
+
+/* =========================================================
+   SEARCH ACTIONS
+========================================================= */
+
+.searchActions{
+
+  display:none;
+
+  margin-top:15px;
+
+  padding:13px;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:12px;
+
+  border:
+    1px solid rgba(217,196,154,.18);
+
+  border-radius:14px;
+
+  background:
+    rgba(217,196,154,.055);
+
+}
+
+.searchActions.visible{
+
+  display:flex;
+
+}
+
+.selectionText{
+
+  color:
+    var(--muted);
+
+  font-size:11px;
+
+}
+
+.selectionText strong{
+
+  color:#fff;
+
+}
+
+.clearSelection{
+
+  border:0;
+
+  background:none;
+
+  color:#bcae90;
+
+  font-size:11px;
+
+  font-weight:700;
+
+}
+
 /* =========================================================
    LEGEND
 ========================================================= */
@@ -1277,19 +1374,6 @@ input[type="search"]{
   margin-top:10px;
 
 }
-
-#createPasswordOverlay{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,4,7,.82);backdrop-filter:blur(18px)}
-#createPasswordOverlay .passwordModal{width:min(520px,100%);background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:30px;box-shadow:0 30px 90px rgba(0,0,0,.55)}
-#createPasswordOverlay .passwordBrand{display:flex;align-items:center;gap:16px;margin-bottom:24px}
-#createPasswordOverlay .passwordBrand img{width:64px;height:64px;object-fit:contain}
-#createPasswordOverlay h2{margin:0;font-size:27px}
-#createPasswordOverlay .passwordSub{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.5}
-#createPasswordOverlay label{display:block;margin:14px 0 7px;color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase}
-#createPasswordOverlay input{width:100%;height:48px;padding:0 14px;border:1px solid var(--border2);border-radius:11px;background:#111016;color:#fff;outline:none}
-#createPasswordOverlay input:focus{border-color:rgba(232,191,208,.7)}
-#createPasswordError{min-height:20px;margin-top:12px;color:#f2a5b5;font-size:12px;line-height:1.5}
-#createPasswordOverlay .passwordActions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
-@media(max-width:650px){#createPasswordOverlay .passwordModal{padding:22px}#createPasswordOverlay h2{font-size:23px}}
 
 /* =========================================================
    ADMIN
@@ -1713,6 +1797,8 @@ input[type="search"]{
 
   }
 
+
+
   .adminGrid{
 
     grid-template-columns:
@@ -1761,6 +1847,8 @@ input[type="search"]{
       1fr;
 
   }
+
+
 
   .resultsGrid{
 
@@ -1925,6 +2013,21 @@ input[type="search"]{
   font-size: 9px;
   font-weight: 900;
 }
+
+
+/* ADMIN INVITATION PASSWORD SETUP */
+#createPasswordOverlay{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,4,7,.82);backdrop-filter:blur(18px)}
+#createPasswordOverlay .passwordModal{width:min(520px,100%);background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:30px;box-shadow:0 30px 90px rgba(0,0,0,.55)}
+#createPasswordOverlay .passwordBrand{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+#createPasswordOverlay .passwordBrand img{width:64px;height:64px;object-fit:contain}
+#createPasswordOverlay h2{margin:0;font-size:27px}
+#createPasswordOverlay .passwordSub{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.5}
+#createPasswordOverlay label{display:block;margin:14px 0 7px;color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+#createPasswordOverlay input{width:100%;height:48px;padding:0 14px;border:1px solid var(--border2);border-radius:11px;background:#111016;color:#fff;outline:none}
+#createPasswordOverlay input:focus{border-color:rgba(232,191,208,.7)}
+#createPasswordError{min-height:20px;margin-top:12px;color:#f2a5b5;font-size:12px;line-height:1.5}
+#createPasswordOverlay .passwordActions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
+@media(max-width:650px){#createPasswordOverlay .passwordModal{padding:22px}#createPasswordOverlay h2{font-size:23px}}
 
 </style>
 
@@ -2113,6 +2216,31 @@ input[type="search"]{
     id="resultsGrid"
     class="resultsGrid"
   ></div>
+
+  <div
+    id="searchActions"
+    class="searchActions"
+  >
+
+    <div class="selectionText">
+
+      <strong id="selectionCount">
+        0
+      </strong>
+
+      classes selected
+
+    </div>
+
+    <button
+      class="clearSelection"
+      id="clearSelection"
+    >
+      Clear selection
+    </button>
+
+  </div>
+
 </section>
 
 <!-- =========================================================
@@ -2187,6 +2315,7 @@ input[type="search"]{
 <!-- =========================================================
      ADMIN LOGIN
 ========================================================= -->
+
 
 <!-- ADMIN INVITATION PASSWORD SETUP -->
 <div id="createPasswordOverlay" class="overlay">
@@ -2885,6 +3014,321 @@ const supabaseClient =
     SUPABASE_KEY
   );
 
+
+/* =========================================================
+   ACADEMY YEAR
+========================================================= */
+
+const ACADEMY_SEASON_START =
+  new Date(
+    2026,
+    8,
+    1,
+    0,
+    0,
+    0,
+    0
+  );
+
+const ACADEMY_SEASON_END =
+  new Date(
+    2027,
+    7,
+    1,
+    0,
+    0,
+    0,
+    0
+  );
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let classes = [];
+
+let teachers = [];
+
+let admins = [];
+
+let branches = [];
+
+let currentUser = null;
+
+let currentBranch = "Maadi";
+
+let selectedClassIds =
+  new Set();
+
+
+/* =========================================================
+   DAYS / STUDIOS
+========================================================= */
+
+const days = [
+
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday"
+
+];
+
+const studios = [
+
+  "Studio 1",
+  "Studio 2",
+  "Studio 3"
+
+];
+
+
+/* =========================================================
+   FALLBACK BRANCHES
+========================================================= */
+
+const fallbackBranches = [
+
+  "Maadi",
+  "New Cairo",
+  "Sheikh Zayed",
+  "New Giza"
+
+];
+
+
+/* =========================================================
+   TEACHER COLORS
+========================================================= */
+
+const defaultTeacherColors = {
+
+  "Mr. Mohamed Fadlon":
+    "#DCE6F1",
+
+  "Ms. Nada Nabil":
+    "#F3B3A5",
+
+  "Ms. Noran Mohamed":
+    "#ADD8E6",
+
+  "Ms. Victoria Pashchenko":
+    "#CCFFCC",
+
+  "Ms. Marina Ehab":
+    "#F2C2D4",
+
+  "Ms. Valentina Kendall":
+    "#E8C6DC",
+
+  "Ms. Nada Amr":
+    "#B4C7E7",
+
+  "Ms. Mahinour Ahmed":
+    "#F6EB20",
+
+  "Ms. Una Stepanovic":
+    "#FFF200",
+
+  "Ms. Rena Takemura":
+    "#99CCFF",
+
+  "Ms. Luiza Pigatto":
+    "#D461A6"
+
+};
+
+let teacherColors = {
+  ...defaultTeacherColors
+};
+
+
+/* =========================================================
+   NORMALIZATION
+========================================================= */
+
+function normalizeText(value){
+
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(/\s+/g," ")
+    .trim();
+
+}
+
+
+function normalizeClassName(name){
+
+  if(!name)
+    return "";
+
+  return String(name)
+
+    .replace(
+      /^\s*Competition\b/i,
+      "Premier"
+    )
+
+    .replace(
+      /\s+/g,
+      " "
+    )
+
+    .trim();
+
+}
+
+
+/* =========================================================
+   TIME
+========================================================= */
+
+function parseTime(time){
+
+  const text =
+    String(time || "")
+      .trim()
+      .toUpperCase();
+
+  const match =
+    text.match(
+      /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/
+    );
+
+  if(!match)
+    return null;
+
+  let hour =
+    parseInt(
+      match[1],
+      10
+    );
+
+  const minute =
+    parseInt(
+      match[2] || "0",
+      10
+    );
+
+  const period =
+    match[3];
+
+  if(
+    period === "PM" &&
+    hour !== 12
+  ){
+
+    hour += 12;
+
+  }
+
+  if(
+    period === "AM" &&
+    hour === 12
+  ){
+
+    hour = 0;
+
+  }
+
+  if(
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ){
+
+    return null;
+
+  }
+
+  return {
+    hour,
+    minute
+  };
+
+}
+
+
+function makeLocalDate(
+  date,
+  time
+){
+
+  const parsed =
+    parseTime(time);
+
+  if(!parsed)
+    return null;
+
+  return new Date(
+
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+
+    parsed.hour,
+    parsed.minute,
+
+    0,
+    0
+
+  );
+
+}
+
+
+function toRFC3339(date){
+
+  if(!date)
+    return null;
+
+  const pad =
+    n =>
+      String(n)
+        .padStart(2,"0");
+
+  const offset =
+    -date.getTimezoneOffset();
+
+  const sign =
+    offset >= 0
+      ? "+"
+      : "-";
+
+  const offsetHours =
+    Math.floor(
+      Math.abs(offset) / 60
+    );
+
+  const offsetMinutes =
+    Math.abs(offset) % 60;
+
+  return (
+
+    date.getFullYear() +
+    "-" +
+    pad(date.getMonth()+1) +
+    "-" +
+    pad(date.getDate()) +
+    "T" +
+    pad(date.getHours()) +
+    ":" +
+    pad(date.getMinutes()) +
+    ":00" +
+    sign +
+    pad(offsetHours) +
+    ":" +
+    pad(offsetMinutes)
+
+  );
+
+}
 
 /* =========================================================
    BRANCHES
@@ -3787,6 +4231,10 @@ function runSearch(){
     grid.innerHTML =
       "";
 
+    selectedClassIds.clear();
+
+    updateSearchActions();
+
     return;
 
   }
@@ -3818,6 +4266,25 @@ function runSearch(){
   grid.innerHTML =
     "";
 
+  const visibleIds =
+    new Set(
+      matches.map(
+        c =>
+          String(c.id)
+      )
+    );
+
+  selectedClassIds =
+    new Set(
+      [...selectedClassIds]
+        .filter(
+          id =>
+            visibleIds.has(
+              String(id)
+            )
+        )
+    );
+
   if(
     !matches.length
   ){
@@ -3840,6 +4307,8 @@ function runSearch(){
       "No matching classes found.";
 
     grid.appendChild(card);
+
+    updateSearchActions();
 
     return;
 
@@ -3915,6 +4384,51 @@ function runSearch(){
 
       left.appendChild(name);
 
+      const select =
+        document.createElement(
+          "button"
+        );
+
+      select.className =
+        "selectClass";
+
+      if(
+        selectedClassIds.has(
+          String(c.id)
+        )
+      ){
+
+        select.classList.add(
+          "selected"
+        );
+
+        select.textContent =
+          "✓";
+
+      }
+
+      else{
+
+        select.textContent =
+          "＋";
+
+      }
+
+      select.onclick =
+        event=>{
+
+          event.stopPropagation();
+
+          toggleClassSelection(
+            c.id
+          );
+
+        };
+
+      top.appendChild(left);
+
+      top.appendChild(select);
+
       const info =
         document.createElement(
           "div"
@@ -3942,8 +4456,138 @@ function runSearch(){
     }
   );
 
+  updateSearchActions();
+
 }
 
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+function toggleClassSelection(
+  id
+){
+
+  const key =
+    String(id);
+
+  if(
+    selectedClassIds.has(key)
+  ){
+
+    selectedClassIds.delete(key);
+
+  }
+
+  else{
+
+    selectedClassIds.add(key);
+
+  }
+
+  runSearch();
+
+}
+
+
+function updateSearchActions(){
+
+  const actions =
+    document.getElementById(
+      "searchActions"
+    );
+
+  const count =
+    document.getElementById(
+      "selectionCount"
+    );
+
+  count.textContent =
+    selectedClassIds.size;
+
+  if(
+    selectedClassIds.size > 0
+  ){
+
+    actions.classList.add(
+      "visible"
+    );
+
+  }
+
+  else{
+
+    actions.classList.remove(
+      "visible"
+    );
+
+  }
+
+}
+
+
+
+/* ADMIN INVITATION / PASSWORD SETUP */
+function invitationIsPresent(){
+  const hash=window.location.hash||"";
+  const search=window.location.search||"";
+  const hp=new URLSearchParams(hash.startsWith("#")?hash.slice(1):hash);
+  const qp=new URLSearchParams(search);
+  return hp.get("type")==="invite" || qp.get("type")==="invite" || !!qp.get("code");
+}
+function showCreatePassword(){
+  const o=document.getElementById("createPasswordOverlay");
+  if(o)o.style.display="flex";
+  setTimeout(()=>document.getElementById("invitePassword")?.focus(),100);
+}
+function hideCreatePassword(){document.getElementById("createPasswordOverlay").style.display="none";}
+function cleanInvitationUrl(){try{window.history.replaceState({},document.title,window.location.origin+window.location.pathname);}catch(e){}}
+async function handleInvitationFlow(){
+  if(!invitationIsPresent()) return false;
+  const errorElement=document.getElementById("createPasswordError");
+  try{
+    const qp=new URLSearchParams(window.location.search);
+    const code=qp.get("code");
+    if(code){const r=await supabaseClient.auth.exchangeCodeForSession(code);if(r.error)throw r.error;}
+    const r=await supabaseClient.auth.getSession();
+    if(r.error)throw r.error;
+    if(!r.data?.session?.user)throw new Error("This invitation link is invalid or has expired. Please ask the administrator to send a new invitation.");
+    currentUser=r.data.session.user;
+    showCreatePassword();
+    return true;
+  }catch(e){
+    console.error("Invitation setup error:",e);
+    errorElement.textContent=e.message||"Unable to open this administrator invitation.";
+    showCreatePassword();
+    return true;
+  }
+}
+async function createInvitedAdminPassword(){
+  const password=document.getElementById("invitePassword").value;
+  const confirm=document.getElementById("invitePasswordConfirm").value;
+  const errorElement=document.getElementById("createPasswordError");
+  const button=document.getElementById("createPasswordButton");
+  errorElement.textContent="";
+  if(!password||!confirm){errorElement.textContent="Please enter and confirm your password.";return;}
+  if(password.length<6){errorElement.textContent="Your password must be at least 6 characters.";return;}
+  if(password!==confirm){errorElement.textContent="The passwords do not match.";return;}
+  button.disabled=true;button.textContent="Creating Password...";
+  try{
+    const r=await supabaseClient.auth.updateUser({password});
+    if(r.error)throw r.error;
+    const user=r.data?.user||currentUser;
+    if(!user)throw new Error("Your invitation session could not be found. Please open the invitation link again.");
+    const a=await supabaseClient.from("admins").select("id,email,role").eq("id",user.id).maybeSingle();
+    if(a.error)throw a.error;
+    if(!a.data){await supabaseClient.auth.signOut();throw new Error("Your account was not found in the PBA administrator list. Please ask a Superior Administrator to resend the invitation.");}
+    currentUser=user;currentUser.adminRole=a.data.role||"admin";
+    hideCreatePassword();cleanInvitationUrl();await openAdmin();
+  }catch(e){console.error("Create invited admin password error:",e);errorElement.textContent=e.message||"Unable to create your password.";}
+  finally{button.disabled=false;button.textContent="Create Password & Continue";}
+}
+document.getElementById("createPasswordButton").addEventListener("click",createInvitedAdminPassword);
+[document.getElementById("invitePassword"),document.getElementById("invitePasswordConfirm")].forEach(input=>input.addEventListener("keydown",e=>{if(e.key==="Enter")createInvitedAdminPassword();}));
 
 
 /* =========================================================
@@ -4843,6 +5487,10 @@ async function deleteClass(c){
     return;
 
   }
+
+  selectedClassIds.delete(
+    String(c.id)
+  );
 
   await loadClasses();
 
@@ -5841,69 +6489,6 @@ async function inviteAdmin(){
 
 
 /* =========================================================
-   ADMIN INVITATION PASSWORD FLOW
-========================================================= */
-
-function invitationIsPresent(){
-  const hash=window.location.hash||"";
-  const search=window.location.search||"";
-  const hp=new URLSearchParams(hash.startsWith("#")?hash.slice(1):hash);
-  const qp=new URLSearchParams(search);
-  return hp.get("type")==="invite" || qp.get("type")==="invite" || !!qp.get("code");
-}
-
-async function handleInvitationFlow(){
-  if(!invitationIsPresent()) return false;
-  const params=new URLSearchParams(window.location.search);
-  const code=params.get("code");
-  try{
-    if(code){
-      const {error}=await supabaseClient.auth.exchangeCodeForSession(code);
-      if(error) throw error;
-    }
-    const {data}=await supabaseClient.auth.getSession();
-    const session=data?.session;
-    if(!session){
-      document.getElementById("createPasswordError").textContent="This invitation link is invalid or has expired. Please ask the Superior Administrator to send a new invitation.";
-      document.getElementById("createPasswordOverlay").style.display="flex";
-      return true;
-    }
-    currentUser=session.user;
-    document.getElementById("loginOverlay").style.display="none";
-    document.getElementById("createPasswordOverlay").style.display="flex";
-    return true;
-  }catch(error){
-    console.error("Invitation flow error:",error);
-    document.getElementById("createPasswordError").textContent=error?.message || "Unable to open the administrator invitation.";
-    document.getElementById("createPasswordOverlay").style.display="flex";
-    return true;
-  }
-}
-
-async function createInvitedAdminPassword(){
-  const password=document.getElementById("invitePassword").value;
-  const confirmPassword=document.getElementById("invitePasswordConfirm").value;
-  const errorElement=document.getElementById("createPasswordError");
-  errorElement.textContent="";
-  if(!password){ errorElement.textContent="Enter a password."; return; }
-  if(password.length<6){ errorElement.textContent="Password must be at least 6 characters."; return; }
-  if(password!==confirmPassword){ errorElement.textContent="Passwords do not match."; return; }
-  const {data,error}=await supabaseClient.auth.updateUser({password});
-  if(error){ errorElement.textContent=error.message; return; }
-  const user=data?.user || currentUser;
-  const {data:admin,error:adminError}=await supabaseClient.from("admins").select("id,email,role").eq("id",user.id).maybeSingle();
-  if(adminError){ errorElement.textContent="Admin database error: "+adminError.message; return; }
-  if(!admin){ errorElement.textContent="This invited account is not authorized as an administrator."; return; }
-  currentUser=user;
-  currentUser.adminRole=admin.role || "admin";
-  document.getElementById("createPasswordOverlay").style.display="none";
-  window.history.replaceState({},document.title,window.location.pathname);
-  await openAdmin();
-}
-
-document.getElementById("createPasswordButton").addEventListener("click",createInvitedAdminPassword);
-
-/* =========================================================
    EVENT LISTENERS
 ========================================================= */
 
@@ -5923,6 +6508,7 @@ document.getElementById(
       currentBranch
     );
 
+    selectedClassIds.clear();
 
     updateBranchDisplay();
 
@@ -5944,8 +6530,23 @@ document.getElementById(
 );
 
 
+/* CLEAR SELECTION */
 
-/* ADMIN LOGIN *//* ADMIN LOGIN */
+document.getElementById(
+  "clearSelection"
+).addEventListener(
+  "click",
+  ()=>{
+
+    selectedClassIds.clear();
+
+    runSearch();
+
+  }
+);
+
+
+/* ADMIN LOGIN */
 
 document.getElementById(
   "loginButton"
@@ -6762,8 +7363,8 @@ document.getElementById(
 
 async function initializeApp(){
 
-  const invitationHandled =
-    await handleInvitationFlow();
+
+  const invitationHandled = await handleInvitationFlow();
 
   if(!invitationHandled){
     await restoreAdminSession();
