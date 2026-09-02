@@ -21,11 +21,6 @@
 ========================================================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-<!-- =========================================================
-     GOOGLE CALENDAR
-========================================================= -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -686,6 +681,7 @@ input[type="search"]{
 }
 
 
+
 .statusWrap{
 
   padding:
@@ -1026,6 +1022,755 @@ input[type="search"]{
 
 }
 
+.selectClass{
+
+  flex-shrink:0;
+
+  width:34px;
+
+  height:34px;
+
+  border-radius:50%;
+
+  border:
+    1px solid rgba(40,35,30,.28);
+
+  background:
+    rgba(255,255,255,.32);
+
+  color:#4d4030;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  font-size:16px;
+
+  font-weight:800;
+
+}
+
+.selectClass.selected{
+
+  background:#171419;
+
+  color:#f1dfb2;
+
+}
+
+/* =========================================================
+   SEARCH ACTIONS
+========================================================= */
+
+.searchActions{
+
+  display:none;
+
+  margin-top:15px;
+
+  padding:13px;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:12px;
+
+  border:
+    1px solid rgba(217,196,154,.18);
+
+  border-radius:14px;
+
+  background:
+    rgba(217,196,154,.055);
+
+}
+
+.searchActions.visible{
+
+  display:flex;
+
+}
+
+.selectionText{
+
+  color:
+    var(--muted);
+
+  font-size:11px;
+
+}
+
+.selectionText strong{
+
+  color:#fff;
+
+}
+
+.clearSelection{
+
+  border:0;
+
+  background:none;
+
+  color:#bcae90;
+
+  font-size:11px;
+
+  font-weight:700;
+
+}
+
+/* =========================================================
+   LEGEND
+========================================================= */
+
+.legendWrap{
+
+  padding:
+    0 24px 70px;
+
+}
+
+.legend{
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.045),
+      rgba(255,255,255,.018)
+    );
+
+  border:
+    1px solid var(--border);
+
+  border-radius:18px;
+
+  padding:22px;
+
+}
+
+.legendGrid{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:8px;
+
+  margin-top:15px;
+
+}
+
+.legendItem{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:8px;
+
+  padding:8px 10px;
+
+  background:#141218;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:9px;
+
+  font-size:11px;
+
+}
+
+.legendColor{
+
+  width:16px;
+
+  height:16px;
+
+  border-radius:5px;
+
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer{
+
+  border-top:
+    1px solid var(--border);
+
+  padding:
+    25px 24px;
+
+  color:#625e68;
+
+  text-align:center;
+
+  font-size:10px;
+
+  letter-spacing:1px;
+
+}
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.overlay{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:1000;
+
+  display:none;
+
+  align-items:center;
+
+  justify-content:center;
+
+  padding:20px;
+
+  background:
+    rgba(0,0,0,.78);
+
+  backdrop-filter:
+    blur(12px);
+
+}
+
+.modal{
+
+  width:min(520px,100%);
+
+  max-height:
+    90vh;
+
+  overflow-y:auto;
+
+  background:#18161d;
+
+  border:
+    1px solid var(--border2);
+
+  border-radius:20px;
+
+  padding:25px;
+
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.6);
+
+}
+
+.modalTop{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:13px;
+
+  margin-bottom:20px;
+
+}
+
+.modalLogo{
+
+  width:48px;
+
+  height:48px;
+
+  border-radius:50%;
+
+  object-fit:cover;
+
+}
+
+.modal h2{
+
+  margin:0;
+
+  font-size:20px;
+
+}
+
+.modalSub{
+
+  color:
+    var(--muted);
+
+  font-size:11px;
+
+  margin-top:4px;
+
+}
+
+.modal label{
+
+  display:block;
+
+  color:
+    var(--muted);
+
+  font-size:10px;
+
+  text-transform:uppercase;
+
+  letter-spacing:1px;
+
+  margin:
+    13px 0 6px;
+
+}
+
+.modal input{
+
+  width:100%;
+
+  height:45px;
+
+  border-radius:10px;
+
+  border:
+    1px solid var(--border2);
+
+  background:#111016;
+
+  color:#fff;
+
+  padding:
+    0 12px;
+
+  outline:none;
+
+}
+
+.modalActions{
+
+  display:flex;
+
+  justify-content:flex-end;
+
+  gap:8px;
+
+  margin-top:18px;
+
+  flex-wrap:wrap;
+
+}
+
+.error{
+
+  color:#e998a5;
+
+  font-size:11px;
+
+  margin-top:10px;
+
+}
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+.adminPanel{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:800;
+
+  display:none;
+
+  overflow:auto;
+
+  background:
+    var(--bg);
+
+}
+
+.adminTop{
+
+  position:sticky;
+
+  top:0;
+
+  z-index:10;
+
+  background:
+    rgba(13,12,16,.9);
+
+  backdrop-filter:
+    blur(18px);
+
+  border-bottom:
+    1px solid var(--border);
+
+}
+
+.adminTopInner{
+
+  max-width:1500px;
+
+  margin:auto;
+
+  padding:
+    15px 24px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:15px;
+
+}
+
+.adminContent{
+
+  max-width:1500px;
+
+  margin:auto;
+
+  padding:
+    30px 24px 70px;
+
+}
+
+.adminGrid{
+
+  display:grid;
+
+  grid-template-columns:
+    420px 1fr;
+
+  gap:20px;
+
+  align-items:start;
+
+}
+
+.adminCard{
+
+  background:
+    var(--card);
+
+  border:
+    1px solid var(--border);
+
+  border-radius:17px;
+
+  padding:20px;
+
+}
+
+.adminCard h2{
+
+  margin:
+    0 0 18px;
+
+  font-size:18px;
+
+}
+
+.formGrid{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:10px;
+
+}
+
+.formField.full{
+
+  grid-column:
+    1/-1;
+
+}
+
+.formField label{
+
+  display:block;
+
+  color:
+    var(--muted);
+
+  font-size:10px;
+
+  text-transform:uppercase;
+
+  letter-spacing:1px;
+
+  margin-bottom:6px;
+
+}
+
+.formField input,
+.formField select{
+
+  height:43px;
+
+}
+
+.adminList{
+
+  display:grid;
+
+  gap:8px;
+
+  max-height:650px;
+
+  overflow-y:auto;
+
+}
+
+/* =========================================================
+   ADMIN SEARCH
+========================================================= */
+
+.adminSearchWrap{
+
+  margin-bottom:15px;
+
+}
+
+.adminSearch{
+
+  width:100%;
+
+  height:45px;
+
+  border-radius:11px;
+
+  border:
+    1px solid var(--border2);
+
+  background:#111016;
+
+  color:#fff;
+
+  padding:
+    0 14px;
+
+  outline:none;
+
+}
+
+.adminSearch:focus{
+
+  border-color:
+    rgba(232,191,208,.65);
+
+}
+
+.adminSearchInfo{
+
+  margin-top:7px;
+
+  color:
+    var(--muted);
+
+  font-size:10px;
+
+}
+
+/* =========================================================
+   ADMIN ITEMS
+========================================================= */
+
+.adminItem{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:15px;
+
+  padding:13px;
+
+  border:
+    1px solid var(--border);
+
+  background:#141218;
+
+  border-radius:12px;
+
+}
+
+.adminItemName{
+
+  font-size:13px;
+
+  font-weight:800;
+
+}
+
+.adminItemDetails{
+
+  margin-top:5px;
+
+  color:
+    var(--muted);
+
+  font-size:10px;
+
+  line-height:1.6;
+
+}
+
+.adminActions{
+
+  display:flex;
+
+  gap:6px;
+
+  flex-shrink:0;
+
+}
+
+.adminTabs{
+
+  display:flex;
+
+  gap:8px;
+
+  margin-bottom:18px;
+
+  flex-wrap:wrap;
+
+}
+
+.adminTab{
+
+  border:
+    1px solid var(--border);
+
+  background:#141218;
+
+  color:#aaa;
+
+  padding:
+    9px 13px;
+
+  border-radius:9px;
+
+}
+
+.adminTab.active{
+
+  background:
+    var(--pink);
+
+  color:#171219;
+
+  border-color:transparent;
+
+}
+
+.adminSection{
+
+  display:none;
+
+}
+
+.adminSection.active{
+
+  display:block;
+
+}
+
+.smallNote{
+
+  color:
+    var(--muted);
+
+  font-size:11px;
+
+  line-height:1.6;
+
+  margin-top:10px;
+
+}
+
+.teacherRow,
+.adminRow{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:12px;
+
+  padding:12px;
+
+  margin-bottom:8px;
+
+  background:#141218;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:11px;
+
+}
+
+.rowLeft{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+  min-width:0;
+
+}
+
+.colorDot{
+
+  width:18px;
+
+  height:18px;
+
+  border-radius:5px;
+
+  flex-shrink:0;
+
+}
+
+.rowText{
+
+  font-size:12px;
+
+  font-weight:700;
+
+}
+
+.rowSub{
+
+  color:
+    var(--muted);
+
+  font-size:10px;
+
+  margin-top:3px;
+
+}
 
 /* =========================================================
    RESPONSIVE
@@ -1051,6 +1796,7 @@ input[type="search"]{
       1fr 1fr;
 
   }
+
 
 
   .adminGrid{
@@ -1101,6 +1847,7 @@ input[type="search"]{
       1fr;
 
   }
+
 
 
   .resultsGrid{
@@ -1469,6 +2216,57 @@ input[type="search"]{
     id="resultsGrid"
     class="resultsGrid"
   ></div>
+
+  <div
+    id="searchActions"
+    class="searchActions"
+  >
+
+    <div class="selectionText">
+
+      <strong id="selectionCount">
+        0
+      </strong>
+
+      classes selected
+
+    </div>
+
+    <button
+      class="clearSelection"
+      id="clearSelection"
+    >
+      Clear selection
+    </button>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     SCHEDULE
+========================================================= -->
+
+<main class="scheduleWrap">
+
+  <div class="scheduleHeader">
+
+    <div>
+
+      <div class="sectionEyebrow">
+        Weekly Schedule
+      </div>
+
+      <h2
+        class="sectionTitle"
+        id="scheduleTitle"
+      >
+        Maadi Branch
+      </h2>
+
+    </div>
+
+  </div>
 
   <div class="scheduleScroller">
 
@@ -2260,6 +3058,8 @@ let currentUser = null;
 
 let currentBranch = "Maadi";
 
+let selectedClassIds =
+  new Set();
 
 
 /* =========================================================
@@ -2529,129 +3329,6 @@ function toRFC3339(date){
   );
 
 }
-
-const dayIndex = {
-
-  Sunday:0,
-  Monday:1,
-  Tuesday:2,
-  Wednesday:3,
-  Thursday:4,
-  Friday:5,
-  Saturday:6
-
-};
-
-
-function nextOccurrence(dayName, startTime){
-
-  const now =
-    new Date();
-
-  const today =
-    now.getDay();
-
-  let difference =
-    dayIndex[dayName] -
-    today;
-
-  if(difference < 0)
-    difference += 7;
-
-  const date =
-    new Date(now);
-
-  date.setDate(
-    now.getDate() +
-    difference
-  );
-
-  date.setHours(
-    0,0,0,0
-  );
-
-  // If the class is today but its start time has already passed,
-  // use the occurrence next week instead of the one that already happened.
-  if(difference === 0 && startTime){
-
-    const start =
-      makeLocalDate(date, startTime);
-
-    if(start && start <= now){
-      date.setDate(
-        date.getDate() + 7
-      );
-    }
-
-  }
-
-  return date;
-
-}
-
-
-function firstSeasonOccurrence(dayName){
-
-  const date =
-    new Date(
-      ACADEMY_SEASON_START
-    );
-
-  const wanted =
-    dayIndex[dayName];
-
-  const current =
-    date.getDay();
-
-  let difference =
-    wanted -
-    current;
-
-  if(difference < 0)
-    difference += 7;
-
-  date.setDate(
-    date.getDate() +
-    difference
-  );
-
-  date.setHours(
-    0,0,0,0
-  );
-
-  return date;
-
-}
-
-
-function getSeasonOccurrences(dayName){
-
-  const dates = [];
-
-  let date =
-    firstSeasonOccurrence(
-      dayName
-    );
-
-  while(
-    date < ACADEMY_SEASON_END
-  ){
-
-    dates.push(
-      new Date(date)
-    );
-
-    date.setDate(
-      date.getDate() + 7
-    );
-
-  }
-
-  return dates;
-
-}
-
-
 
 /* =========================================================
    BRANCHES
@@ -3554,7 +4231,9 @@ function runSearch(){
     grid.innerHTML =
       "";
 
+    selectedClassIds.clear();
 
+    updateSearchActions();
 
     return;
 
@@ -3587,6 +4266,25 @@ function runSearch(){
   grid.innerHTML =
     "";
 
+  const visibleIds =
+    new Set(
+      matches.map(
+        c =>
+          String(c.id)
+      )
+    );
+
+  selectedClassIds =
+    new Set(
+      [...selectedClassIds]
+        .filter(
+          id =>
+            visibleIds.has(
+              String(id)
+            )
+        )
+    );
+
   if(
     !matches.length
   ){
@@ -3610,6 +4308,7 @@ function runSearch(){
 
     grid.appendChild(card);
 
+    updateSearchActions();
 
     return;
 
@@ -3685,6 +4384,47 @@ function runSearch(){
 
       left.appendChild(name);
 
+      const select =
+        document.createElement(
+          "button"
+        );
+
+      select.className =
+        "selectClass";
+
+      if(
+        selectedClassIds.has(
+          String(c.id)
+        )
+      ){
+
+        select.classList.add(
+          "selected"
+        );
+
+        select.textContent =
+          "✓";
+
+      }
+
+      else{
+
+        select.textContent =
+          "＋";
+
+      }
+
+      select.onclick =
+        event=>{
+
+          event.stopPropagation();
+
+          toggleClassSelection(
+            c.id
+          );
+
+        };
+
       top.appendChild(left);
 
       top.appendChild(select);
@@ -3716,15 +4456,75 @@ function runSearch(){
     }
   );
 
+  updateSearchActions();
 
 }
 
 
 /* =========================================================
-   CALENDAR BUTTON
+   SELECTION
 ========================================================= */
 
+function toggleClassSelection(
+  id
+){
 
+  const key =
+    String(id);
+
+  if(
+    selectedClassIds.has(key)
+  ){
+
+    selectedClassIds.delete(key);
+
+  }
+
+  else{
+
+    selectedClassIds.add(key);
+
+  }
+
+  runSearch();
+
+}
+
+
+function updateSearchActions(){
+
+  const actions =
+    document.getElementById(
+      "searchActions"
+    );
+
+  const count =
+    document.getElementById(
+      "selectionCount"
+    );
+
+  count.textContent =
+    selectedClassIds.size;
+
+  if(
+    selectedClassIds.size > 0
+  ){
+
+    actions.classList.add(
+      "visible"
+    );
+
+  }
+
+  else{
+
+    actions.classList.remove(
+      "visible"
+    );
+
+  }
+
+}
 
 
 
@@ -4687,6 +5487,10 @@ async function deleteClass(c){
     return;
 
   }
+
+  selectedClassIds.delete(
+    String(c.id)
+  );
 
   await loadClasses();
 
@@ -5704,6 +6508,7 @@ document.getElementById(
       currentBranch
     );
 
+    selectedClassIds.clear();
 
     updateBranchDisplay();
 
@@ -5733,12 +6538,12 @@ document.getElementById(
   "click",
   ()=>{
 
+    selectedClassIds.clear();
 
     runSearch();
 
   }
 );
-
 
 
 /* ADMIN LOGIN */
