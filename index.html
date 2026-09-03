@@ -2009,6 +2009,15 @@ input[type="search"]{
       <span id="saveSchedulePdfText" class="pdfButtonLabel">Save Schedule as PDF</span>
     </button>
 
+    <button
+      id="publicAdminLogin"
+      class="btn btnDark"
+      type="button"
+      title="Open PBA Administration"
+    >
+      Admin Login
+    </button>
+
     <div class="brand">
 
       <img
@@ -7287,6 +7296,19 @@ initializeApp();
    ADMIN AUTH CONTROLS
 ========================================================= */
 
+document.getElementById("publicAdminLogin").addEventListener("click",function(){
+  if(currentUser){
+    openAdmin();
+    return;
+  }
+
+  const overlay=document.getElementById("loginOverlay");
+  const error=document.getElementById("loginError");
+  error.textContent="";
+  overlay.style.display="flex";
+  setTimeout(()=>document.getElementById("adminEmail").focus(),0);
+});
+
 document.getElementById("loginButton").addEventListener("click",adminLogin);
 
 document.getElementById("cancelLogin").addEventListener("click",function(){
@@ -7337,22 +7359,32 @@ document.getElementById("logoutButton").addEventListener("click",async function(
   button.textContent="Logout";
 });
 
-/* Ctrl + Shift + A opens Admin Login when logged out, or Admin Panel when logged in. */
-document.addEventListener("keydown", function(event){
-  if(event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a"){
+/* ADMIN SHORTCUT — CTRL + SHIFT + A */
+function openAdminShortcut(event){
+  const key = String(event.key || "").toLowerCase();
+  if(event.ctrlKey && event.shiftKey && key === "a"){
     event.preventDefault();
-    event.stopPropagation();
+    event.stopImmediatePropagation();
 
     if(currentUser){
       openAdmin();
     }else{
-      const overlay=document.getElementById("loginOverlay");
-      overlay.style.display="flex";
-      document.getElementById("loginError").textContent="";
-      setTimeout(()=>document.getElementById("adminEmail").focus(),0);
+      const overlay = document.getElementById("loginOverlay");
+      if(!overlay) return;
+      overlay.style.display = "flex";
+      const error = document.getElementById("loginError");
+      if(error) error.textContent = "";
+      setTimeout(()=>{
+        const email = document.getElementById("adminEmail");
+        if(email) email.focus();
+      },50);
     }
   }
-});
+}
+
+/* Listen during capture so the page receives the shortcut as early as possible. */
+window.addEventListener("keydown", openAdminShortcut, true);
+window.addEventListener("keyup", openAdminShortcut, true);
 </script>
 
 </body>
