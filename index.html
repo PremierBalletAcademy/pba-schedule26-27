@@ -4778,6 +4778,13 @@ async function restoreAdminSession(){
 
 async function openAdmin(){
 
+  /* Never open the administration panel without a verified admin session. */
+  if(!currentUser){
+    document.getElementById("loginOverlay").style.display="flex";
+    document.getElementById("adminEmail").focus();
+    return;
+  }
+
   document.getElementById(
     "adminPanel"
   ).style.display =
@@ -7258,7 +7265,12 @@ async function initializeApp(){
 
   await loadTeachers();
 
+  await loadAnnouncements();
+
   await loadClasses();
+
+  /* Keep the public page visible unless an authenticated admin explicitly opens it. */
+  document.getElementById("adminPanel").style.display="none";
 
 }
 
@@ -7271,13 +7283,73 @@ initializeApp();
 
 
 
-/* Admin Panel keyboard shortcut */
+/* =========================================================
+   ADMIN AUTH CONTROLS
+========================================================= */
+
+document.getElementById("loginButton").addEventListener("click",adminLogin);
+
+document.getElementById("cancelLogin").addEventListener("click",function(){
+  document.getElementById("loginOverlay").style.display="none";
+  document.getElementById("loginError").textContent="";
+});
+
+document.getElementById("adminPassword").addEventListener("keydown",function(event){
+  if(event.key === "Enter"){
+    event.preventDefault();
+    adminLogin();
+  }
+});
+
+document.getElementById("adminEmail").addEventListener("keydown",function(event){
+  if(event.key === "Enter"){
+    event.preventDefault();
+    document.getElementById("adminPassword").focus();
+  }
+});
+
+document.getElementById("closeAdmin").addEventListener("click",function(){
+  document.getElementById("adminPanel").style.display="none";
+});
+
+document.getElementById("logoutButton").addEventListener("click",async function(){
+  const button=document.getElementById("logoutButton");
+  button.disabled=true;
+  button.textContent="Logging out...";
+
+  try{
+    const {error}=await supabaseClient.auth.signOut();
+    if(error) throw error;
+  }catch(error){
+    console.error("Logout error:",error);
+    button.disabled=false;
+    button.textContent="Logout";
+    alert("Unable to log out: " + (error?.message || "Unknown error"));
+    return;
+  }
+
+  currentUser=null;
+  document.getElementById("adminPanel").style.display="none";
+  document.getElementById("adminEmail").value="";
+  document.getElementById("adminPassword").value="";
+  document.getElementById("loginError").textContent="";
+  button.disabled=false;
+  button.textContent="Logout";
+});
+
+/* Ctrl + Shift + A opens Admin Login when logged out, or Admin Panel when logged in. */
 document.addEventListener("keydown", function(event){
   if(event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a"){
     event.preventDefault();
     event.stopPropagation();
-    if(typeof openAdmin === "function"){
+
+    if(currentUser){
       openAdmin();
+    }else{
+      const overlay=document.getElementById("loginOverlay");
+      overlay.style.display="flex";
+      document.getElementById("loginError").textContent="";
+      setTimeout(()=>document.getElementById("adminEmail").focus(),0);
     }
   }
 });
