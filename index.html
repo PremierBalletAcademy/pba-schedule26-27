@@ -7269,6 +7269,18 @@ async function initializeApp(){
 
 initializeApp();
 
+
+
+/* Admin Panel keyboard shortcut */
+document.addEventListener("keydown", function(event){
+  if(event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a"){
+    event.preventDefault();
+    event.stopPropagation();
+    if(typeof openAdmin === "function"){
+      openAdmin();
+    }
+  }
+});
 </script>
 
 </body>
