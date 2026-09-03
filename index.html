@@ -3051,6 +3051,73 @@ function normalizeClassName(name){
 }
 
 
+function parseTime(time){
+
+  const text =
+    String(time || "")
+      .trim()
+      .toUpperCase();
+
+  const match =
+    text.match(
+      /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/
+    );
+
+  if(!match)
+    return null;
+
+  let hour =
+    parseInt(
+      match[1],
+      10
+    );
+
+  const minute =
+    parseInt(
+      match[2] || "0",
+      10
+    );
+
+  const period =
+    match[3];
+
+  if(
+    period === "PM" &&
+    hour !== 12
+  ){
+
+    hour += 12;
+
+  }
+
+  if(
+    period === "AM" &&
+    hour === 12
+  ){
+
+    hour = 0;
+
+  }
+
+  if(
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ){
+
+    return null;
+
+  }
+
+  return {
+    hour,
+    minute
+  };
+
+}
+
+
 /* =========================================================
    BRANCHES
 ========================================================= */
