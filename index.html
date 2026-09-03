@@ -7341,7 +7341,7 @@ document.getElementById("logoutButton").addEventListener("click",async function(
 });
 
 /* ADMIN SHORTCUT — CTRL + SHIFT + L */
-function openAdminShortcut(event){
+async function openAdminShortcut(event){
   const key = String(event.key || "").toLowerCase();
   const code = String(event.code || "").toLowerCase();
   if(event.ctrlKey && event.shiftKey && (key === "l" || code === "keyl")){
@@ -7351,9 +7351,12 @@ function openAdminShortcut(event){
     const overlay = document.getElementById("loginOverlay");
     if(!overlay) return;
 
+    /* Always show the login screen. If a previous admin session exists,
+       sign it out first so Ctrl+Shift+L never bypasses the login. */
     if(typeof currentUser !== "undefined" && currentUser){
-      openAdmin();
-      return;
+      try { await supabaseClient.auth.signOut(); } catch(e) { console.warn("Shortcut sign-out:", e); }
+      currentUser = null;
+      document.getElementById("adminPanel").style.display = "none";
     }
 
     overlay.style.display = "flex";
