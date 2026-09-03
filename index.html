@@ -7288,18 +7288,7 @@ initializeApp();
 ========================================================= */
 
 /* public admin button removed; keyboard shortcut only */
-/* document.getElementById("publicAdminLogin").addEventListener("click",function(){
-  if(currentUser){
-    openAdmin();
-    return;
-  }
 
-  const overlay=document.getElementById("loginOverlay");
-  const error=document.getElementById("loginError");
-  error.textContent="";
-  overlay.style.display="flex";
-  setTimeout(()=>document.getElementById("adminEmail").focus(),0);
-}); */
 
 document.getElementById("loginButton").addEventListener("click",adminLogin);
 
