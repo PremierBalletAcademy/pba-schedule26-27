@@ -701,67 +701,6 @@ input[type="search"]{
 }
 
 /* =========================================================
-   ANNOUNCEMENTS
-========================================================= */
-
-.announcementsWrap{
-  max-width:1500px;
-  margin:auto;
-  padding:0 24px 28px;
-}
-
-.announcementsHeader{
-  display:flex;
-  align-items:end;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:12px;
-}
-
-.announcementsGrid{
-  display:grid;
-  gap:10px;
-}
-
-.announcementCard{
-  background:linear-gradient(135deg,rgba(232,191,208,.12),rgba(255,255,255,.035));
-  border:1px solid rgba(232,191,208,.24);
-  border-radius:15px;
-  padding:16px 18px;
-}
-
-.announcementTitle{
-  font-size:15px;
-  font-weight:800;
-}
-
-.announcementMessage{
-  margin-top:7px;
-  color:#d8d4dc;
-  font-size:12px;
-  line-height:1.65;
-  white-space:pre-wrap;
-}
-
-.announcementMeta{
-  margin-top:9px;
-  color:var(--muted);
-  font-size:10px;
-}
-
-.announcementEmpty{
-  display:none;
-}
-
-.announcementAdminMessage{
-  min-height:18px;
-}
-
-.announcementPreview{
-  max-width:700px;
-}
-
-/* =========================================================
    SCHEDULE
 ========================================================= */
 
@@ -1792,8 +1731,7 @@ input[type="search"]{
   .statusWrap,
   .scheduleWrap,
   .results,
-  .legendWrap,
-  .announcementsWrap{
+  .legendWrap{
 
     padding-left:15px;
     padding-right:15px;
@@ -2176,25 +2114,6 @@ input[type="search"]{
 </section>
 
 <!-- =========================================================
-     ANNOUNCEMENTS
-========================================================= -->
-
-<section class="announcementsWrap" id="announcementsSection" style="display:none">
-
-  <div class="announcementsHeader">
-
-    <div>
-      <div class="sectionEyebrow">Announcements</div>
-      <h2 class="sectionTitle">Latest Updates</h2>
-    </div>
-
-  </div>
-
-  <div id="announcementsGrid" class="announcementsGrid"></div>
-
-</section>
-
-<!-- =========================================================
      SCHEDULE
 ========================================================= -->
 
@@ -2447,13 +2366,6 @@ input[type="search"]{
         data-tab="teachersAdmin"
       >
         Teachers
-      </button>
-
-      <button
-        class="adminTab"
-        data-tab="announcementsAdmin"
-      >
-        Announcements
       </button>
 
       <button
@@ -2853,95 +2765,6 @@ input[type="search"]{
     </div>
 
     <!-- =====================================================
-         ANNOUNCEMENTS ADMIN
-    ====================================================== -->
-
-    <div
-      id="announcementsAdmin"
-      class="adminSection"
-    >
-
-      <div class="adminGrid">
-
-        <div class="adminCard">
-
-          <h2 id="announcementFormTitle">
-            Add Announcement
-          </h2>
-
-          <div class="formField">
-            <label>Title</label>
-            <input
-              id="announcementTitleInput"
-              placeholder="Important Schedule Update"
-            >
-          </div>
-
-          <div class="formField" style="margin-top:12px">
-            <label>Message</label>
-            <textarea
-              id="announcementMessageInput"
-              rows="6"
-              placeholder="Write the announcement here..."
-              style="width:100%;min-height:130px;resize:vertical;border-radius:11px;border:1px solid var(--border2);background:#111016;color:#fff;padding:12px;outline:none;font:inherit;font-size:13px;line-height:1.5;"
-            ></textarea>
-          </div>
-
-          <div class="formField" style="margin-top:12px">
-            <label>Show For</label>
-            <select id="announcementBranchInput"></select>
-          </div>
-
-          <div class="formField" style="margin-top:12px">
-            <label>Status</label>
-            <select id="announcementActiveInput">
-              <option value="true">Active — Show on schedule</option>
-              <option value="false">Inactive — Hide from schedule</option>
-            </select>
-          </div>
-
-          <input id="editAnnouncementId" type="hidden">
-
-          <div id="announcementAdminMessage" class="smallNote announcementAdminMessage"></div>
-
-          <div class="modalActions">
-            <button
-              class="btn btnDark"
-              id="cancelAnnouncementEdit"
-              style="display:none"
-            >
-              Cancel Edit
-            </button>
-
-            <button
-              class="btn btnPink"
-              id="saveAnnouncementButton"
-            >
-              Publish Announcement
-            </button>
-          </div>
-
-        </div>
-
-        <div class="adminCard">
-
-          <div class="sectionEyebrow">Database</div>
-          <h2>Announcements</h2>
-
-          <div
-            id="announcementList"
-            class="adminList"
-          >
-            Loading...
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- =====================================================
          ADMINISTRATORS
     ====================================================== -->
 
@@ -3099,8 +2922,6 @@ let teachers = [];
 let admins = [];
 
 let branches = [];
-
-let announcements = [];
 
 let currentUser = null;
 
@@ -3700,230 +3521,6 @@ function populateTeacherSelect(){
 
 }
 
-
-/* =========================================================
-   ANNOUNCEMENTS
-========================================================= */
-
-function populateAnnouncementBranchSelect(){
-
-  const select=document.getElementById("announcementBranchInput");
-  if(!select) return;
-
-  const current=select.value;
-  select.innerHTML="";
-
-  const all=document.createElement("option");
-  all.value="__ALL__";
-  all.textContent="All Branches";
-  select.appendChild(all);
-
-  branches.forEach(branch=>{
-    const option=document.createElement("option");
-    option.value=branch.name;
-    option.textContent=branch.name+" Branch";
-    select.appendChild(option);
-  });
-
-  if(current && [...select.options].some(o=>o.value===current)){
-    select.value=current;
-  }else{
-    select.value="__ALL__";
-  }
-}
-
-async function loadAnnouncements(){
-
-  try{
-    const {data,error}=await supabaseClient
-      .from("announcements")
-      .select("id,title,message,branch,active,created_at")
-      .order("created_at",{ascending:false});
-
-    if(error) throw error;
-
-    announcements=data || [];
-  }catch(error){
-    console.warn("Announcements unavailable:",error.message);
-    announcements=[];
-  }
-
-  populateAnnouncementBranchSelect();
-  renderAnnouncements();
-  renderAnnouncementList();
-}
-
-function renderAnnouncements(){
-
-  const section=document.getElementById("announcementsSection");
-  const grid=document.getElementById("announcementsGrid");
-  if(!section || !grid) return;
-
-  const visible=announcements.filter(a=>
-    a.active !== false &&
-    (!a.branch || a.branch === "__ALL__" || a.branch === currentBranch)
-  );
-
-  grid.innerHTML="";
-  section.style.display=visible.length ? "block" : "none";
-
-  visible.forEach(a=>{
-    const card=document.createElement("article");
-    card.className="announcementCard";
-
-    const title=document.createElement("div");
-    title.className="announcementTitle";
-    title.textContent=a.title || "Announcement";
-
-    const message=document.createElement("div");
-    message.className="announcementMessage";
-    message.textContent=a.message || "";
-
-    const meta=document.createElement("div");
-    meta.className="announcementMeta";
-    meta.textContent=(a.branch && a.branch !== "__ALL__")
-      ? `${a.branch} Branch`
-      : "All Branches";
-
-    card.appendChild(title);
-    card.appendChild(message);
-    card.appendChild(meta);
-    grid.appendChild(card);
-  });
-}
-
-function renderAnnouncementList(){
-
-  const list=document.getElementById("announcementList");
-  if(!list) return;
-
-  list.innerHTML="";
-
-  if(!announcements.length){
-    const empty=document.createElement("div");
-    empty.className="adminItem";
-    empty.textContent="No announcements yet.";
-    list.appendChild(empty);
-    return;
-  }
-
-  announcements.forEach(a=>{
-    const item=document.createElement("div");
-    item.className="adminItem";
-
-    const info=document.createElement("div");
-
-    const name=document.createElement("div");
-    name.className="adminItemName";
-    name.textContent=a.title || "Announcement";
-
-    const details=document.createElement("div");
-    details.className="adminItemDetails";
-    const target=(a.branch && a.branch !== "__ALL__") ? `${a.branch} Branch` : "All Branches";
-    details.textContent=`${target} · ${a.active === false ? "Inactive" : "Active"}${a.message ? " · " + a.message : ""}`;
-
-    info.appendChild(name);
-    info.appendChild(details);
-
-    const actions=document.createElement("div");
-    actions.className="adminActions";
-
-    const edit=document.createElement("button");
-    edit.className="btn btnGold";
-    edit.textContent="Edit";
-    edit.onclick=()=>startAnnouncementEdit(a);
-
-    const del=document.createElement("button");
-    del.className="btn btnDanger";
-    del.textContent="Delete";
-    del.onclick=()=>deleteAnnouncement(a);
-
-    actions.appendChild(edit);
-    actions.appendChild(del);
-    item.appendChild(info);
-    item.appendChild(actions);
-    list.appendChild(item);
-  });
-}
-
-function startAnnouncementEdit(a){
-
-  document.getElementById("editAnnouncementId").value=a.id;
-  document.getElementById("announcementTitleInput").value=a.title || "";
-  document.getElementById("announcementMessageInput").value=a.message || "";
-  document.getElementById("announcementBranchInput").value=a.branch || "__ALL__";
-  document.getElementById("announcementActiveInput").value=a.active === false ? "false" : "true";
-  document.getElementById("announcementFormTitle").textContent="Edit Announcement";
-  document.getElementById("saveAnnouncementButton").textContent="Save Changes";
-  document.getElementById("cancelAnnouncementEdit").style.display="inline-block";
-  document.getElementById("announcementAdminMessage").textContent="";
-  document.getElementById("announcementsAdmin").scrollIntoView({behavior:"smooth"});
-}
-
-function cancelAnnouncementEdit(){
-
-  document.getElementById("editAnnouncementId").value="";
-  document.getElementById("announcementTitleInput").value="";
-  document.getElementById("announcementMessageInput").value="";
-  document.getElementById("announcementBranchInput").value="__ALL__";
-  document.getElementById("announcementActiveInput").value="true";
-  document.getElementById("announcementFormTitle").textContent="Add Announcement";
-  document.getElementById("saveAnnouncementButton").textContent="Publish Announcement";
-  document.getElementById("cancelAnnouncementEdit").style.display="none";
-  document.getElementById("announcementAdminMessage").textContent="";
-}
-
-async function saveAnnouncement(){
-
-  const id=document.getElementById("editAnnouncementId").value;
-  const title=document.getElementById("announcementTitleInput").value.trim();
-  const message=document.getElementById("announcementMessageInput").value.trim();
-  const branch=document.getElementById("announcementBranchInput").value || "__ALL__";
-  const active=document.getElementById("announcementActiveInput").value === "true";
-  const info=document.getElementById("announcementAdminMessage");
-
-  if(!title || !message){
-    info.textContent="Please enter both a title and a message.";
-    return;
-  }
-
-  if(!currentUser){
-    info.textContent="You must be logged in.";
-    return;
-  }
-
-  const payload={title,message,branch,active};
-  let result;
-
-  if(id){
-    result=await supabaseClient.from("announcements").update(payload).eq("id",id);
-  }else{
-    result=await supabaseClient.from("announcements").insert(payload);
-  }
-
-  if(result.error){
-    info.textContent=result.error.message;
-    return;
-  }
-
-  info.textContent=id ? "Announcement updated successfully." : "Announcement published successfully.";
-  cancelAnnouncementEdit();
-  await loadAnnouncements();
-}
-
-async function deleteAnnouncement(a){
-
-  if(!confirm(`Delete announcement "${a.title || "Announcement"}"?`)) return;
-
-  const {error}=await supabaseClient.from("announcements").delete().eq("id",a.id);
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  await loadAnnouncements();
-}
 
 /* =========================================================
    LOAD CLASSES
@@ -4778,13 +4375,6 @@ async function restoreAdminSession(){
 
 async function openAdmin(){
 
-  /* Never open the administration panel without a verified admin session. */
-  if(!currentUser){
-    document.getElementById("loginOverlay").style.display="flex";
-    document.getElementById("adminEmail").focus();
-    return;
-  }
-
   document.getElementById(
     "adminPanel"
   ).style.display =
@@ -4801,8 +4391,6 @@ async function openAdmin(){
   await loadTeachers();
 
   await loadAdminClasses();
-
-  await loadAnnouncements();
 
   await loadAdmins();
 
@@ -5995,8 +5583,6 @@ async function addOrUpdateTeacher(){
 
   await loadTeachers();
 
-  await loadAnnouncements();
-
   await loadClasses();
 
 }
@@ -6490,12 +6076,6 @@ async function inviteAdmin(){
    EVENT LISTENERS
 ========================================================= */
 
-/* ANNOUNCEMENTS ADMIN */
-
-document.getElementById("saveAnnouncementButton")?.addEventListener("click",saveAnnouncement);
-document.getElementById("cancelAnnouncementEdit")?.addEventListener("click",cancelAnnouncementEdit);
-
-
 /* PUBLIC BRANCH */
 
 document.getElementById(
@@ -6513,8 +6093,6 @@ document.getElementById(
     );
 
     updateBranchDisplay();
-
-    renderAnnouncements();
 
     renderSchedule();
 
@@ -7265,12 +6843,7 @@ async function initializeApp(){
 
   await loadTeachers();
 
-  await loadAnnouncements();
-
   await loadClasses();
-
-  /* Keep the public page visible unless an authenticated admin explicitly opens it. */
-  document.getElementById("adminPanel").style.display="none";
 
 }
 
@@ -7281,99 +6854,6 @@ async function initializeApp(){
 
 initializeApp();
 
-
-
-/* =========================================================
-   ADMIN AUTH CONTROLS
-========================================================= */
-
-/* ADMIN INVITATION */
-  document.getElementById("addAdminButton")?.addEventListener("click", inviteAdmin);
-
-  /* public admin button removed; keyboard shortcut only */
-
-
-document.getElementById("loginButton").addEventListener("click",adminLogin);
-
-document.getElementById("cancelLogin").addEventListener("click",function(){
-  document.getElementById("loginOverlay").style.display="none";
-  document.getElementById("loginError").textContent="";
-});
-
-document.getElementById("adminPassword").addEventListener("keydown",function(event){
-  if(event.key === "Enter"){
-    event.preventDefault();
-    adminLogin();
-  }
-});
-
-document.getElementById("adminEmail").addEventListener("keydown",function(event){
-  if(event.key === "Enter"){
-    event.preventDefault();
-    document.getElementById("adminPassword").focus();
-  }
-});
-
-document.getElementById("closeAdmin").addEventListener("click",function(){
-  document.getElementById("adminPanel").style.display="none";
-});
-
-document.getElementById("logoutButton").addEventListener("click",async function(){
-  const button=document.getElementById("logoutButton");
-  button.disabled=true;
-  button.textContent="Logging out...";
-
-  try{
-    const {error}=await supabaseClient.auth.signOut();
-    if(error) throw error;
-  }catch(error){
-    console.error("Logout error:",error);
-    button.disabled=false;
-    button.textContent="Logout";
-    alert("Unable to log out: " + (error?.message || "Unknown error"));
-    return;
-  }
-
-  currentUser=null;
-  document.getElementById("adminPanel").style.display="none";
-  document.getElementById("adminEmail").value="";
-  document.getElementById("adminPassword").value="";
-  document.getElementById("loginError").textContent="";
-  button.disabled=false;
-  button.textContent="Logout";
-});
-
-/* ADMIN SHORTCUT — CTRL + SHIFT + L */
-async function openAdminShortcut(event){
-  const key = String(event.key || "").toLowerCase();
-  const code = String(event.code || "").toLowerCase();
-  if(event.ctrlKey && event.shiftKey && (key === "l" || code === "keyl")){
-    event.preventDefault();
-    event.stopPropagation();
-
-    const overlay = document.getElementById("loginOverlay");
-    if(!overlay) return;
-
-    /* Always show the login screen. If a previous admin session exists,
-       sign it out first so Ctrl+Shift+L never bypasses the login. */
-    if(typeof currentUser !== "undefined" && currentUser){
-      try { await supabaseClient.auth.signOut(); } catch(e) { console.warn("Shortcut sign-out:", e); }
-      currentUser = null;
-      document.getElementById("adminPanel").style.display = "none";
-    }
-
-    overlay.style.display = "flex";
-    const error = document.getElementById("loginError");
-    if(error) error.textContent = "";
-    setTimeout(function(){
-      const email = document.getElementById("adminEmail");
-      if(email) email.focus();
-    },50);
-  }
-}
-
-/* Capture the shortcut at the window level. */
-window.addEventListener("keydown", openAdminShortcut, true);
 </script>
 
 </body>
