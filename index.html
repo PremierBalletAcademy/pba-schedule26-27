@@ -7287,7 +7287,10 @@ initializeApp();
    ADMIN AUTH CONTROLS
 ========================================================= */
 
-/* public admin button removed; keyboard shortcut only */
+/* ADMIN INVITATION */
+  document.getElementById("addAdminButton")?.addEventListener("click", inviteAdmin);
+
+  /* public admin button removed; keyboard shortcut only */
 
 
 document.getElementById("loginButton").addEventListener("click",adminLogin);
