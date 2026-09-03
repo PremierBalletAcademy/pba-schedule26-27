@@ -21,6 +21,8 @@
 ========================================================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -680,8 +682,6 @@ input[type="search"]{
 
 }
 
-
-
 .statusWrap{
 
   padding:
@@ -1019,107 +1019,6 @@ input[type="search"]{
   font-weight:700;
 
   opacity:.78;
-
-}
-
-.selectClass{
-
-  flex-shrink:0;
-
-  width:34px;
-
-  height:34px;
-
-  border-radius:50%;
-
-  border:
-    1px solid rgba(40,35,30,.28);
-
-  background:
-    rgba(255,255,255,.32);
-
-  color:#4d4030;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  font-size:16px;
-
-  font-weight:800;
-
-}
-
-.selectClass.selected{
-
-  background:#171419;
-
-  color:#f1dfb2;
-
-}
-
-/* =========================================================
-   SEARCH ACTIONS
-========================================================= */
-
-.searchActions{
-
-  display:none;
-
-  margin-top:15px;
-
-  padding:13px;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  gap:12px;
-
-  border:
-    1px solid rgba(217,196,154,.18);
-
-  border-radius:14px;
-
-  background:
-    rgba(217,196,154,.055);
-
-}
-
-.searchActions.visible{
-
-  display:flex;
-
-}
-
-.selectionText{
-
-  color:
-    var(--muted);
-
-  font-size:11px;
-
-}
-
-.selectionText strong{
-
-  color:#fff;
-
-}
-
-.clearSelection{
-
-  border:0;
-
-  background:none;
-
-  color:#bcae90;
-
-  font-size:11px;
-
-  font-weight:700;
 
 }
 
@@ -1797,8 +1696,6 @@ input[type="search"]{
 
   }
 
-
-
   .adminGrid{
 
     grid-template-columns:
@@ -1847,8 +1744,6 @@ input[type="search"]{
       1fr;
 
   }
-
-
 
   .resultsGrid{
 
@@ -2028,7 +1923,6 @@ input[type="search"]{
 #createPasswordError{min-height:20px;margin-top:12px;color:#f2a5b5;font-size:12px;line-height:1.5}
 #createPasswordOverlay .passwordActions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
 @media(max-width:650px){#createPasswordOverlay .passwordModal{padding:22px}#createPasswordOverlay h2{font-size:23px}}
-
 </style>
 
 </head>
@@ -2217,30 +2111,6 @@ input[type="search"]{
     class="resultsGrid"
   ></div>
 
-  <div
-    id="searchActions"
-    class="searchActions"
-  >
-
-    <div class="selectionText">
-
-      <strong id="selectionCount">
-        0
-      </strong>
-
-      classes selected
-
-    </div>
-
-    <button
-      class="clearSelection"
-      id="clearSelection"
-    >
-      Clear selection
-    </button>
-
-  </div>
-
 </section>
 
 <!-- =========================================================
@@ -2315,7 +2185,6 @@ input[type="search"]{
 <!-- =========================================================
      ADMIN LOGIN
 ========================================================= -->
-
 
 <!-- ADMIN INVITATION PASSWORD SETUP -->
 <div id="createPasswordOverlay" class="overlay">
@@ -3058,8 +2927,6 @@ let currentUser = null;
 
 let currentBranch = "Maadi";
 
-let selectedClassIds =
-  new Set();
 
 
 /* =========================================================
@@ -3183,152 +3050,6 @@ function normalizeClassName(name){
 
 }
 
-
-/* =========================================================
-   TIME
-========================================================= */
-
-function parseTime(time){
-
-  const text =
-    String(time || "")
-      .trim()
-      .toUpperCase();
-
-  const match =
-    text.match(
-      /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/
-    );
-
-  if(!match)
-    return null;
-
-  let hour =
-    parseInt(
-      match[1],
-      10
-    );
-
-  const minute =
-    parseInt(
-      match[2] || "0",
-      10
-    );
-
-  const period =
-    match[3];
-
-  if(
-    period === "PM" &&
-    hour !== 12
-  ){
-
-    hour += 12;
-
-  }
-
-  if(
-    period === "AM" &&
-    hour === 12
-  ){
-
-    hour = 0;
-
-  }
-
-  if(
-    hour < 0 ||
-    hour > 23 ||
-    minute < 0 ||
-    minute > 59
-  ){
-
-    return null;
-
-  }
-
-  return {
-    hour,
-    minute
-  };
-
-}
-
-
-function makeLocalDate(
-  date,
-  time
-){
-
-  const parsed =
-    parseTime(time);
-
-  if(!parsed)
-    return null;
-
-  return new Date(
-
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-
-    parsed.hour,
-    parsed.minute,
-
-    0,
-    0
-
-  );
-
-}
-
-
-function toRFC3339(date){
-
-  if(!date)
-    return null;
-
-  const pad =
-    n =>
-      String(n)
-        .padStart(2,"0");
-
-  const offset =
-    -date.getTimezoneOffset();
-
-  const sign =
-    offset >= 0
-      ? "+"
-      : "-";
-
-  const offsetHours =
-    Math.floor(
-      Math.abs(offset) / 60
-    );
-
-  const offsetMinutes =
-    Math.abs(offset) % 60;
-
-  return (
-
-    date.getFullYear() +
-    "-" +
-    pad(date.getMonth()+1) +
-    "-" +
-    pad(date.getDate()) +
-    "T" +
-    pad(date.getHours()) +
-    ":" +
-    pad(date.getMinutes()) +
-    ":00" +
-    sign +
-    pad(offsetHours) +
-    ":" +
-    pad(offsetMinutes)
-
-  );
-
-}
 
 /* =========================================================
    BRANCHES
@@ -4231,10 +3952,6 @@ function runSearch(){
     grid.innerHTML =
       "";
 
-    selectedClassIds.clear();
-
-    updateSearchActions();
-
     return;
 
   }
@@ -4266,25 +3983,6 @@ function runSearch(){
   grid.innerHTML =
     "";
 
-  const visibleIds =
-    new Set(
-      matches.map(
-        c =>
-          String(c.id)
-      )
-    );
-
-  selectedClassIds =
-    new Set(
-      [...selectedClassIds]
-        .filter(
-          id =>
-            visibleIds.has(
-              String(id)
-            )
-        )
-    );
-
   if(
     !matches.length
   ){
@@ -4307,8 +4005,6 @@ function runSearch(){
       "No matching classes found.";
 
     grid.appendChild(card);
-
-    updateSearchActions();
 
     return;
 
@@ -4383,51 +4079,7 @@ function runSearch(){
       left.appendChild(time);
 
       left.appendChild(name);
-
-      const select =
-        document.createElement(
-          "button"
-        );
-
-      select.className =
-        "selectClass";
-
-      if(
-        selectedClassIds.has(
-          String(c.id)
-        )
-      ){
-
-        select.classList.add(
-          "selected"
-        );
-
-        select.textContent =
-          "✓";
-
-      }
-
-      else{
-
-        select.textContent =
-          "＋";
-
-      }
-
-      select.onclick =
-        event=>{
-
-          event.stopPropagation();
-
-          toggleClassSelection(
-            c.id
-          );
-
-        };
-
       top.appendChild(left);
-
-      top.appendChild(select);
 
       const info =
         document.createElement(
@@ -4456,138 +4108,7 @@ function runSearch(){
     }
   );
 
-  updateSearchActions();
-
 }
-
-
-/* =========================================================
-   SELECTION
-========================================================= */
-
-function toggleClassSelection(
-  id
-){
-
-  const key =
-    String(id);
-
-  if(
-    selectedClassIds.has(key)
-  ){
-
-    selectedClassIds.delete(key);
-
-  }
-
-  else{
-
-    selectedClassIds.add(key);
-
-  }
-
-  runSearch();
-
-}
-
-
-function updateSearchActions(){
-
-  const actions =
-    document.getElementById(
-      "searchActions"
-    );
-
-  const count =
-    document.getElementById(
-      "selectionCount"
-    );
-
-  count.textContent =
-    selectedClassIds.size;
-
-  if(
-    selectedClassIds.size > 0
-  ){
-
-    actions.classList.add(
-      "visible"
-    );
-
-  }
-
-  else{
-
-    actions.classList.remove(
-      "visible"
-    );
-
-  }
-
-}
-
-
-
-/* ADMIN INVITATION / PASSWORD SETUP */
-function invitationIsPresent(){
-  const hash=window.location.hash||"";
-  const search=window.location.search||"";
-  const hp=new URLSearchParams(hash.startsWith("#")?hash.slice(1):hash);
-  const qp=new URLSearchParams(search);
-  return hp.get("type")==="invite" || qp.get("type")==="invite" || !!qp.get("code");
-}
-function showCreatePassword(){
-  const o=document.getElementById("createPasswordOverlay");
-  if(o)o.style.display="flex";
-  setTimeout(()=>document.getElementById("invitePassword")?.focus(),100);
-}
-function hideCreatePassword(){document.getElementById("createPasswordOverlay").style.display="none";}
-function cleanInvitationUrl(){try{window.history.replaceState({},document.title,window.location.origin+window.location.pathname);}catch(e){}}
-async function handleInvitationFlow(){
-  if(!invitationIsPresent()) return false;
-  const errorElement=document.getElementById("createPasswordError");
-  try{
-    const qp=new URLSearchParams(window.location.search);
-    const code=qp.get("code");
-    if(code){const r=await supabaseClient.auth.exchangeCodeForSession(code);if(r.error)throw r.error;}
-    const r=await supabaseClient.auth.getSession();
-    if(r.error)throw r.error;
-    if(!r.data?.session?.user)throw new Error("This invitation link is invalid or has expired. Please ask the administrator to send a new invitation.");
-    currentUser=r.data.session.user;
-    showCreatePassword();
-    return true;
-  }catch(e){
-    console.error("Invitation setup error:",e);
-    errorElement.textContent=e.message||"Unable to open this administrator invitation.";
-    showCreatePassword();
-    return true;
-  }
-}
-async function createInvitedAdminPassword(){
-  const password=document.getElementById("invitePassword").value;
-  const confirm=document.getElementById("invitePasswordConfirm").value;
-  const errorElement=document.getElementById("createPasswordError");
-  const button=document.getElementById("createPasswordButton");
-  errorElement.textContent="";
-  if(!password||!confirm){errorElement.textContent="Please enter and confirm your password.";return;}
-  if(password.length<6){errorElement.textContent="Your password must be at least 6 characters.";return;}
-  if(password!==confirm){errorElement.textContent="The passwords do not match.";return;}
-  button.disabled=true;button.textContent="Creating Password...";
-  try{
-    const r=await supabaseClient.auth.updateUser({password});
-    if(r.error)throw r.error;
-    const user=r.data?.user||currentUser;
-    if(!user)throw new Error("Your invitation session could not be found. Please open the invitation link again.");
-    const a=await supabaseClient.from("admins").select("id,email,role").eq("id",user.id).maybeSingle();
-    if(a.error)throw a.error;
-    if(!a.data){await supabaseClient.auth.signOut();throw new Error("Your account was not found in the PBA administrator list. Please ask a Superior Administrator to resend the invitation.");}
-    currentUser=user;currentUser.adminRole=a.data.role||"admin";
-    hideCreatePassword();cleanInvitationUrl();await openAdmin();
-  }catch(e){console.error("Create invited admin password error:",e);errorElement.textContent=e.message||"Unable to create your password.";}
-  finally{button.disabled=false;button.textContent="Create Password & Continue";}
-}
-document.getElementById("createPasswordButton").addEventListener("click",createInvitedAdminPassword);
-[document.getElementById("invitePassword"),document.getElementById("invitePasswordConfirm")].forEach(input=>input.addEventListener("keydown",e=>{if(e.key==="Enter")createInvitedAdminPassword();}));
 
 
 /* =========================================================
@@ -5487,10 +5008,6 @@ async function deleteClass(c){
     return;
 
   }
-
-  selectedClassIds.delete(
-    String(c.id)
-  );
 
   await loadClasses();
 
@@ -6508,8 +6025,6 @@ document.getElementById(
       currentBranch
     );
 
-    selectedClassIds.clear();
-
     updateBranchDisplay();
 
     renderSchedule();
@@ -6530,223 +6045,6 @@ document.getElementById(
 );
 
 
-/* CLEAR SELECTION */
-
-document.getElementById(
-  "clearSelection"
-).addEventListener(
-  "click",
-  ()=>{
-
-    selectedClassIds.clear();
-
-    runSearch();
-
-  }
-);
-
-
-/* ADMIN LOGIN */
-
-document.getElementById(
-  "loginButton"
-).addEventListener(
-  "click",
-  adminLogin
-);
-
-
-document.getElementById(
-  "cancelLogin"
-).addEventListener(
-  "click",
-  ()=>{
-
-    document.getElementById(
-      "loginOverlay"
-    ).style.display =
-      "none";
-
-  }
-);
-
-
-document.getElementById(
-  "adminPassword"
-).addEventListener(
-  "keydown",
-  event=>{
-
-    if(
-      event.key ===
-      "Enter"
-    ){
-
-      adminLogin();
-
-    }
-
-  }
-);
-
-
-/* ADMIN SHORTCUT */
-
-document.addEventListener(
-  "keydown",
-  event=>{
-
-    if(
-
-      event.ctrlKey &&
-      event.shiftKey &&
-      event.key.toLowerCase() ===
-      "a"
-
-    ){
-
-      event.preventDefault();
-
-      document.getElementById(
-        "loginOverlay"
-      ).style.display =
-        "flex";
-
-      document.getElementById(
-        "adminEmail"
-      ).focus();
-
-    }
-
-  }
-);
-
-
-/* ADMIN SCHEDULE SEARCH */
-
-document.getElementById(
-  "adminScheduleSearch"
-).addEventListener(
-  "input",
-  renderAdminClasses
-);
-
-
-/* SAVE CLASS */
-
-document.getElementById(
-  "saveClass"
-).addEventListener(
-  "click",
-  saveClass
-);
-
-
-/* CANCEL CLASS EDIT */
-
-document.getElementById(
-  "cancelEdit"
-).addEventListener(
-  "click",
-  cancelEdit
-);
-
-
-/* BRANCH */
-
-document.getElementById(
-  "saveBranchButton"
-).addEventListener(
-  "click",
-  addOrUpdateBranch
-);
-
-
-document.getElementById(
-  "cancelBranchEdit"
-).addEventListener(
-  "click",
-  cancelBranchEdit
-);
-
-
-/* TEACHER */
-
-document.getElementById(
-  "addTeacherButton"
-).addEventListener(
-  "click",
-  addOrUpdateTeacher
-);
-
-
-document.getElementById(
-  "cancelTeacherEdit"
-).addEventListener(
-  "click",
-  cancelTeacherEdit
-);
-
-
-/* ADMIN INVITE */
-
-document.getElementById(
-  "addAdminButton"
-).addEventListener(
-  "click",
-  inviteAdmin
-);
-
-
-/* CLOSE ADMIN */
-
-document.getElementById(
-  "closeAdmin"
-).addEventListener(
-  "click",
-  async()=>{
-
-    document.getElementById(
-      "adminPanel"
-    ).style.display =
-      "none";
-
-    cancelEdit();
-
-    cancelTeacherEdit();
-
-    cancelBranchEdit();
-
-    await loadBranches();
-
-    await loadTeachers();
-
-    await loadClasses();
-
-  }
-);
-
-
-/* LOGOUT */
-
-document.getElementById(
-  "logoutButton"
-).addEventListener(
-  "click",
-  async()=>{
-
-    await supabaseClient.auth.signOut();
-
-    currentUser =
-      null;
-
-    document.getElementById(
-      "adminPanel"
-    ).style.display =
-      "none";
-
-  }
-);
 
 
 /* =========================================================
@@ -7361,10 +6659,114 @@ document.getElementById(
    INITIALIZATION
 ========================================================= */
 
+function invitationIsPresent(){
+  const hash=window.location.hash||"";
+  const search=window.location.search||"";
+  const hp=new URLSearchParams(hash.startsWith("#")?hash.slice(1):hash);
+  const qp=new URLSearchParams(search);
+  return hp.get("type")==="invite" ||
+         qp.get("type")==="invite" ||
+         !!qp.get("code");
+}
+
+async function handleInvitationFlow(){
+  if(!invitationIsPresent()) return false;
+
+  const params=new URLSearchParams(window.location.search);
+  const code=params.get("code");
+
+  try{
+    if(code){
+      const {error}=await supabaseClient.auth.exchangeCodeForSession(code);
+      if(error) throw error;
+    }
+
+    const {data}=await supabaseClient.auth.getSession();
+    const session=data?.session;
+    const user=session?.user;
+
+    if(!user){
+      document.getElementById("createPasswordError").textContent=
+        "This invitation link could not be activated. Please open the invitation link again.";
+      document.getElementById("createPasswordOverlay").style.display="flex";
+      return true;
+    }
+
+    currentUser=user;
+    document.getElementById("loginOverlay").style.display="none";
+    document.getElementById("createPasswordOverlay").style.display="flex";
+    return true;
+  }catch(error){
+    console.error("Invitation activation error:",error);
+    document.getElementById("createPasswordError").textContent=
+      error?.message || "Unable to activate this invitation.";
+    document.getElementById("createPasswordOverlay").style.display="flex";
+    return true;
+  }
+}
+
+async function createInvitedAdminPassword(){
+  const password=document.getElementById("invitePassword").value;
+  const confirm=document.getElementById("invitePasswordConfirm").value;
+  const errorElement=document.getElementById("createPasswordError");
+  errorElement.textContent="";
+
+  if(!password || !confirm){
+    errorElement.textContent="Please enter and confirm your password.";
+    return;
+  }
+  if(password.length<6){
+    errorElement.textContent="Password must be at least 6 characters.";
+    return;
+  }
+  if(password!==confirm){
+    errorElement.textContent="The passwords do not match.";
+    return;
+  }
+
+  const button=document.getElementById("createPasswordButton");
+  button.disabled=true;
+  button.textContent="Creating Password...";
+
+  try{
+    const {data,error}=await supabaseClient.auth.updateUser({password});
+    if(error) throw error;
+
+    const user=data?.user || currentUser;
+    if(!user) throw new Error("No authenticated invitation user was found.");
+
+    const {data:admin,error:adminError}=await supabaseClient
+      .from("admins")
+      .select("id,email,role")
+      .eq("id",user.id)
+      .maybeSingle();
+
+    if(adminError) throw adminError;
+    if(!admin){
+      throw new Error("This account is not authorized as an administrator.");
+    }
+
+    currentUser=user;
+    currentUser.adminRole=admin.role || "admin";
+    document.getElementById("createPasswordOverlay").style.display="none";
+    if(history.replaceState){
+      history.replaceState({},document.title,window.location.pathname);
+    }
+    await openAdmin();
+  }catch(error){
+    console.error("Admin password creation error:",error);
+    errorElement.textContent=error?.message || "Unable to create the administrator password.";
+  }finally{
+    button.disabled=false;
+    button.textContent="Create Password & Continue";
+  }
+}
+
+document.getElementById("createPasswordButton").addEventListener("click",createInvitedAdminPassword);
+
 async function initializeApp(){
 
-
-  const invitationHandled = await handleInvitationFlow();
+  const invitationHandled=await handleInvitationFlow();
 
   if(!invitationHandled){
     await restoreAdminSession();
