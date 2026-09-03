@@ -7340,32 +7340,34 @@ document.getElementById("logoutButton").addEventListener("click",async function(
   button.textContent="Logout";
 });
 
-/* ADMIN SHORTCUT — CTRL + SHIFT + A */
+/* ADMIN SHORTCUT — CTRL + SHIFT + L */
 function openAdminShortcut(event){
   const key = String(event.key || "").toLowerCase();
-  if(event.ctrlKey && event.shiftKey && key === "a"){
+  const code = String(event.code || "").toLowerCase();
+  if(event.ctrlKey && event.shiftKey && (key === "l" || code === "keyl")){
     event.preventDefault();
-    event.stopImmediatePropagation();
+    event.stopPropagation();
 
-    if(currentUser){
+    const overlay = document.getElementById("loginOverlay");
+    if(!overlay) return;
+
+    if(typeof currentUser !== "undefined" && currentUser){
       openAdmin();
-    }else{
-      const overlay = document.getElementById("loginOverlay");
-      if(!overlay) return;
-      overlay.style.display = "flex";
-      const error = document.getElementById("loginError");
-      if(error) error.textContent = "";
-      setTimeout(()=>{
-        const email = document.getElementById("adminEmail");
-        if(email) email.focus();
-      },50);
+      return;
     }
+
+    overlay.style.display = "flex";
+    const error = document.getElementById("loginError");
+    if(error) error.textContent = "";
+    setTimeout(function(){
+      const email = document.getElementById("adminEmail");
+      if(email) email.focus();
+    },50);
   }
 }
 
-/* Listen during capture so the page receives the shortcut as early as possible. */
+/* Capture the shortcut at the window level. */
 window.addEventListener("keydown", openAdminShortcut, true);
-window.addEventListener("keyup", openAdminShortcut, true);
 </script>
 
 </body>
