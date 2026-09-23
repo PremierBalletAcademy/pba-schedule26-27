@@ -391,7 +391,7 @@ input[type="search"]{
   top:0;
   width:1200px;
   padding:24px;
-  background:#FFFFFF;
+  background:#0d0c10;
   color:#fff;
   z-index:-1;
 }
@@ -8121,7 +8121,7 @@ async function saveScheduleAsPDF(){
     padding:"0",
     boxSizing:"border-box",
     background:"#FFFFFF",
-    color:"#fff",
+    color:"#17151C",
     overflow:"hidden",
     zIndex:"-9999",
     fontFamily:"Inter, Arial, Helvetica, sans-serif"
@@ -8140,9 +8140,9 @@ async function saveScheduleAsPDF(){
       alignItems:"center",
       gap:"30px",
       padding:"24px 32px",
-      border:"2px solid rgba(217,196,154,.45)",
+      border:"2px solid #D9C49A",
       borderRadius:"22px",
-      background:"linear-gradient(135deg,rgba(255,255,255,.085),rgba(255,255,255,.025))"
+      background:"#FAF8F9"
     });
 
     const brand = document.createElement("div");
@@ -8175,7 +8175,7 @@ async function saveScheduleAsPDF(){
       fontWeight:"900",
       letterSpacing:"2px",
       lineHeight:"1.0",
-      color:"#f8f1e8",
+      color:"#17151C",
       whiteSpace:"nowrap"
     });
     text.appendChild(name);
@@ -8188,7 +8188,7 @@ async function saveScheduleAsPDF(){
       fontWeight:"900",
       letterSpacing:"3px",
       lineHeight:"1",
-      color:"#d9c49a",
+      color:"#B79A5B",
       whiteSpace:"nowrap"
     });
     text.appendChild(sub);
@@ -8209,7 +8209,7 @@ async function saveScheduleAsPDF(){
       fontSize:"72px",
       fontWeight:"900",
       lineHeight:"1.0",
-      color:"#f3dce6",
+      color:"#C98FA8",
       whiteSpace:"normal",
       overflowWrap:"anywhere"
     });
@@ -8223,7 +8223,7 @@ async function saveScheduleAsPDF(){
       fontWeight:"900",
       letterSpacing:"3px",
       lineHeight:"1",
-      color:"#d9c49a",
+      color:"#B79A5B",
       whiteSpace:"nowrap"
     });
     right.appendChild(season);
@@ -8253,7 +8253,7 @@ async function saveScheduleAsPDF(){
       fontSize:"64px",
       fontWeight:"900",
       lineHeight:"1.05",
-      color:"#f8f1e8",
+      color:"#17151C",
       whiteSpace:"nowrap"
     });
     title.appendChild(main);
@@ -8266,7 +8266,7 @@ async function saveScheduleAsPDF(){
       fontWeight:"900",
       letterSpacing:"3px",
       lineHeight:"1",
-      color:"#d9c49a",
+      color:"#B79A5B",
       whiteSpace:"nowrap"
     });
     title.appendChild(year);
@@ -8284,8 +8284,8 @@ async function saveScheduleAsPDF(){
       height:`${LEGEND_H}px`,
       padding:"20px 24px 16px",
       boxSizing:"border-box",
-      borderTop:"2px solid rgba(255,255,255,.16)",
-      background:"rgba(255,255,255,.035)"
+      borderTop:"2px solid #E4E0E4",
+      background:"#FAF8F9"
     });
 
     const title = document.createElement("div");
@@ -8295,7 +8295,7 @@ async function saveScheduleAsPDF(){
       fontWeight:"900",
       letterSpacing:"3px",
       lineHeight:"1",
-      color:"#d9c49a",
+      color:"#B79A5B",
       marginBottom:"14px",
       whiteSpace:"nowrap"
     });
@@ -8327,7 +8327,7 @@ async function saveScheduleAsPDF(){
         borderRadius:"8px",
         flexShrink:"0",
         background:teacherColors[teacher] || "#D9D5DF",
-        border:"2px solid rgba(0,0,0,.18)"
+        border:"2px solid #D8D3D8"
       });
 
       const tx = document.createElement("div");
@@ -8335,7 +8335,7 @@ async function saveScheduleAsPDF(){
       Object.assign(tx.style,{
         fontSize:"40px",
         fontWeight:"900",
-        color:"#eee",
+        color:"#17151C",
         whiteSpace:"normal",
         overflow:"visible",
         textOverflow:"clip",
@@ -8413,6 +8413,7 @@ async function saveScheduleAsPDF(){
         dn.style.fontSize="64px";
         dn.style.lineHeight="1.0";
         dn.style.fontWeight="900";
+        dn.style.color="#17151C";
         dn.style.whiteSpace="nowrap";
       }
       if(dnum){
@@ -8420,6 +8421,7 @@ async function saveScheduleAsPDF(){
         dnum.style.lineHeight="1";
         dnum.style.marginTop="8px";
         dnum.style.fontWeight="800";
+        dnum.style.color="#4A4650";
       }
       day.appendChild(h);
     }
@@ -8440,6 +8442,7 @@ async function saveScheduleAsPDF(){
         n.style.marginBottom="16px";
         n.style.letterSpacing="1px";
         n.style.fontWeight="900";
+        n.style.color="#17151C";
         n.style.whiteSpace="nowrap";
         n.style.overflow="visible";
         studio.appendChild(n);
@@ -8466,6 +8469,7 @@ async function saveScheduleAsPDF(){
           time.style.fontSize="52px";
           time.style.lineHeight="1.0";
           time.style.fontWeight="900";
+          time.style.color="#17151C";
           time.style.whiteSpace="normal";
           time.style.overflowWrap="anywhere";
         }
@@ -8478,6 +8482,7 @@ async function saveScheduleAsPDF(){
           name.style.wordBreak="normal";
           name.style.marginTop="8px";
           name.style.fontWeight="900";
+          name.style.color="#17151C";
         }
         if(teacher){
           teacher.style.fontSize="58px";
@@ -8500,6 +8505,7 @@ async function saveScheduleAsPDF(){
           fontSize:"34px",
           lineHeight:"1.05",
           fontWeight:"900",
+          color:"#77727D",
           textAlign:"center",
           whiteSpace:"normal",
           overflow:"visible"
@@ -8519,6 +8525,7 @@ async function saveScheduleAsPDF(){
         fontSize:"34px",
         lineHeight:"1.05",
         fontWeight:"900",
+        color:"#77727D",
         textAlign:"center"
       });
       day.appendChild(empty);
@@ -8547,7 +8554,7 @@ async function saveScheduleAsPDF(){
     fontSize:"24px",
     fontWeight:"800",
     letterSpacing:"2px",
-    color:"#77727d"
+    color:"#77727D"
   });
   exportRoot.appendChild(footer);
 
@@ -8581,7 +8588,7 @@ async function saveScheduleAsPDF(){
       scale:1,
       useCORS:true,
       allowTaint:false,
-      backgroundColor:"#0d0c10",
+      backgroundColor:"#FFFFFF",
       logging:false,
       scrollX:0,
       scrollY:0,
